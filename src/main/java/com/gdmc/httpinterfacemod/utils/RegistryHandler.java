@@ -2,15 +2,15 @@ package com.gdmc.httpinterfacemod.utils;
 
 import com.gdmc.httpinterfacemod.settlementcommand.SetBuildAreaCommand;
 import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.command.CommandSource;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraftforge.event.server.ServerStartingEvent;
 
 public class RegistryHandler {
 
-    public static void registerCommands(FMLServerStartingEvent event) {
+    public static void registerCommands(ServerStartingEvent event) {
 
         // TODO might be wrong (didn't test)
-        CommandDispatcher<CommandSource> dispatcher = event.getServer().getCommandManager().getDispatcher();
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getServer().getCommands().getDispatcher();
         SetBuildAreaCommand.register(dispatcher);
         // maybe try this instead:
 //        CommandDispatcher<CommandSource> dispatcher = event.getServer().getFunctionManager().getCommandDispatcher();

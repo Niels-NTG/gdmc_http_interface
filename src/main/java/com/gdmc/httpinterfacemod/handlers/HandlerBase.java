@@ -3,14 +3,12 @@ package com.gdmc.httpinterfacemod.handlers;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ICommandSource;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.vector.Vector2f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.World;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -128,24 +126,39 @@ public abstract class HandlerBase implements HttpHandler {
         return result;
     }
 
-    protected static CommandSource createCommandSource(String name, MinecraftServer mcServer) {
-        ICommandSource iCmdSrc = new ICommandSource() {
-            @Override public void sendMessage(ITextComponent component, UUID senderUUID) { }
-            @Override public boolean shouldReceiveFeedback() { return false; }
-            @Override public boolean shouldReceiveErrors() { return false; }
-            @Override public boolean allowLogging() { return false; }
+    protected static CommandSourceStack createCommandSource(String name, MinecraftServer mcServer) {
+        CommandSource commandSource = new CommandSource() {
+            @Override
+            public void sendMessage(Component p_80166_, UUID p_80167_) {
+
+            }
+
+            @Override
+            public boolean acceptsSuccess() {
+                return false;
+            }
+
+            @Override
+            public boolean acceptsFailure() {
+                return false;
+            }
+
+            @Override
+            public boolean shouldInformAdmins() {
+                return false;
+            }
         };
 
-        return new CommandSource(
-                iCmdSrc,
-                new Vector3d(0, 0, 0),
-                new Vector2f(0, 0),
-                Objects.requireNonNull(mcServer.getWorld(World.OVERWORLD)),
-                4,
-                name,
-                new StringTextComponent(name),
-                mcServer,
-                null
+        return new CommandSourceStack(
+            commandSource,
+            new Vec3(0, 0, 0),
+            new Vec2(0, 0),
+            mcServer.overworld(),
+            4,
+            name,
+            Component.nullToEmpty(name),
+            mcServer,
+            null
         );
     }
 }

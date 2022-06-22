@@ -8,26 +8,24 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import net.minecraft.block.BlockState;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.arguments.BlockPosArgument;
-import net.minecraft.command.arguments.BlockStateArgument;
-import net.minecraft.command.arguments.BlockStateInput;
-import net.minecraft.command.arguments.ILocationArgument;
-import net.minecraft.inventory.IClearable;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.blocks.BlockInput;
+import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.state.Property;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Clearable;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,11 +37,10 @@ import java.util.stream.Collectors;
 
 public class BlocksHandler extends HandlerBase {
 //    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.setblock.failed"));
-    private final CommandSource cmdSrc;
+    private final CommandSourceStack cmdSrc;
 
     public BlocksHandler(MinecraftServer mcServer) {
         super(mcServer);
-
         cmdSrc = createCommandSource("GDMC-BlockHandler", mcServer);
     }
 
@@ -97,16 +94,16 @@ public class BlocksHandler extends HandlerBase {
                 String returnValue;
                 try {
                     StringReader sr = new StringReader(line);
-                    ILocationArgument li = null;
+                    Coordinates li = null;
                     try {
                         li = BlockPosArgument.blockPos().parse(sr);
                         sr.skip();
                     } catch (CommandSyntaxException e) {
                         sr = new StringReader(line); // TODO maybe delete this
                     }
-                    BlockStateInput bsi = BlockStateArgument.blockState().parse(sr);
+                    BlockInput bsi = BlockStateArgument.block().parse(sr);
 
-                    CommandSource cs = cmdSrc.withPos(new Vector3d(x, y, z));
+                    CommandSourceStack cs = cmdSrc.withPosition(new Vec3(0, 0, 0));
 
                     int xx, yy, zz;
                     if(li != null) {
@@ -161,12 +158,12 @@ public class BlocksHandler extends HandlerBase {
         resolveRequest(httpExchange, responseString);
     }
 
-    private int setBlock(BlockPos pos, BlockStateInput state, int flags) {
-        ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
+    private int setBlock(BlockPos pos, BlockInput state, int flags) {
+        ServerLevel serverWorld = mcServer.overworld();
 
         assert serverWorld != null;
-        TileEntity tileentity = serverWorld.getTileEntity(pos);
-        IClearable.clearObj(tileentity);
+        BlockEntity blockEntity = serverWorld.getBlockEntity(pos);
+        Clearable.tryClear(blockEntity);
 
         if (!state.place(serverWorld, pos, flags)) {
             return 0;
@@ -194,11 +191,11 @@ public class BlocksHandler extends HandlerBase {
     }
 
     private String getBlock(BlockPos pos, boolean returnJson) {
-        ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
+        ServerLevel serverLevel = mcServer.overworld();
 
-        assert serverWorld != null;
+        assert serverLevel != null;
 
-        BlockState bs = serverWorld.getBlockState(pos);
+        BlockState bs = serverLevel.getBlockState(pos);
 
         String str;
         if(returnJson) {
@@ -217,13 +214,13 @@ public class BlocksHandler extends HandlerBase {
     }
 
     private String getBlockWithState(BlockPos pos, boolean returnJson) {
-        ServerWorld serverWorld = mcServer.getWorld(World.OVERWORLD);
+        ServerLevel serverLevel = mcServer.overworld();
 
-        assert serverWorld != null;
+        assert serverLevel != null;
         // TODO: #118 if we ever want to do nbt
 //        TileEntity tileentity = serverWorld.getTileEntity(pos);
 
-        BlockState bs = serverWorld.getBlockState(pos);
+        BlockState bs = serverLevel.getBlockState(pos);
 
         String str;
         if(returnJson) {

@@ -2,19 +2,16 @@ package com.gdmc.httpinterfacemod.handlers;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.storage.ChunkSerializer;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -55,25 +52,25 @@ public class ChunkHandler extends HandlerBase {
         boolean RETURN_TEXT = !contentType.equals("application/octet-stream");
 
         // construct response
-        ServerWorld world = mcServer.getWorld(World.OVERWORLD);
-        assert world != null;
+        ServerLevel serverLevel = mcServer.overworld();
+        assert serverLevel != null;
 
-        CompletableFuture<ListNBT> cfs = CompletableFuture.supplyAsync(() -> {
-            ListNBT returnList = new ListNBT();
+        CompletableFuture<ListTag> cfs = CompletableFuture.supplyAsync(() -> {
+            ListTag returnList = new ListTag();
             for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
                 for(int x = chunkX; x < chunkX + chunkDX; x++) {
-                    Chunk chunk = world.getChunk(x, z);
+                    LevelChunk chunk = serverLevel.getChunk(x, z);
 
-                    CompoundNBT chunkNBT = ChunkSerializer.write(world, chunk);
+                    CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
                     returnList.add(chunkNBT);
                 }
             return returnList;
         }, mcServer);
 
         // block this thread until the above code has run on the main thread
-        ListNBT chunkList = cfs.join();
+        ListTag chunkList = cfs.join();
 
-        CompoundNBT bodyNBT = new CompoundNBT();
+        CompoundTag bodyNBT = new CompoundTag();
         bodyNBT.put("Chunks", chunkList);
         bodyNBT.putInt("ChunkX", chunkX);
         bodyNBT.putInt("ChunkZ", chunkZ);
@@ -93,7 +90,7 @@ public class ChunkHandler extends HandlerBase {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
 
-            CompoundNBT containterNBT = new CompoundNBT();
+            CompoundTag containterNBT = new CompoundTag();
             containterNBT.put("file", bodyNBT);
             containterNBT.write(dos);
             dos.flush();

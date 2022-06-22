@@ -1,20 +1,18 @@
 package com.gdmc.httpinterfacemod;
 
 import com.gdmc.httpinterfacemod.utils.RegistryHandler;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
-import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.util.UUID;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("gdmchttp")
@@ -32,23 +30,25 @@ public class GdmcHttpMod
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
+    public void onServerStarting(ServerStartingEvent event) {
         // do something when the server starts
         LOGGER.info("HELLO from server starting");
         RegistryHandler.registerCommands(event);
         MinecraftServer minecraftServer = event.getServer();
 
+        UUID uuid = UUID.randomUUID();
+
         try {
             GdmcHttpServer.startServer(minecraftServer);
-            minecraftServer.sendMessage(new StringTextComponent("GDMC Server started successfully."), Util.DUMMY_UUID);
+            minecraftServer.sendMessage(Component.nullToEmpty("GDMC Server started successfully."), uuid);
         } catch (IOException e) {
             LOGGER.warn("Unable to start server!");
-            minecraftServer.sendMessage(new StringTextComponent("GDMC Server failed to start!"), Util.DUMMY_UUID);
+            minecraftServer.sendMessage(Component.nullToEmpty("GDMC Server failed to start!"), uuid);
         }
     }
 
     @SubscribeEvent
-    public void onServerStopping(FMLServerStoppingEvent event) {
+    public void onServerStopping(ServerStoppingEvent event) {
         LOGGER.info("HELLO from server stopping");
 
         GdmcHttpServer.stopServer();
