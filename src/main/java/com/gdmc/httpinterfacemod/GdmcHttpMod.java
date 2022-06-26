@@ -12,7 +12,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.UUID;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("gdmchttp")
@@ -36,14 +35,12 @@ public class GdmcHttpMod
         RegistryHandler.registerCommands(event);
         MinecraftServer minecraftServer = event.getServer();
 
-        UUID uuid = UUID.randomUUID();
-
         try {
             GdmcHttpServer.startServer(minecraftServer);
-            minecraftServer.sendMessage(Component.nullToEmpty("GDMC Server started successfully."), uuid);
+            minecraftServer.sendSystemMessage(Component.nullToEmpty("GDMC Server started successfully."));
         } catch (IOException e) {
             LOGGER.warn("Unable to start server!");
-            minecraftServer.sendMessage(Component.nullToEmpty("GDMC Server failed to start!"), uuid);
+            minecraftServer.sendSystemMessage(Component.nullToEmpty("GDMC Server failed to start!"));
         }
     }
 

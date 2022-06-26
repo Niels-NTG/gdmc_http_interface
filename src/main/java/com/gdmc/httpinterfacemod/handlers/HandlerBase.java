@@ -129,7 +129,7 @@ public abstract class HandlerBase implements HttpHandler {
     protected static CommandSourceStack createCommandSource(String name, MinecraftServer mcServer) {
         CommandSource commandSource = new CommandSource() {
             @Override
-            public void sendMessage(Component p_80166_, UUID p_80167_) {
+            public void sendSystemMessage(Component p_230797_) {
 
             }
 

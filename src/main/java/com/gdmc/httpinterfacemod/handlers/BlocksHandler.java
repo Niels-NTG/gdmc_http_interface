@@ -8,24 +8,32 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.arguments.blocks.BlockInput;
-import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +45,8 @@ import java.util.stream.Collectors;
 
 public class BlocksHandler extends HandlerBase {
 //    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.setblock.failed"));
+
+    private static final Logger LOGGER = LogManager.getLogger();
     private final CommandSourceStack cmdSrc;
 
     public BlocksHandler(MinecraftServer mcServer) {
@@ -90,6 +100,8 @@ public class BlocksHandler extends HandlerBase {
 
             int blockFlags = customFlags >= 0? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
+            CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(0, 0, 0));
+
             for(String line : body) {
                 String returnValue;
                 try {
@@ -101,22 +113,28 @@ public class BlocksHandler extends HandlerBase {
                     } catch (CommandSyntaxException e) {
                         sr = new StringReader(line); // TODO maybe delete this
                     }
-                    BlockInput bsi = BlockStateArgument.block().parse(sr);
-
-                    CommandSourceStack cs = cmdSrc.withPosition(new Vec3(0, 0, 0));
 
                     int xx, yy, zz;
                     if(li != null) {
-                        xx = (int)Math.round(li.getPosition(cs).x);
-                        yy = (int)Math.round(li.getPosition(cs).y);
-                        zz = (int)Math.round(li.getPosition(cs).z);
+                        xx = (int)Math.round(li.getPosition(commandSourceStack).x);
+                        yy = (int)Math.round(li.getPosition(commandSourceStack).y);
+                        zz = (int)Math.round(li.getPosition(commandSourceStack).z);
                     } else {
                         xx = x;
                         yy = y;
                         zz = z;
                     }
+                    BlockPos blockPos = new BlockPos(xx, yy, zz);
 
-                    returnValue = setBlock(new BlockPos(xx, yy, zz), bsi, blockFlags) + "";
+                    HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, sr, true);
+                    BlockState blockState = parsedBlockState.blockState();
+                    CompoundTag compoundTag = parsedBlockState.nbt();
+
+                    returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
+
+
+
                 } catch (CommandSyntaxException e) {
                     returnValue = e.getMessage();
                 }
@@ -158,20 +176,29 @@ public class BlocksHandler extends HandlerBase {
         resolveRequest(httpExchange, responseString);
     }
 
-    private int setBlock(BlockPos pos, BlockInput state, int flags) {
-        ServerLevel serverWorld = mcServer.overworld();
+    private int setBlock(BlockPos pos, BlockState blockState, CompoundTag blockEntityData, int flags) {
+        ServerLevel serverLevel = mcServer.overworld();
 
-        assert serverWorld != null;
-        BlockEntity blockEntity = serverWorld.getBlockEntity(pos);
-        Clearable.tryClear(blockEntity);
+        assert serverLevel != null;
+        BlockEntity blockEntitytoClear = serverLevel.getBlockEntity(pos);
+        Clearable.tryClear(blockEntitytoClear);
 
-        if (!state.place(serverWorld, pos, flags)) {
-            return 0;
-        } else {
+        if (serverLevel.setBlock(pos, blockState, flags)) {
+            // TODO wait for serverWorld.setBlock to complete (is sync or async???)
+            // TODO if 'line' contains string that could be Block Entity Data, run a '/data merge block x y z {BlockData}'
+            /*if (blockEntityData != null) {
+                String cmdString = String.format("data merge block %s %s %s %s", pos.getX(), pos.getY(), pos.getZ(), blockEntityData.toString());
+                LOGGER.info(cmdString);
+                try {
+                    return mcServer.getCommands().getDispatcher().execute(cmdString, cmdSrc);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage());
+                    return 0;
+                }
+            }*/
             return 1;
-//            (new TranslationTextComponent(
-//                    "commands.setblock.success",
-//                    pos.getX(), pos.getY(), pos.getZ())).getString();
+        } else {
+            return 0;
         }
     }
 
@@ -201,13 +228,11 @@ public class BlocksHandler extends HandlerBase {
         if(returnJson) {
             JsonObject json = new JsonObject();
 
-            ResourceLocation rl = bs.getBlock().getRegistryName();
-            assert rl != null;
-            json.add("id", new JsonPrimitive(rl.toString()));
+            json.add("id", new JsonPrimitive(Registry.BLOCK.getKey(bs.getBlock()).toString()));
 
             str = new Gson().toJson(json);
         } else {
-            str = Objects.requireNonNull(bs.getBlock().getRegistryName()).toString();
+            str = Objects.requireNonNull(Registry.BLOCK.getKey(bs.getBlock()).toString());
         }
 
         return str;
@@ -226,9 +251,7 @@ public class BlocksHandler extends HandlerBase {
         if(returnJson) {
             JsonObject json = new JsonObject();
 
-            ResourceLocation rl = bs.getBlock().getRegistryName();
-            assert rl != null;
-            json.add("id", new JsonPrimitive(rl.toString()));
+            json.add("id", new JsonPrimitive(Registry.BLOCK.getKey(bs.getBlock()).toString()));
 
             JsonObject state = new JsonObject();
             // put state values into the state object
@@ -240,7 +263,7 @@ public class BlocksHandler extends HandlerBase {
             json.add("state", state);
             str = new Gson().toJson(json);
         } else {
-            str = String.valueOf(bs.getBlock().getRegistryName()) +
+            str = Registry.BLOCK.getKey(bs.getBlock()).toString() +
                     '[' +
                     bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
                     ']';
