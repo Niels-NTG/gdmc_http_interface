@@ -3,7 +3,6 @@ package com.gdmc.httpinterfacemod.handlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
@@ -25,6 +24,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,6 +62,7 @@ public class BlocksHandler extends HandlerBase {
         int x;
         int y;
         int z;
+        boolean includeData;
         boolean includeState;
         boolean doBlockUpdates;
         boolean spawnDrops;
@@ -72,6 +73,7 @@ public class BlocksHandler extends HandlerBase {
             y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
             z = Integer.parseInt(queryParams.getOrDefault("z", "0"));
 
+            includeData = Boolean.parseBoolean(queryParams.getOrDefault("includeData", "false"));
             includeState = Boolean.parseBoolean(queryParams.getOrDefault("includeState", "false"));
 
             doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", "true"));
@@ -89,9 +91,9 @@ public class BlocksHandler extends HandlerBase {
 
         // construct response
         String method = httpExchange.getRequestMethod().toLowerCase();
-        String responseString;
+        String responseString = "";
 
-        if(method.equals("put")) {
+        if (method.equals("put")) {
             InputStream bodyStream = httpExchange.getRequestBody();
             List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
                     .lines().collect(Collectors.toList());
@@ -115,7 +117,7 @@ public class BlocksHandler extends HandlerBase {
                     }
 
                     int xx, yy, zz;
-                    if(li != null) {
+                    if (li != null) {
                         xx = (int)Math.round(li.getPosition(commandSourceStack).x);
                         yy = (int)Math.round(li.getPosition(commandSourceStack).y);
                         zz = (int)Math.round(li.getPosition(commandSourceStack).z);
@@ -133,14 +135,12 @@ public class BlocksHandler extends HandlerBase {
 
                     returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
 
-
-
                 } catch (CommandSyntaxException e) {
                     returnValue = e.getMessage();
                 }
                 returnValues.add(returnValue);
             }
-            if(!returnJson) {
+            if (!returnJson) {
                 responseString = String.join("\n", returnValues);
             } else {
                 JsonObject json = new JsonObject();
@@ -153,13 +153,22 @@ public class BlocksHandler extends HandlerBase {
                 json.add("results", resultsArray);
                 responseString = new Gson().toJson(json);
             }
-        } else if(method.equals("get")) {
-            if(includeState) {
-                responseString = getBlockWithState(new BlockPos(x, y, z), returnJson);
+        } else if (method.equals("get")) {
+            BlockPos blockPos = new BlockPos(x, y, z);
+
+            if (returnJson) {
+
             } else {
-                responseString = getBlock(new BlockPos(x, y, z), returnJson) + "";
+                responseString = getBlockStr(blockPos) + "";
+                if (includeState) {
+                    responseString += getBlockStateStr(blockPos);
+                }
+                if (includeData) {
+                    responseString += getBlockDataStr(blockPos);
+                }
             }
-        } else{
+
+        } else {
             throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
@@ -217,58 +226,45 @@ public class BlocksHandler extends HandlerBase {
         return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
     }
 
-    private String getBlock(BlockPos pos, boolean returnJson) {
+    private String getBlockStr(BlockPos pos) {
         ServerLevel serverLevel = mcServer.overworld();
 
         assert serverLevel != null;
 
         BlockState bs = serverLevel.getBlockState(pos);
+        return Objects.requireNonNull(getBlockRegistryName(bs));
+    }
 
-        String str;
-        if(returnJson) {
-            JsonObject json = new JsonObject();
+    private String getBlockStateStr(BlockPos pos) {
+        ServerLevel serverLevel = mcServer.overworld();
 
-            json.add("id", new JsonPrimitive(Registry.BLOCK.getKey(bs.getBlock()).toString()));
+        assert serverLevel != null;
+        BlockState bs = serverLevel.getBlockState(pos);
 
-            str = new Gson().toJson(json);
-        } else {
-            str = Objects.requireNonNull(Registry.BLOCK.getKey(bs.getBlock()).toString());
+        return '[' +
+            bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
+            ']';
+    }
+
+    private String getBlockDataStr(BlockPos pos) {
+        String str = "";
+        ServerLevel serverLevel = mcServer.overworld();
+
+        assert serverLevel != null;
+
+        BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
+        if (blockEntity != null) {
+            CompoundTag tags = blockEntity.saveWithoutMetadata();
+            str = tags.getAsString();
         }
-
         return str;
     }
 
-    private String getBlockWithState(BlockPos pos, boolean returnJson) {
-        ServerLevel serverLevel = mcServer.overworld();
-
-        assert serverLevel != null;
-        // TODO: #118 if we ever want to do nbt
-//        TileEntity tileentity = serverWorld.getTileEntity(pos);
-
-        BlockState bs = serverLevel.getBlockState(pos);
-
-        String str;
-        if(returnJson) {
-            JsonObject json = new JsonObject();
-
-            json.add("id", new JsonPrimitive(Registry.BLOCK.getKey(bs.getBlock()).toString()));
-
-            JsonObject state = new JsonObject();
-            // put state values into the state object
-            bs.getValues().entrySet().stream()
-                    .map(propertyToStringPairFunction)
-                    .filter(Objects::nonNull)
-                    .forEach(pair -> state.add(pair.getKey(), new JsonPrimitive(pair.getValue())));
-
-            json.add("state", state);
-            str = new Gson().toJson(json);
-        } else {
-            str = Registry.BLOCK.getKey(bs.getBlock()).toString() +
-                    '[' +
-                    bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
-                    ']';
-        }
-        return str;
+    public static String getBlockRegistryName(BlockState blockState) {
+        return getBlockRegistryName(blockState.getBlock());
+    }
+    public static String getBlockRegistryName(Block block) {
+        return ForgeRegistries.BLOCKS.getKey(block).toString();
     }
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
