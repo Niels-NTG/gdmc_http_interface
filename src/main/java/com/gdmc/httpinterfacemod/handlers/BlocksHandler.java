@@ -1,8 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
@@ -157,14 +155,21 @@ public class BlocksHandler extends HandlerBase {
             BlockPos blockPos = new BlockPos(x, y, z);
 
             if (returnJson) {
-
-            } else {
-                responseString = getBlockStr(blockPos) + "";
+                JsonObject json = new JsonObject();
+                String blockId = getBlockAsStr(blockPos);
+                assert blockId != null;
+                json.addProperty("id", blockId);
                 if (includeState) {
-                    responseString += getBlockStateStr(blockPos);
+                    json.add("state", getBlockStateAsJsonObject(blockPos));
+                }
+                responseString = new Gson().toJson(json);
+            } else {
+                responseString = getBlockAsStr(blockPos) + "";
+                if (includeState) {
+                    responseString += getBlockStateAsStr(blockPos);
                 }
                 if (includeData) {
-                    responseString += getBlockDataStr(blockPos);
+                    responseString += getBlockDataAsStr(blockPos);
                 }
             }
 
@@ -226,7 +231,7 @@ public class BlocksHandler extends HandlerBase {
         return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
     }
 
-    private String getBlockStr(BlockPos pos) {
+    private String getBlockAsStr(BlockPos pos) {
         ServerLevel serverLevel = mcServer.overworld();
 
         assert serverLevel != null;
@@ -235,7 +240,19 @@ public class BlocksHandler extends HandlerBase {
         return Objects.requireNonNull(getBlockRegistryName(bs));
     }
 
-    private String getBlockStateStr(BlockPos pos) {
+    private JsonObject getBlockStateAsJsonObject(BlockPos pos) {
+        ServerLevel serverLevel = mcServer.overworld();
+
+        assert serverLevel != null;
+        BlockState bs = serverLevel.getBlockState(pos);
+
+        JsonObject stateJsonObject = new JsonObject();
+
+        bs.getValues().entrySet().stream().map(propertyToStringPairFunction).filter(Objects::nonNull).forEach(pair -> stateJsonObject.add(pair.getKey(), new JsonPrimitive(pair.getValue())));
+        return stateJsonObject;
+    }
+
+    private String getBlockStateAsStr(BlockPos pos) {
         ServerLevel serverLevel = mcServer.overworld();
 
         assert serverLevel != null;
@@ -246,7 +263,7 @@ public class BlocksHandler extends HandlerBase {
             ']';
     }
 
-    private String getBlockDataStr(BlockPos pos) {
+    private String getBlockDataAsStr(BlockPos pos) {
         String str = "";
         ServerLevel serverLevel = mcServer.overworld();
 
