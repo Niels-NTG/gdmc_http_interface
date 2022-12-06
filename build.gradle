@@ -17,7 +17,7 @@ version = '0.5.0'
 group = 'com.nilsgawlik.gdmchttp' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'gdmchttp'
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '18' // Need this here so eclipse task generates correctly.
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17' // Need this here so eclipse task generates correctly.
 
 minecraft {
     // The mappings can be changed at any time, and must be in the following format.
