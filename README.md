@@ -1,8 +1,8 @@
-# Minecraft HTTP Interface Mod (Minecraft 1.16.5)
+# Minecraft HTTP Interface Mod (Minecraft 1.19.2)
 
 This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_java_mod) which is based on the Forge MDK.
 
-The latest release is [0.4.1 for Minecraft version 1.16.5](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.4.1)
+The latest release is [0.5.0 for Minecraft version 1.19.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v0.5.0)
 
 ## What it's all about
 
@@ -23,9 +23,9 @@ GET     /chunks     Get raw chunk nbt data
 GET     /buildarea  Get the build area defined by the /setbuildarea chat command
 ```
 
-A detailed documentation of the endpoints can be found [over here](https://github.com/nilsgawlik/gdmc_http_interface/wiki/Interface-Endpoints).
+A detailed documentation of the endpoints can be found [over here](https://github.com/Niels-NTG/gdmc_http_interface/wiki/Interface-Endpoints).
 
 ## Installation
 
-Install instructions are [over here](https://github.com/nilsgawlik/gdmc_http_interface/wiki/Installation).
+Install instructions are [over here](https://github.com/Niels-NTG/gdmc_http_interface/wiki/Installation).
 You need to own a copy of Minecraft to use the http interface!

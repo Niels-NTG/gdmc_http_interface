@@ -1,16 +1,13 @@
 package com.gdmc.httpinterfacemod;
 
 import com.gdmc.httpinterfacemod.utils.RegistryHandler;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Util;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.server.FMLServerStartingEvent;
-import net.minecraftforge.fml.event.server.FMLServerStoppingEvent;
-import net.minecraftforge.fml.loading.FMLCommonLaunchHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +29,7 @@ public class GdmcHttpMod
 
     // You can use SubscribeEvent and let the Event Bus discover methods to call
     @SubscribeEvent
-    public void onServerStarting(FMLServerStartingEvent event) {
+    public void onServerStarting(ServerStartingEvent event) {
         // do something when the server starts
         LOGGER.info("HELLO from server starting");
         RegistryHandler.registerCommands(event);
@@ -40,15 +37,15 @@ public class GdmcHttpMod
 
         try {
             GdmcHttpServer.startServer(minecraftServer);
-            minecraftServer.sendMessage(new StringTextComponent("GDMC Server started successfully."), Util.DUMMY_UUID);
+            minecraftServer.sendSystemMessage(Component.nullToEmpty("GDMC Server started successfully."));
         } catch (IOException e) {
             LOGGER.warn("Unable to start server!");
-            minecraftServer.sendMessage(new StringTextComponent("GDMC Server failed to start!"), Util.DUMMY_UUID);
+            minecraftServer.sendSystemMessage(Component.nullToEmpty("GDMC Server failed to start!"));
         }
     }
 
     @SubscribeEvent
-    public void onServerStopping(FMLServerStoppingEvent event) {
+    public void onServerStopping(ServerStoppingEvent event) {
         LOGGER.info("HELLO from server stopping");
 
         GdmcHttpServer.stopServer();

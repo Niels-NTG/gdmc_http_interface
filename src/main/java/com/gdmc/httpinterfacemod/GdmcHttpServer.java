@@ -2,7 +2,6 @@ package com.gdmc.httpinterfacemod;
 
 import com.gdmc.httpinterfacemod.handlers.*;
 import com.sun.net.httpserver.HttpServer;
-import net.minecraft.command.CommandSource;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

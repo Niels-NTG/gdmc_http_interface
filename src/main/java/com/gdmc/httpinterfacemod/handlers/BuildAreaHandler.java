@@ -6,8 +6,6 @@ import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 
 public class BuildAreaHandler extends HandlerBase {
     public static class BuildArea {
