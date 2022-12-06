@@ -53,7 +53,6 @@ public class ChunkHandler extends HandlerBase {
 
         // construct response
         ServerLevel serverLevel = mcServer.overworld();
-        assert serverLevel != null;
 
         CompletableFuture<ListTag> cfs = CompletableFuture.supplyAsync(() -> {
             ListTag returnList = new ListTag();

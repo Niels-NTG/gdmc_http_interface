@@ -193,7 +193,6 @@ public class BlocksHandler extends HandlerBase {
     private int setBlock(BlockPos pos, BlockState blockState, CompoundTag blockEntityData, int flags) {
         ServerLevel serverLevel = mcServer.overworld();
 
-        assert serverLevel != null;
         BlockEntity blockEntitytoClear = serverLevel.getBlockEntity(pos);
         Clearable.tryClear(blockEntitytoClear);
 
@@ -234,8 +233,6 @@ public class BlocksHandler extends HandlerBase {
     private String getBlockAsStr(BlockPos pos) {
         ServerLevel serverLevel = mcServer.overworld();
 
-        assert serverLevel != null;
-
         BlockState bs = serverLevel.getBlockState(pos);
         return Objects.requireNonNull(getBlockRegistryName(bs));
     }
@@ -243,7 +240,6 @@ public class BlocksHandler extends HandlerBase {
     private JsonObject getBlockStateAsJsonObject(BlockPos pos) {
         ServerLevel serverLevel = mcServer.overworld();
 
-        assert serverLevel != null;
         BlockState bs = serverLevel.getBlockState(pos);
 
         JsonObject stateJsonObject = new JsonObject();
@@ -255,7 +251,6 @@ public class BlocksHandler extends HandlerBase {
     private String getBlockStateAsStr(BlockPos pos) {
         ServerLevel serverLevel = mcServer.overworld();
 
-        assert serverLevel != null;
         BlockState bs = serverLevel.getBlockState(pos);
 
         return '[' +
@@ -266,8 +261,6 @@ public class BlocksHandler extends HandlerBase {
     private String getBlockDataAsStr(BlockPos pos) {
         String str = "";
         ServerLevel serverLevel = mcServer.overworld();
-
-        assert serverLevel != null;
 
         BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
         if (blockEntity != null) {
