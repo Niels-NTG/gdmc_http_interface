@@ -34,21 +34,6 @@ public class GdmcHttpServer {
         httpServer.createContext("/chunks", new ChunkHandler(mcServer));
         httpServer.createContext("/blocks", new BlocksHandler(mcServer));
         httpServer.createContext("/buildarea", new BuildAreaHandler(mcServer));
+        httpServer.createContext("/info", new InfoHandler(mcServer));
     }
 }
-
-
-
-//                    //old chunk palette stuff
-//                    ArrayList<String> sectionList = new ArrayList<>();
-//                    ListNBT sectionListNBT = new ListNBT();
-//                    for(ChunkSection chunkSection : chunk.getSections()) {
-//                        if(ChunkSection.isEmpty(chunkSection)) {
-//                            sectionList.add("");
-//                            continue;
-//                        }
-//                        PalettedContainer<BlockState> palettedContainer = chunkSection.getData();
-//                        CompoundNBT chunkPaletteCompound = new CompoundNBT();
-//                        palettedContainer.writeChunkPalette(chunkPaletteCompound, "palette", "data");
-//                        sectionList.add(chunkPaletteCompound.toString());
-//                    }
