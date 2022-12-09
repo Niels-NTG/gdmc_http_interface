@@ -34,6 +34,6 @@ public class GdmcHttpServer {
         httpServer.createContext("/chunks", new ChunkHandler(mcServer));
         httpServer.createContext("/blocks", new BlocksHandler(mcServer));
         httpServer.createContext("/buildarea", new BuildAreaHandler(mcServer));
-        httpServer.createContext("/info", new InfoHandler(mcServer));
+        httpServer.createContext("/version", new MinecraftVersionHandler(mcServer));
     }
 }

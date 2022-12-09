@@ -21,7 +21,7 @@ GET,PUT /blocks     Modify blocks in the world
 POST    /command    Run Minecraft commands
 GET     /chunks     Get raw chunk nbt data
 GET     /buildarea  Get the build area defined by the /setbuildarea chat command
-GET     /info       Get Minecraft version
+GET     /version    Get Minecraft version
 ```
 
 A detailed documentation of the endpoints can be found [over here](https://github.com/Niels-NTG/gdmc_http_interface/wiki/Interface-Endpoints).
