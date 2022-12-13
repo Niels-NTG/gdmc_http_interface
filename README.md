@@ -2,7 +2,7 @@
 
 This repo is based on the [GDMC example mod](https://github.com/Lasbleic/gdmc_java_mod) which is based on the Forge MDK.
 
-The latest release is [0.5.1 for Minecraft version 1.19.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v0.5.1)
+You can download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and [install](#Installation) it.
 
 ## What it's all about
 
@@ -17,11 +17,11 @@ When you open a Minecraft world, this mod opens an HTTP Server on localhost:9000
 The current endpoints of the interface are 
 
 ```
-GET,PUT /blocks     Modify blocks in the world
-POST    /command    Run Minecraft commands
-GET     /chunks     Get raw chunk nbt data
-GET     /buildarea  Get the build area defined by the /setbuildarea chat command
-GET     /version    Get Minecraft version
+GET,PUT,OPTIONS /blocks     Modify blocks in the world
+POST            /command    Run Minecraft commands
+GET             /chunks     Get raw chunk nbt data
+GET             /buildarea  Get the build area defined by the /setbuildarea chat command
+GET             /version    Get Minecraft version
 ```
 
 A detailed documentation of the endpoints can be found [over here](https://github.com/Niels-NTG/gdmc_http_interface/wiki/Interface-Endpoints).
