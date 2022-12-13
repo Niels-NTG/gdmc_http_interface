@@ -100,7 +100,7 @@ public class BlocksHandler extends HandlerBase {
 
             int blockFlags = customFlags >= 0? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
-            CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(0, 0, 0));
+            CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(x, y, z));
 
             for(String line : body) {
                 String returnValue;
