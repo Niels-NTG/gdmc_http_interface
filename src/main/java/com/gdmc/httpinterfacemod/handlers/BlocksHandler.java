@@ -14,9 +14,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -32,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -174,8 +177,11 @@ public class BlocksHandler extends HandlerBase {
                 }
             }
 
+        } else if (method.equals("options")) {
+            responseString = new Gson().toJson(new BlockInfoForOptionsRequest());
+
         } else {
-            throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
+            throw new HandlerBase.HttpException("Method not allowed. Only PUT, GET and OPTIONS requests are supported.", 405);
         }
 
         //headers
@@ -276,6 +282,18 @@ public class BlocksHandler extends HandlerBase {
     }
     public static String getBlockRegistryName(Block block) {
         return ForgeRegistries.BLOCKS.getKey(block).toString();
+    }
+
+    public class BlockInfoForOptionsRequest {
+        private String version;
+        private String[] methods = {"GET", "PUT", "OPTIONS"};
+        private ArrayList<String> dimensions = new ArrayList<>();
+        public BlockInfoForOptionsRequest() {
+            this.version = mcServer.getServerVersion();
+            for (ResourceKey<Level> levelResourceKey : mcServer.levelKeys()) {
+                this.dimensions.add(levelResourceKey.location().getPath());
+            }
+        }
     }
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
