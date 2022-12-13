@@ -6,7 +6,9 @@ import com.sun.net.httpserver.HttpHandler;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -72,6 +74,25 @@ public abstract class HandlerBase implements HttpHandler {
         }
     }
 
+    public ServerLevel getServerLevel() {
+        return getServerLevel(null);
+    }
+
+    public ServerLevel getServerLevel(String levelName) {
+        if (levelName != null) {
+            levelName = levelName.toLowerCase();
+            if (levelName.equals("nether") || levelName.equals("end")) {
+                levelName = "the_" + levelName;
+            }
+            for (ResourceKey<net.minecraft.world.level.Level> levelResourceKey : mcServer.levelKeys()) {
+                if (levelResourceKey.location().getPath().equals(levelName)) {
+                    return mcServer.getLevel(levelResourceKey);
+                }
+            }
+        }
+        return mcServer.overworld();
+    }
+
     protected abstract void internalHandle(HttpExchange httpExchange) throws IOException;
 
     protected static void addDefaultHeaders(Headers headers) {
@@ -126,7 +147,7 @@ public abstract class HandlerBase implements HttpHandler {
         return result;
     }
 
-    protected static CommandSourceStack createCommandSource(String name, MinecraftServer mcServer) {
+    protected CommandSourceStack createCommandSource(String name, MinecraftServer mcServer, String dimension) {
         CommandSource commandSource = new CommandSource() {
             @Override
             public void sendSystemMessage(Component p_230797_) {
@@ -153,7 +174,7 @@ public abstract class HandlerBase implements HttpHandler {
             commandSource,
             new Vec3(0, 0, 0),
             new Vec2(0, 0),
-            mcServer.overworld(),
+            this.getServerLevel(dimension),
             4,
             name,
             Component.nullToEmpty(name),

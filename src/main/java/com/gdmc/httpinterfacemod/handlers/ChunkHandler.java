@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class ChunkHandler extends HandlerBase {
+
+    String dimension;
     public ChunkHandler(MinecraftServer mcServer) {
         super(mcServer);
     }
@@ -35,6 +37,7 @@ public class ChunkHandler extends HandlerBase {
             chunkZ = Integer.parseInt(queryParams.getOrDefault("z", "0"));
             chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
             chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+            dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
             throw new HandlerBase.HttpException(message, 400);
@@ -52,7 +55,7 @@ public class ChunkHandler extends HandlerBase {
         boolean RETURN_TEXT = !contentType.equals("application/octet-stream");
 
         // construct response
-        ServerLevel serverLevel = mcServer.overworld();
+        ServerLevel serverLevel = getServerLevel(dimension);
 
         CompletableFuture<ListTag> cfs = CompletableFuture.supplyAsync(() -> {
             ListTag returnList = new ListTag();

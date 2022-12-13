@@ -45,9 +45,11 @@ public class BlocksHandler extends HandlerBase {
     private static final Logger LOGGER = LogManager.getLogger();
     private final CommandSourceStack cmdSrc;
 
+    private String dimension;
+
     public BlocksHandler(MinecraftServer mcServer) {
         super(mcServer);
-        cmdSrc = createCommandSource("GDMC-BlockHandler", mcServer);
+        cmdSrc = createCommandSource("GDMC-BlockHandler", mcServer, dimension);
     }
 
     @Override
@@ -75,6 +77,7 @@ public class BlocksHandler extends HandlerBase {
             doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", "true"));
             spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", "false"));
             customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
+            dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
             throw new HandlerBase.HttpException(message, 400);
@@ -189,7 +192,7 @@ public class BlocksHandler extends HandlerBase {
     }
 
     private int setBlock(BlockPos pos, BlockState blockState, CompoundTag blockEntityData, int flags) {
-        ServerLevel serverLevel = mcServer.overworld();
+        ServerLevel serverLevel = getServerLevel(dimension);
 
         BlockEntity blockEntitytoClear = serverLevel.getBlockEntity(pos);
         Clearable.tryClear(blockEntitytoClear);
@@ -229,14 +232,14 @@ public class BlocksHandler extends HandlerBase {
     }
 
     private String getBlockAsStr(BlockPos pos) {
-        ServerLevel serverLevel = mcServer.overworld();
+        ServerLevel serverLevel = getServerLevel(dimension);
 
         BlockState bs = serverLevel.getBlockState(pos);
         return Objects.requireNonNull(getBlockRegistryName(bs));
     }
 
     private JsonObject getBlockStateAsJsonObject(BlockPos pos) {
-        ServerLevel serverLevel = mcServer.overworld();
+        ServerLevel serverLevel = getServerLevel(dimension);
 
         BlockState bs = serverLevel.getBlockState(pos);
 
@@ -247,7 +250,7 @@ public class BlocksHandler extends HandlerBase {
     }
 
     private String getBlockStateAsStr(BlockPos pos) {
-        ServerLevel serverLevel = mcServer.overworld();
+        ServerLevel serverLevel = getServerLevel(dimension);
 
         BlockState bs = serverLevel.getBlockState(pos);
 
@@ -258,7 +261,7 @@ public class BlocksHandler extends HandlerBase {
 
     private String getBlockDataAsStr(BlockPos pos) {
         String str = "";
-        ServerLevel serverLevel = mcServer.overworld();
+        ServerLevel serverLevel = getServerLevel(dimension);
 
         BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
         if (blockEntity != null) {

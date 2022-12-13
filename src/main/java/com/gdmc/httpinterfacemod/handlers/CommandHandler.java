@@ -11,25 +11,31 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class CommandHandler extends HandlerBase {
     private static final Logger LOGGER = LogManager.getLogger();
-    private final CommandSourceStack cmdSrc;
+
+    private String dimension;
 
     public CommandHandler(MinecraftServer mcServer) {
         super(mcServer);
-        cmdSrc = createCommandSource("GDMC-CommandHandler", mcServer);
     }
 
     @Override
     public void internalHandle(HttpExchange httpExchange) throws IOException {
 
+        Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
+        dimension = queryParams.getOrDefault("dimension", null);
+
         // execute command(s)
         InputStream bodyStream = httpExchange.getRequestBody();
         List<String> commands = new BufferedReader(new InputStreamReader(bodyStream))
                 .lines().filter(a -> a.length() > 0).collect(Collectors.toList());
+
+        CommandSourceStack cmdSrc = createCommandSource("GDMC-CommandHandler", mcServer, dimension);
 
         List<String> outputs = new ArrayList<>();
         for (String command: commands) {
