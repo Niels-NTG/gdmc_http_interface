@@ -3,8 +3,6 @@ package com.gdmc.httpinterfacemod;
 import com.gdmc.httpinterfacemod.handlers.*;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.server.MinecraftServer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -12,7 +10,6 @@ import java.net.InetSocketAddress;
 public class GdmcHttpServer {
     private static HttpServer httpServer;
     private static MinecraftServer mcServer;
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public static void startServer(MinecraftServer mcServer) throws IOException {
         GdmcHttpServer.mcServer = mcServer;

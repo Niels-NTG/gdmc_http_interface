@@ -39,10 +39,8 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-//new CachedBlockInfo(p_210438_0_.getSource().getWorld(), BlockPosArgument.getLoadedBlockPos(p_210438_0_, "pos"), true)
 
 public class BlocksHandler extends HandlerBase {
-//    private static final SimpleCommandExceptionType FAILED_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("commands.setblock.failed"));
 
     private static final Logger LOGGER = LogManager.getLogger();
     private final CommandSourceStack cmdSrc;

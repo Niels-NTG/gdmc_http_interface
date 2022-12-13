@@ -31,7 +31,7 @@ public class GdmcHttpMod
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
         // do something when the server starts
-        LOGGER.info("HELLO from server starting");
+        LOGGER.info("Server starting");
         RegistryHandler.registerCommands(event);
         MinecraftServer minecraftServer = event.getServer();
 
@@ -46,7 +46,7 @@ public class GdmcHttpMod
 
     @SubscribeEvent
     public void onServerStopping(ServerStoppingEvent event) {
-        LOGGER.info("HELLO from server stopping");
+        LOGGER.info("Server stopping");
 
         GdmcHttpServer.stopServer();
     }
