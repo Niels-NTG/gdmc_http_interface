@@ -99,12 +99,12 @@ public class BlocksHandler extends HandlerBase {
 
         // construct response
         String method = httpExchange.getRequestMethod().toLowerCase();
-        String responseString = "";
+        String responseString;
 
         if (method.equals("put")) {
             InputStream bodyStream = httpExchange.getRequestBody();
             List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
-                    .lines().collect(Collectors.toList());
+                    .lines().toList();
 
             List<String> returnValues = new LinkedList<>();
 
@@ -163,6 +163,7 @@ public class BlocksHandler extends HandlerBase {
             }
         } else if (method.equals("get")) {
             JsonArray jsonArray = new JsonArray();
+            StringBuilder responseStringBuilder = new StringBuilder();
             for (int rangeX = x; rangeX < x + dx; rangeX++) {
                 for (int rangeY = y; rangeY < y + dy; rangeY++) {
                     for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
@@ -182,14 +183,20 @@ public class BlocksHandler extends HandlerBase {
                             }
                             jsonArray.add(json);
                         } else {
-                            responseString += rangeX + " " + rangeY + " " + rangeZ + " " + blockId;
+                            responseStringBuilder.append(rangeX);
+                            responseStringBuilder.append(' ');
+                            responseStringBuilder.append(rangeY);
+                            responseStringBuilder.append(' ');
+                            responseStringBuilder.append(rangeZ);
+                            responseStringBuilder.append(' ');
+                            responseStringBuilder.append(getBlockAsStr(blockPos));
                             if (includeState) {
-                                responseString += getBlockStateAsStr(blockPos);
+                                responseStringBuilder.append(getBlockStateAsStr(blockPos));
                             }
                             if (includeData) {
-                                responseString += getBlockDataAsStr(blockPos);
+                                responseStringBuilder.append(getBlockDataAsStr(blockPos));
                             }
-                            responseString += "\n";
+                            responseStringBuilder.append('\n');
                         }
                     }
                 }
@@ -197,7 +204,7 @@ public class BlocksHandler extends HandlerBase {
             if (returnJson) {
                 responseString = new Gson().toJson(jsonArray);
             } else {
-                responseString = responseString.trim();
+                responseString = responseStringBuilder.deleteCharAt(responseStringBuilder.length() - 1).toString();
             }
 
         } else if (method.equals("options")) {
