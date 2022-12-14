@@ -63,6 +63,9 @@ public class BlocksHandler extends HandlerBase {
         int x;
         int y;
         int z;
+        int dx;
+        int dy;
+        int dz;
         boolean includeData;
         boolean includeState;
         boolean doBlockUpdates;
@@ -74,12 +77,17 @@ public class BlocksHandler extends HandlerBase {
             y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
             z = Integer.parseInt(queryParams.getOrDefault("z", "0"));
 
+            dx = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
+            dy = Integer.parseInt(queryParams.getOrDefault("dy", "1"));
+            dz = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+
             includeData = Boolean.parseBoolean(queryParams.getOrDefault("includeData", "false"));
             includeState = Boolean.parseBoolean(queryParams.getOrDefault("includeState", "false"));
 
             doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", "true"));
             spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", "false"));
             customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
+
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
@@ -156,25 +164,39 @@ public class BlocksHandler extends HandlerBase {
                 responseString = new Gson().toJson(json);
             }
         } else if (method.equals("get")) {
-            BlockPos blockPos = new BlockPos(x, y, z);
-
+            JsonArray jsonArray = new JsonArray();
+            for (int rangeX = x; rangeX < x + dx; rangeX++) {
+                for (int rangeY = y; rangeY < y + dy; rangeY++) {
+                    for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+                        BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+                        String blockId = getBlockAsStr(blockPos);
+                        if (returnJson) {
+                            JsonObject json = new JsonObject();
+                            json.addProperty("id", blockId);
+                            json.addProperty("x", rangeX);
+                            json.addProperty("y", rangeY);
+                            json.addProperty("z", rangeZ);
+                            if (includeState) {
+                                json.add("state", getBlockStateAsJsonObject(blockPos));
+                            }
+                            jsonArray.add(json);
+                        } else {
+                            responseString += rangeX + " " + rangeY + " " + rangeZ + " " + blockId;
+                            if (includeState) {
+                                responseString += getBlockStateAsStr(blockPos);
+                            }
+                            if (includeData) {
+                                responseString += getBlockDataAsStr(blockPos);
+                            }
+                            responseString += "\n";
+                        }
+                    }
+                }
+            }
             if (returnJson) {
-                JsonObject json = new JsonObject();
-                String blockId = getBlockAsStr(blockPos);
-                assert blockId != null;
-                json.addProperty("id", blockId);
-                if (includeState) {
-                    json.add("state", getBlockStateAsJsonObject(blockPos));
-                }
-                responseString = new Gson().toJson(json);
+                responseString = new Gson().toJson(jsonArray);
             } else {
-                responseString = getBlockAsStr(blockPos) + "";
-                if (includeState) {
-                    responseString += getBlockStateAsStr(blockPos);
-                }
-                if (includeData) {
-                    responseString += getBlockDataAsStr(blockPos);
-                }
+                responseString = responseString.trim();
             }
 
         } else if (method.equals("options")) {
