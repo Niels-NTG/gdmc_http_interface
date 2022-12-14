@@ -179,6 +179,9 @@ public class BlocksHandler extends HandlerBase {
                             if (includeState) {
                                 json.add("state", getBlockStateAsJsonObject(blockPos));
                             }
+                            if (includeData) {
+                                json.add("data", getBlockDataAsJsonObject(blockPos));
+                            }
                             jsonArray.add(json);
                         } else {
                             responseString += rangeX + " " + rangeY + " " + rangeZ + " " + blockId;
@@ -287,10 +290,23 @@ public class BlocksHandler extends HandlerBase {
             ']';
     }
 
-    private String getBlockDataAsStr(BlockPos pos) {
-        String str = "";
+    private JsonObject getBlockDataAsJsonObject(BlockPos pos) {
         ServerLevel serverLevel = getServerLevel(dimension);
+        JsonObject dataJsonObject = new JsonObject();
+        BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
+        if (blockEntity != null) {
+            CompoundTag tags = blockEntity.saveWithoutMetadata();
+            JsonObject tagsAsJsonObject= new Gson().toJsonTree(tags).getAsJsonObject().getAsJsonObject("tags");
+            if (tagsAsJsonObject != null) {
+                return tagsAsJsonObject;
+            }
+        }
+        return  dataJsonObject;
+    }
 
+    private String getBlockDataAsStr(BlockPos pos) {
+        ServerLevel serverLevel = getServerLevel(dimension);
+        String str = "{}";
         BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
         if (blockEntity != null) {
             CompoundTag tags = blockEntity.saveWithoutMetadata();
