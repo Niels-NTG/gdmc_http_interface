@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -288,7 +289,8 @@ public class BlocksHandler extends HandlerBase {
         BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
         if (blockEntity != null) {
             CompoundTag tags = blockEntity.saveWithoutMetadata();
-            JsonObject tagsAsJsonObject= new Gson().toJsonTree(tags).getAsJsonObject().getAsJsonObject("tags");
+            String tagsAsJsonString = (new JsonTagVisitor()).visit(tags);
+            JsonObject tagsAsJsonObject = (new JsonParser()).parse(tagsAsJsonString).getAsJsonObject();
             if (tagsAsJsonObject != null) {
                 return tagsAsJsonObject;
             }
@@ -328,35 +330,35 @@ public class BlocksHandler extends HandlerBase {
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, String> propertyToStringFunction =
-            new Function<Map.Entry<Property<?>, Comparable<?>>, String>() {
-                public String apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
-                    if (element == null) {
-                        return "<NULL>";
-                    } else {
-                        Property<?> property = element.getKey();
-                        return property.getName() + "=" + this.valueToName(property, element.getValue());
-                    }
+        new Function<>() {
+            public String apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
+                if (element == null) {
+                    return "<NULL>";
+                } else {
+                    Property<?> property = element.getKey();
+                    return property.getName() + "=" + this.valueToName(property, element.getValue());
                 }
+            }
 
-                private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
-                    return property.getName((T)propertyValue);
-                }
-            };
+            private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
+                return property.getName((T) propertyValue);
+            }
+        };
 
     // function that converts a bunch of Property/Comparable pairs into String/String pairs
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>> propertyToStringPairFunction =
-            new Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>>() {
-                public Map.Entry<String, String> apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
-                    if (element == null) {
-                        return null;
-                    } else {
-                        Property<?> property = element.getKey();
-                        return new ImmutablePair<String, String>(property.getName(), this.valueToName(property, element.getValue()));
-                    }
+        new Function<>() {
+            public Map.Entry<String, String> apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
+                if (element == null) {
+                    return null;
+                } else {
+                    Property<?> property = element.getKey();
+                    return new ImmutablePair<>(property.getName(), this.valueToName(property, element.getValue()));
                 }
+            }
 
-                private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
-                    return property.getName((T)propertyValue);
-                }
-            };
+            private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
+                return property.getName((T) propertyValue);
+            }
+        };
 }
