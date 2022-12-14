@@ -229,18 +229,10 @@ public class BlocksHandler extends HandlerBase {
         Clearable.tryClear(blockEntitytoClear);
 
         if (serverLevel.setBlock(pos, blockState, flags)) {
-            // TODO wait for serverWorld.setBlock to complete (is sync or async???)
-            // TODO if 'line' contains string that could be Block Entity Data, run a '/data merge block x y z {BlockData}'
-            /*if (blockEntityData != null) {
-                String cmdString = String.format("data merge block %s %s %s %s", pos.getX(), pos.getY(), pos.getZ(), blockEntityData.toString());
-                LOGGER.info(cmdString);
-                try {
-                    return mcServer.getCommands().getDispatcher().execute(cmdString, cmdSrc);
-                } catch (Exception e) {
-                    LOGGER.error(e.getMessage());
-                    return 0;
-                }
-            }*/
+            if (blockEntityData != null) {
+                BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(pos);
+                existingBlockEntity.deserializeNBT(blockEntityData);
+            }
             return 1;
         } else {
             return 0;
