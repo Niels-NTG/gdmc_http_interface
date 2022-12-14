@@ -15,38 +15,38 @@ public class JsonTagVisitor implements TagVisitor {
 		return this.builder.toString();
 	}
 
-	public void visitString(StringTag p_178228_) {
-		this.builder.append(StringTag.quoteAndEscape(p_178228_.getAsString()));
+	public void visitString(StringTag stringTag) {
+		this.builder.append(StringTag.quoteAndEscape(stringTag.getAsString()));
 	}
 
-	public void visitByte(ByteTag p_178217_) {
-		this.builder.append(p_178217_.getAsNumber());
+	public void visitByte(ByteTag byteTag) {
+		this.builder.append(byteTag.getAsNumber());
 	}
 
-	public void visitShort(ShortTag p_178227_) {
-		this.builder.append(p_178227_.getAsNumber());
+	public void visitShort(ShortTag shortTag) {
+		this.builder.append(shortTag.getAsNumber());
 	}
 
-	public void visitInt(IntTag p_178223_) {
-		this.builder.append(p_178223_.getAsNumber());
+	public void visitInt(IntTag intTag) {
+		this.builder.append(intTag.getAsNumber());
 	}
 
-	public void visitLong(LongTag p_178226_) {
-		this.builder.append(p_178226_.getAsNumber());
+	public void visitLong(LongTag longTag) {
+		this.builder.append(longTag.getAsNumber());
 	}
 
-	public void visitFloat(FloatTag p_178221_) {
-		this.builder.append(p_178221_.getAsFloat());
+	public void visitFloat(FloatTag floatTag) {
+		this.builder.append(floatTag.getAsFloat());
 	}
 
-	public void visitDouble(DoubleTag p_178219_) {
-		this.builder.append(p_178219_.getAsDouble());
+	public void visitDouble(DoubleTag doubleTag) {
+		this.builder.append(doubleTag.getAsDouble());
 	}
 
-	public void visitByteArray(ByteArrayTag p_178216_) {
+	public void visitByteArray(ByteArrayTag byteTags) {
 		this.builder.append('[');
-		byte[] byteArray = p_178216_.getAsByteArray();
-		for(int i = 0; i < byteArray.length; ++i) {
+		byte[] byteArray = byteTags.getAsByteArray();
+		for(int i = 0; i < byteArray.length; i++) {
 			if (i != 0) {
 				this.builder.append(',');
 			}
@@ -55,10 +55,10 @@ public class JsonTagVisitor implements TagVisitor {
 		this.builder.append(']');
 	}
 
-	public void visitIntArray(IntArrayTag p_178222_) {
+	public void visitIntArray(IntArrayTag intTags) {
 		this.builder.append('[');
-		int[] intArray = p_178222_.getAsIntArray();
-		for(int i = 0; i < intArray.length; ++i) {
+		int[] intArray = intTags.getAsIntArray();
+		for(int i = 0; i < intArray.length; i++) {
 			if (i != 0) {
 				this.builder.append(',');
 			}
@@ -67,9 +67,9 @@ public class JsonTagVisitor implements TagVisitor {
 		this.builder.append(']');
 	}
 
-	public void visitLongArray(LongArrayTag p_178225_) {
+	public void visitLongArray(LongArrayTag longTags) {
 		this.builder.append('[');
-		long[] longArray = p_178225_.getAsLongArray();
+		long[] longArray = longTags.getAsLongArray();
 		for (int i = 0; i < longArray.length; i++) {
 			if (i != 0) {
 				this.builder.append(',');
@@ -79,28 +79,28 @@ public class JsonTagVisitor implements TagVisitor {
 		this.builder.append(']');
 	}
 
-	public void visitList(ListTag p_178224_) {
+	public void visitList(ListTag listTag) {
 		this.builder.append('[');
-		for(int i = 0; i < p_178224_.size(); ++i) {
+		for(int i = 0; i < listTag.size(); i++) {
 			if (i != 0) {
 				this.builder.append(',');
 			}
 
-			this.builder.append((new JsonTagVisitor()).visit(p_178224_.get(i)));
+			this.builder.append((new JsonTagVisitor()).visit(listTag.get(i)));
 		}
 		this.builder.append(']');
 	}
 
-	public void visitCompound(CompoundTag p_178218_) {
+	public void visitCompound(CompoundTag compoundTag) {
 		this.builder.append('{');
-		List<String> list = Lists.newArrayList(p_178218_.getAllKeys());
+		List<String> list = Lists.newArrayList(compoundTag.getAllKeys());
 		Collections.sort(list);
 
 		for (String s : list) {
 			if (this.builder.length() != 1) {
 				this.builder.append(',');
 			}
-			this.builder.append(handleEscape(s)).append(':').append((new JsonTagVisitor()).visit(p_178218_.get(s)));
+			this.builder.append(handleEscape(s)).append(':').append((new JsonTagVisitor()).visit(compoundTag.get(s)));
 		}
 		this.builder.append('}');
 	}
@@ -109,7 +109,5 @@ public class JsonTagVisitor implements TagVisitor {
 		return SIMPLE_VALUE.matcher(s).matches() ? s : StringTag.quoteAndEscape(s);
 	}
 
-	public void visitEnd(EndTag p_178220_) {
-
-	}
+	public void visitEnd(EndTag endTag) {}
 }

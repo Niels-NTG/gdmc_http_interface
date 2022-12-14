@@ -27,8 +27,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;
@@ -46,7 +44,6 @@ import java.util.stream.Collectors;
 
 public class BlocksHandler extends HandlerBase {
 
-    private static final Logger LOGGER = LogManager.getLogger();
     private final CommandSourceStack cmdSrc;
 
     private String dimension;
@@ -151,9 +148,7 @@ public class BlocksHandler extends HandlerBase {
                 }
                 returnValues.add(returnValue);
             }
-            if (!returnJson) {
-                responseString = String.join("\n", returnValues);
-            } else {
+            if (returnJson) {
                 JsonObject json = new JsonObject();
                 JsonArray resultsArray = new JsonArray();
 
@@ -163,6 +158,8 @@ public class BlocksHandler extends HandlerBase {
 
                 json.add("results", resultsArray);
                 responseString = new Gson().toJson(json);
+            } else {
+                responseString = String.join("\n", returnValues);
             }
         } else if (method.equals("get")) {
             JsonArray jsonArray = new JsonArray();
@@ -232,7 +229,9 @@ public class BlocksHandler extends HandlerBase {
         if (serverLevel.setBlock(pos, blockState, flags)) {
             if (blockEntityData != null) {
                 BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(pos);
-                existingBlockEntity.deserializeNBT(blockEntityData);
+                if (existingBlockEntity != null) {
+                    existingBlockEntity.deserializeNBT(blockEntityData);
+                }
             }
             return 1;
         } else {
@@ -290,12 +289,12 @@ public class BlocksHandler extends HandlerBase {
         if (blockEntity != null) {
             CompoundTag tags = blockEntity.saveWithoutMetadata();
             String tagsAsJsonString = (new JsonTagVisitor()).visit(tags);
-            JsonObject tagsAsJsonObject = (new JsonParser()).parse(tagsAsJsonString).getAsJsonObject();
+            JsonObject tagsAsJsonObject = JsonParser.parseString(tagsAsJsonString).getAsJsonObject();
             if (tagsAsJsonObject != null) {
                 return tagsAsJsonObject;
             }
         }
-        return  dataJsonObject;
+        return dataJsonObject;
     }
 
     private String getBlockDataAsStr(BlockPos pos) {
