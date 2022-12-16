@@ -20,6 +20,7 @@ The current endpoints of the interface are
 GET,PUT         /blocks     Modify blocks in the world
 POST            /command    Run Minecraft commands
 GET             /chunks     Get raw chunk nbt data
+GET             /biomes     Get biome of position in the world
 GET             /buildarea  Get the build area defined by the /setbuildarea chat command
 GET             /version    Get Minecraft version
 ```
