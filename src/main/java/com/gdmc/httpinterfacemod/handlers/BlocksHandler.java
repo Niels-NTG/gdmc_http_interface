@@ -189,7 +189,7 @@ public class BlocksHandler extends HandlerBase {
                     for (int rangeY = y; rangeY < y + dy; rangeY++) {
                         for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
                             BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                            String listItem = rangeX + ' ' + rangeY + ' ' + rangeZ + ' ' + getBlockAsStr(blockPos);
+                            String listItem = rangeX + " " + rangeY + " " + rangeZ + " " + getBlockAsStr(blockPos);
                             if (includeState) {
                                 listItem += getBlockStateAsStr(blockPos);
                             }
