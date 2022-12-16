@@ -15,11 +15,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -162,14 +160,13 @@ public class BlocksHandler extends HandlerBase {
                 responseString = String.join("\n", returnValues);
             }
         } else if (method.equals("get")) {
-            JsonArray jsonArray = new JsonArray();
-            StringBuilder responseStringBuilder = new StringBuilder();
-            for (int rangeX = x; rangeX < x + dx; rangeX++) {
-                for (int rangeY = y; rangeY < y + dy; rangeY++) {
-                    for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
-                        BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                        String blockId = getBlockAsStr(blockPos);
-                        if (returnJson) {
+            if (returnJson) {
+                JsonArray jsonArray = new JsonArray();
+                for (int rangeX = x; rangeX < x + dx; rangeX++) {
+                    for (int rangeY = y; rangeY < y + dy; rangeY++) {
+                        for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+                            BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+                            String blockId = getBlockAsStr(blockPos);
                             JsonObject json = new JsonObject();
                             json.addProperty("id", blockId);
                             json.addProperty("x", rangeX);
@@ -182,29 +179,28 @@ public class BlocksHandler extends HandlerBase {
                                 json.add("data", getBlockDataAsJsonObject(blockPos));
                             }
                             jsonArray.add(json);
-                        } else {
-                            responseStringBuilder.append(rangeX);
-                            responseStringBuilder.append(' ');
-                            responseStringBuilder.append(rangeY);
-                            responseStringBuilder.append(' ');
-                            responseStringBuilder.append(rangeZ);
-                            responseStringBuilder.append(' ');
-                            responseStringBuilder.append(getBlockAsStr(blockPos));
-                            if (includeState) {
-                                responseStringBuilder.append(getBlockStateAsStr(blockPos));
-                            }
-                            if (includeData) {
-                                responseStringBuilder.append(getBlockDataAsStr(blockPos));
-                            }
-                            responseStringBuilder.append('\n');
                         }
                     }
                 }
-            }
-            if (returnJson) {
                 responseString = new Gson().toJson(jsonArray);
             } else {
-                responseString = responseStringBuilder.deleteCharAt(responseStringBuilder.length() - 1).toString();
+                ArrayList<String> responseList = new ArrayList<>();
+                for (int rangeX = x; rangeX < x + dx; rangeX++) {
+                    for (int rangeY = y; rangeY < y + dy; rangeY++) {
+                        for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+                            BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+                            String listItem = rangeX + ' ' + rangeY + ' ' + rangeZ + ' ' + getBlockAsStr(blockPos);
+                            if (includeState) {
+                                listItem += getBlockStateAsStr(blockPos);
+                            }
+                            if (includeData) {
+                                listItem += getBlockDataAsStr(blockPos);
+                            }
+                            responseList.add(listItem);
+                        }
+                    }
+                }
+                responseString = String.join("\n", responseList);
             }
         } else {
             throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
@@ -315,7 +311,7 @@ public class BlocksHandler extends HandlerBase {
         return getBlockRegistryName(blockState.getBlock());
     }
     public static String getBlockRegistryName(Block block) {
-        return ForgeRegistries.BLOCKS.getKey(block).toString();
+        return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block)).toString();
     }
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
