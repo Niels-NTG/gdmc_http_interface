@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -26,8 +27,6 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.annotation.Nullable;
 import java.io.BufferedReader;
@@ -45,7 +44,6 @@ import java.util.stream.Collectors;
 
 public class BlocksHandler extends HandlerBase {
 
-    private static final Logger LOGGER = LogManager.getLogger();
     private final CommandSourceStack cmdSrc;
 
     private String dimension;
@@ -63,6 +61,9 @@ public class BlocksHandler extends HandlerBase {
         int x;
         int y;
         int z;
+        int dx;
+        int dy;
+        int dz;
         boolean includeData;
         boolean includeState;
         boolean doBlockUpdates;
@@ -74,12 +75,17 @@ public class BlocksHandler extends HandlerBase {
             y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
             z = Integer.parseInt(queryParams.getOrDefault("z", "0"));
 
+            dx = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
+            dy = Integer.parseInt(queryParams.getOrDefault("dy", "1"));
+            dz = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+
             includeData = Boolean.parseBoolean(queryParams.getOrDefault("includeData", "false"));
             includeState = Boolean.parseBoolean(queryParams.getOrDefault("includeState", "false"));
 
             doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", "true"));
             spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", "false"));
             customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
+
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
@@ -93,12 +99,12 @@ public class BlocksHandler extends HandlerBase {
 
         // construct response
         String method = httpExchange.getRequestMethod().toLowerCase();
-        String responseString = "";
+        String responseString;
 
         if (method.equals("put")) {
             InputStream bodyStream = httpExchange.getRequestBody();
             List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
-                    .lines().collect(Collectors.toList());
+                    .lines().toList();
 
             List<String> returnValues = new LinkedList<>();
 
@@ -142,9 +148,7 @@ public class BlocksHandler extends HandlerBase {
                 }
                 returnValues.add(returnValue);
             }
-            if (!returnJson) {
-                responseString = String.join("\n", returnValues);
-            } else {
+            if (returnJson) {
                 JsonObject json = new JsonObject();
                 JsonArray resultsArray = new JsonArray();
 
@@ -154,34 +158,56 @@ public class BlocksHandler extends HandlerBase {
 
                 json.add("results", resultsArray);
                 responseString = new Gson().toJson(json);
+            } else {
+                responseString = String.join("\n", returnValues);
             }
         } else if (method.equals("get")) {
-            BlockPos blockPos = new BlockPos(x, y, z);
-
-            if (returnJson) {
-                JsonObject json = new JsonObject();
-                String blockId = getBlockAsStr(blockPos);
-                assert blockId != null;
-                json.addProperty("id", blockId);
-                if (includeState) {
-                    json.add("state", getBlockStateAsJsonObject(blockPos));
-                }
-                responseString = new Gson().toJson(json);
-            } else {
-                responseString = getBlockAsStr(blockPos) + "";
-                if (includeState) {
-                    responseString += getBlockStateAsStr(blockPos);
-                }
-                if (includeData) {
-                    responseString += getBlockDataAsStr(blockPos);
+            JsonArray jsonArray = new JsonArray();
+            StringBuilder responseStringBuilder = new StringBuilder();
+            for (int rangeX = x; rangeX < x + dx; rangeX++) {
+                for (int rangeY = y; rangeY < y + dy; rangeY++) {
+                    for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+                        BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+                        String blockId = getBlockAsStr(blockPos);
+                        if (returnJson) {
+                            JsonObject json = new JsonObject();
+                            json.addProperty("id", blockId);
+                            json.addProperty("x", rangeX);
+                            json.addProperty("y", rangeY);
+                            json.addProperty("z", rangeZ);
+                            if (includeState) {
+                                json.add("state", getBlockStateAsJsonObject(blockPos));
+                            }
+                            if (includeData) {
+                                json.add("data", getBlockDataAsJsonObject(blockPos));
+                            }
+                            jsonArray.add(json);
+                        } else {
+                            responseStringBuilder.append(rangeX);
+                            responseStringBuilder.append(' ');
+                            responseStringBuilder.append(rangeY);
+                            responseStringBuilder.append(' ');
+                            responseStringBuilder.append(rangeZ);
+                            responseStringBuilder.append(' ');
+                            responseStringBuilder.append(getBlockAsStr(blockPos));
+                            if (includeState) {
+                                responseStringBuilder.append(getBlockStateAsStr(blockPos));
+                            }
+                            if (includeData) {
+                                responseStringBuilder.append(getBlockDataAsStr(blockPos));
+                            }
+                            responseStringBuilder.append('\n');
+                        }
+                    }
                 }
             }
-
-        } else if (method.equals("options")) {
-            responseString = new Gson().toJson(new BlockInfoForOptionsRequest());
-
+            if (returnJson) {
+                responseString = new Gson().toJson(jsonArray);
+            } else {
+                responseString = responseStringBuilder.deleteCharAt(responseStringBuilder.length() - 1).toString();
+            }
         } else {
-            throw new HandlerBase.HttpException("Method not allowed. Only PUT, GET and OPTIONS requests are supported.", 405);
+            throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
         //headers
@@ -204,18 +230,12 @@ public class BlocksHandler extends HandlerBase {
         Clearable.tryClear(blockEntitytoClear);
 
         if (serverLevel.setBlock(pos, blockState, flags)) {
-            // TODO wait for serverWorld.setBlock to complete (is sync or async???)
-            // TODO if 'line' contains string that could be Block Entity Data, run a '/data merge block x y z {BlockData}'
-            /*if (blockEntityData != null) {
-                String cmdString = String.format("data merge block %s %s %s %s", pos.getX(), pos.getY(), pos.getZ(), blockEntityData.toString());
-                LOGGER.info(cmdString);
-                try {
-                    return mcServer.getCommands().getDispatcher().execute(cmdString, cmdSrc);
-                } catch (Exception e) {
-                    LOGGER.error(e.getMessage());
-                    return 0;
+            if (blockEntityData != null) {
+                BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(pos);
+                if (existingBlockEntity != null) {
+                    existingBlockEntity.deserializeNBT(blockEntityData);
                 }
-            }*/
+            }
             return 1;
         } else {
             return 0;
@@ -265,10 +285,24 @@ public class BlocksHandler extends HandlerBase {
             ']';
     }
 
-    private String getBlockDataAsStr(BlockPos pos) {
-        String str = "";
+    private JsonObject getBlockDataAsJsonObject(BlockPos pos) {
         ServerLevel serverLevel = getServerLevel(dimension);
+        JsonObject dataJsonObject = new JsonObject();
+        BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
+        if (blockEntity != null) {
+            CompoundTag tags = blockEntity.saveWithoutMetadata();
+            String tagsAsJsonString = (new JsonTagVisitor()).visit(tags);
+            JsonObject tagsAsJsonObject = JsonParser.parseString(tagsAsJsonString).getAsJsonObject();
+            if (tagsAsJsonObject != null) {
+                return tagsAsJsonObject;
+            }
+        }
+        return dataJsonObject;
+    }
 
+    private String getBlockDataAsStr(BlockPos pos) {
+        ServerLevel serverLevel = getServerLevel(dimension);
+        String str = "{}";
         BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
         if (blockEntity != null) {
             CompoundTag tags = blockEntity.saveWithoutMetadata();
@@ -284,49 +318,37 @@ public class BlocksHandler extends HandlerBase {
         return ForgeRegistries.BLOCKS.getKey(block).toString();
     }
 
-    public class BlockInfoForOptionsRequest {
-        private String version;
-        private String[] methods = {"GET", "PUT", "OPTIONS"};
-        private ArrayList<String> dimensions = new ArrayList<>();
-        public BlockInfoForOptionsRequest() {
-            this.version = mcServer.getServerVersion();
-            for (ResourceKey<Level> levelResourceKey : mcServer.levelKeys()) {
-                this.dimensions.add(levelResourceKey.location().getPath());
-            }
-        }
-    }
-
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, String> propertyToStringFunction =
-            new Function<Map.Entry<Property<?>, Comparable<?>>, String>() {
-                public String apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
-                    if (element == null) {
-                        return "<NULL>";
-                    } else {
-                        Property<?> property = element.getKey();
-                        return property.getName() + "=" + this.valueToName(property, element.getValue());
-                    }
+        new Function<>() {
+            public String apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
+                if (element == null) {
+                    return "<NULL>";
+                } else {
+                    Property<?> property = element.getKey();
+                    return property.getName() + "=" + this.valueToName(property, element.getValue());
                 }
+            }
 
-                private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
-                    return property.getName((T)propertyValue);
-                }
-            };
+            private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
+                return property.getName((T) propertyValue);
+            }
+        };
 
     // function that converts a bunch of Property/Comparable pairs into String/String pairs
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>> propertyToStringPairFunction =
-            new Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>>() {
-                public Map.Entry<String, String> apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
-                    if (element == null) {
-                        return null;
-                    } else {
-                        Property<?> property = element.getKey();
-                        return new ImmutablePair<String, String>(property.getName(), this.valueToName(property, element.getValue()));
-                    }
+        new Function<>() {
+            public Map.Entry<String, String> apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
+                if (element == null) {
+                    return null;
+                } else {
+                    Property<?> property = element.getKey();
+                    return new ImmutablePair<>(property.getName(), this.valueToName(property, element.getValue()));
                 }
+            }
 
-                private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
-                    return property.getName((T)propertyValue);
-                }
-            };
+            private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
+                return property.getName((T) propertyValue);
+            }
+        };
 }
