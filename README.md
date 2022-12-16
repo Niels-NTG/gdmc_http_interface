@@ -17,7 +17,7 @@ When you open a Minecraft world, this mod opens an HTTP Server on localhost:9000
 The current endpoints of the interface are 
 
 ```
-GET,PUT,OPTIONS /blocks     Modify blocks in the world
+GET,PUT         /blocks     Modify blocks in the world
 POST            /command    Run Minecraft commands
 GET             /chunks     Get raw chunk nbt data
 GET             /buildarea  Get the build area defined by the /setbuildarea chat command

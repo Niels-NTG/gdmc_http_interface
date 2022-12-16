@@ -206,12 +206,8 @@ public class BlocksHandler extends HandlerBase {
             } else {
                 responseString = responseStringBuilder.deleteCharAt(responseStringBuilder.length() - 1).toString();
             }
-
-        } else if (method.equals("options")) {
-            responseString = new Gson().toJson(new BlockInfoForOptionsRequest());
-
         } else {
-            throw new HandlerBase.HttpException("Method not allowed. Only PUT, GET and OPTIONS requests are supported.", 405);
+            throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
         //headers
@@ -320,18 +316,6 @@ public class BlocksHandler extends HandlerBase {
     }
     public static String getBlockRegistryName(Block block) {
         return ForgeRegistries.BLOCKS.getKey(block).toString();
-    }
-
-    public class BlockInfoForOptionsRequest {
-        private String version;
-        private String[] methods = {"GET", "PUT", "OPTIONS"};
-        private ArrayList<String> dimensions = new ArrayList<>();
-        public BlockInfoForOptionsRequest() {
-            this.version = mcServer.getServerVersion();
-            for (ResourceKey<Level> levelResourceKey : mcServer.levelKeys()) {
-                this.dimensions.add(levelResourceKey.location().getPath());
-            }
-        }
     }
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
