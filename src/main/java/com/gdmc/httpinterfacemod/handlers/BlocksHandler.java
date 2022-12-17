@@ -238,21 +238,6 @@ public class BlocksHandler extends HandlerBase {
         }
     }
 
-    public int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {
-        /*
-            flags:
-                * 1 will cause a block update.
-                * 2 will send the change to clients.
-                * 4 will prevent the block from being re-rendered.
-                * 8 will force any re-renders to run on the main thread instead
-                * 16 will prevent neighbor reactions (e.g. fences connecting, observers pulsing).
-                * 32 will prevent neighbor reactions from spawning drops.
-                * 64 will signify the block is being moved.
-        */
-        // construct flags
-        return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
-    }
-
     private String getBlockAsStr(BlockPos pos) {
         ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -312,6 +297,21 @@ public class BlocksHandler extends HandlerBase {
     }
     public static String getBlockRegistryName(Block block) {
         return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block)).toString();
+    }
+
+    public static int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {
+        /*
+            flags:
+                * 1 will cause a block update.
+                * 2 will send the change to clients.
+                * 4 will prevent the block from being re-rendered.
+                * 8 will force any re-renders to run on the main thread instead
+                * 16 will prevent neighbor reactions (e.g. fences connecting, observers pulsing).
+                * 32 will prevent neighbor reactions from spawning drops.
+                * 64 will signify the block is being moved.
+        */
+        // construct flags
+        return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
     }
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
