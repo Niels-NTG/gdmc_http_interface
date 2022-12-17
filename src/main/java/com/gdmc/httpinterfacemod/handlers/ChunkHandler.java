@@ -58,11 +58,17 @@ public class ChunkHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         CompletableFuture<ListTag> cfs = CompletableFuture.supplyAsync(() -> {
-            ListTag returnList = new ListTag();
-            for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
-                for(int x = chunkX; x < chunkX + chunkDX; x++) {
-                    LevelChunk chunk = serverLevel.getChunk(x, z);
+            int xOffset = chunkX + chunkDX;
+            int xMin = Math.min(chunkX, xOffset);
+            int xMax = Math.max(chunkX, xOffset);
 
+            int zOffset = chunkZ + chunkDZ;
+            int zMin = Math.min(chunkZ, zOffset);
+            int zMax = Math.max(chunkZ, zOffset);
+            ListTag returnList = new ListTag();
+            for(int z = zMin; z < zMax; z++)
+                for(int x = xMin; x < xMax; x++) {
+                    LevelChunk chunk = serverLevel.getChunk(x, z);
                     CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
                     returnList.add(chunkNBT);
                 }
