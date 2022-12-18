@@ -160,11 +160,23 @@ public class BlocksHandler extends HandlerBase {
                 responseString = String.join("\n", returnValues);
             }
         } else if (method.equals("get")) {
+            int xOffset = x + dx;
+            int xMin = Math.min(x, xOffset);
+            int xMax = Math.max(x, xOffset);
+
+            int yOffset = y + dy;
+            int yMin = Math.min(y, yOffset);
+            int yMax = Math.max(y, yOffset);
+
+            int zOffset = z + dz;
+            int zMin = Math.min(z, zOffset);
+            int zMax = Math.max(z, zOffset);
+
             if (returnJson) {
                 JsonArray jsonArray = new JsonArray();
-                for (int rangeX = x; rangeX < x + dx; rangeX++) {
-                    for (int rangeY = y; rangeY < y + dy; rangeY++) {
-                        for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+                for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+                    for (int rangeY = yMin; rangeY < yMax; rangeY++) {
+                        for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
                             BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
                             String blockId = getBlockAsStr(blockPos);
                             JsonObject json = new JsonObject();
@@ -185,9 +197,9 @@ public class BlocksHandler extends HandlerBase {
                 responseString = new Gson().toJson(jsonArray);
             } else {
                 ArrayList<String> responseList = new ArrayList<>();
-                for (int rangeX = x; rangeX < x + dx; rangeX++) {
-                    for (int rangeY = y; rangeY < y + dy; rangeY++) {
-                        for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+                for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+                    for (int rangeY = yMin; rangeY < yMax; rangeY++) {
+                        for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
                             BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
                             String listItem = rangeX + " " + rangeY + " " + rangeZ + " " + getBlockAsStr(blockPos);
                             if (includeState) {

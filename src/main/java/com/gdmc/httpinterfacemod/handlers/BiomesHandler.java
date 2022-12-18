@@ -54,11 +54,22 @@ public class BiomesHandler extends HandlerBase {
 
 		if (method.equals("get")) {
 			ServerLevel serverLevel = getServerLevel(dimension);
+			int xOffset = x + dx;
+			int xMin = Math.min(x, xOffset);
+			int xMax = Math.max(x, xOffset);
+
+			int yOffset = y + dy;
+			int yMin = Math.min(y, yOffset);
+			int yMax = Math.max(y, yOffset);
+
+			int zOffset = z + dz;
+			int zMin = Math.min(z, zOffset);
+			int zMax = Math.max(z, zOffset);
 			if (returnJson) {
 				JsonArray jsonArray = new JsonArray();
-				for (int rangeX = x; rangeX < x + dx; rangeX++) {
-					for (int rangeY = y; rangeY < y + dy; rangeY++) {
-						for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+				for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
+						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
 							String biomeName = serverLevel.getBiome(blockPos).unwrapKey().get().location().toString();
 							JsonObject json = new JsonObject();
@@ -73,9 +84,9 @@ public class BiomesHandler extends HandlerBase {
 				responseString = new Gson().toJson(jsonArray);
 			} else {
 				ArrayList<String> biomesList = new ArrayList<>();
-				for (int rangeX = x; rangeX < x + dx; rangeX++) {
-					for (int rangeY = y; rangeY < y + dy; rangeY++) {
-						for (int rangeZ = z; rangeZ < z + dz; rangeZ++) {
+				for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
+						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
 							String biomeName = serverLevel.getBiome(blockPos).unwrapKey().get().location().toString();
 							biomesList.add(rangeX + " " + rangeY + " " + rangeZ + " " + biomeName);

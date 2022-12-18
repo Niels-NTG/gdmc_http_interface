@@ -1,5 +1,7 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.nbt.CompoundTag;
@@ -52,17 +54,24 @@ public class ChunkHandler extends HandlerBase {
         // if content type is application/json use that otherwise return text
         Headers requestHeaders = httpExchange.getRequestHeaders();
         String contentType = getHeader(requestHeaders, "Accept", "*/*");
-        boolean RETURN_TEXT = !contentType.equals("application/octet-stream");
+        boolean returnBinary = contentType.equals("application/octet-stream");
+        boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
 
         // construct response
         ServerLevel serverLevel = getServerLevel(dimension);
 
         CompletableFuture<ListTag> cfs = CompletableFuture.supplyAsync(() -> {
-            ListTag returnList = new ListTag();
-            for(int z = chunkZ; z < chunkZ + chunkDZ; z++)
-                for(int x = chunkX; x < chunkX + chunkDX; x++) {
-                    LevelChunk chunk = serverLevel.getChunk(x, z);
+            int xOffset = chunkX + chunkDX;
+            int xMin = Math.min(chunkX, xOffset);
+            int xMax = Math.max(chunkX, xOffset);
 
+            int zOffset = chunkZ + chunkDZ;
+            int zMin = Math.min(chunkZ, zOffset);
+            int zMax = Math.max(chunkZ, zOffset);
+            ListTag returnList = new ListTag();
+            for(int z = zMin; z < zMax; z++)
+                for(int x = xMin; x < xMax; x++) {
+                    LevelChunk chunk = serverLevel.getChunk(x, z);
                     CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
                     returnList.add(chunkNBT);
                 }
@@ -79,15 +88,9 @@ public class ChunkHandler extends HandlerBase {
         bodyNBT.putInt("ChunkDX", chunkDX);
         bodyNBT.putInt("ChunkDZ", chunkDZ);
 
-        // headers and body
+        // Response header and response body
         Headers headers = httpExchange.getResponseHeaders();
-
-        if(RETURN_TEXT) {
-            headers.add("Content-Type", "text/plain; charset=UTF-8");
-            String responseString = bodyNBT.toString();
-
-            resolveRequest(httpExchange, responseString);
-        } else {
+        if (returnBinary) {
             headers.add("Content-Type", "application/octet-stream");
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
@@ -99,6 +102,16 @@ public class ChunkHandler extends HandlerBase {
             byte[] responseBytes = baos.toByteArray();
 
             resolveRequest(httpExchange, responseBytes);
+        } else if (returnJson) {
+            headers.add("Content-Type", "application/json; charset=UTF-8");
+            String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
+
+            resolveRequest(httpExchange, responseString);
+        } else {
+            headers.add("Content-Type", "text/plain; charset=UTF-8");
+            String responseString = bodyNBT.toString();
+
+            resolveRequest(httpExchange, responseString);
         }
     }
 }
