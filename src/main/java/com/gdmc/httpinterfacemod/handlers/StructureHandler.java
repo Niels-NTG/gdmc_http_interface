@@ -1,16 +1,27 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -37,6 +48,7 @@ public class StructureHandler extends HandlerBase {
 		int pivotX;
 		int pivotY;
 		int pivotZ;
+		boolean includeEntities;
 
 		String dimension;
 
@@ -54,6 +66,7 @@ public class StructureHandler extends HandlerBase {
 			pivotX = Integer.parseInt(queryParams.getOrDefault("pivotx", "0"));
 			pivotY = Integer.parseInt(queryParams.getOrDefault("pivoty", "0"));
 			pivotZ = Integer.parseInt(queryParams.getOrDefault("pivotz", "0"));
+			includeEntities = Boolean.parseBoolean(queryParams.getOrDefault("entities", "false"));
 
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
@@ -61,9 +74,11 @@ public class StructureHandler extends HandlerBase {
 			throw new HandlerBase.HttpException(message, 400);
 		}
 
+		// with this header we return pure NBT binary
 		// if content type is application/json use that otherwise return text
 		Headers reqestHeaders = httpExchange.getRequestHeaders();
 		String contentType = getHeader(reqestHeaders, "Accept", "*/*");
+		boolean returnPlainText = contentType.equals("text/plain");
 		boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
@@ -75,6 +90,7 @@ public class StructureHandler extends HandlerBase {
 				// Read request body into NBT data compound that can be placed in the world.
 				InputStream bodyStream = httpExchange.getRequestBody();
 				structureCompound = NbtIo.readCompressed(bodyStream);
+//				TODO detect if file is not GZIPped and parse it some different way.
 			} catch (Exception exception) {
 				String message = "Could not process request body: " + exception.getMessage();
 				throw new HandlerBase.HttpException(message, 400);
@@ -93,30 +109,117 @@ public class StructureHandler extends HandlerBase {
 			}
 			structurePlaceSettings.setRotationPivot(new BlockPos(pivotX, pivotY, pivotZ));
 
+			structurePlaceSettings.setIgnoreEntities(!includeEntities);
+
 			ServerLevel serverLevel = getServerLevel(dimension);
 
 			try {
-				boolean hasPlaced = serverLevel.getStructureManager().readStructure(structureCompound).placeInWorld(
+
+				StructureTemplate structureTemplate = serverLevel.getStructureManager().readStructure(structureCompound);
+
+				BlockPos origin = new BlockPos(x, y, z);
+
+				boolean hasPlaced = structureTemplate.placeInWorld(
 					serverLevel,
-					new BlockPos(x, y, z),
-					new BlockPos(x, y, z),
+					origin,
+					origin,
 					structurePlaceSettings,
 					serverLevel.getRandom(),
 					BlocksHandler.getBlockFlags(true, false)
 				);
 				if (hasPlaced) {
+					ListTag blockList = structureCompound.getList("blocks", Tag.TAG_COMPOUND);
+					for (int i = 0; i < blockList.size(); i++) {
+						CompoundTag tag = blockList.getCompound(i);
+						if (tag.contains("nbt")) {
+							ListTag posTag = tag.getList("pos", Tag.TAG_INT);
+							BlockPos blockPosInStructure = new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2));
+							BlockPos transformedPosition = StructureTemplate.calculateRelativePosition(structurePlaceSettings, blockPosInStructure);
+							BlockPos transformedGlobalBlockPos = origin.offset(transformedPosition);
+
+							BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(transformedGlobalBlockPos);
+							if (existingBlockEntity != null) {
+								existingBlockEntity.deserializeNBT(tag.getCompound("nbt"));
+							}
+						}
+					}
 					responseString = "1";
 				} else {
 					responseString = "0";
 				}
+				resolveRequest(httpExchange, responseString);
 			} catch (Exception exception) {
 				String message = "Could place structure: " + exception.getMessage();
 				throw new HandlerBase.HttpException(message, 500);
 			}
-		} else {
-			throw new HandlerBase.HttpException("Method not allowed. Only POST requests are supported.", 405);
-		}
+		} else if (method.equals("get")) {
+			ServerLevel serverLevel = getServerLevel(dimension);
 
-		resolveRequest(httpExchange, responseString);
+			int xOffset = x + dx;
+			int xMin = Math.min(x, xOffset);
+
+			int yOffset = y + dy;
+			int yMin = Math.min(y, yOffset);
+
+			int zOffset = z + dz;
+			int zMin = Math.min(z, zOffset);
+
+			StructureTemplate structureTemplate = new StructureTemplate();
+			BlockPos origin = new BlockPos(xMin, yMin, zMin);
+			Vec3i size = new Vec3i(Math.abs(dx), Math.abs(dy), Math.abs(dz));
+			structureTemplate.fillFromWorld(
+				serverLevel,
+				origin,
+				size,
+				includeEntities,
+				null
+			);
+
+			CompoundTag newStructureCompoundTag = structureTemplate.save(new CompoundTag());
+			ListTag blockList = newStructureCompoundTag.getList("blocks", Tag.TAG_COMPOUND);
+			for (int i = 0; i < blockList.size(); i++) {
+				CompoundTag tag = blockList.getCompound(i);
+				if (tag.contains("nbt") || !tag.contains("pos")) {
+					continue;
+				}
+				ListTag posTag = tag.getList("pos", Tag.TAG_INT);
+				BlockPos blockPosInStructure = new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2));
+				BlockPos blockPosInWorld = origin.offset(blockPosInStructure);
+
+				BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(blockPosInWorld);
+				if (existingBlockEntity != null) {
+					CompoundTag blockEntityCompoundTag = existingBlockEntity.saveWithoutMetadata();
+					tag.put("nbt", blockEntityCompoundTag);
+				}
+
+			}
+
+			// Response header and response body
+			Headers responseHeaders = httpExchange.getResponseHeaders();
+			if (returnPlainText) {
+				responseHeaders.add("Content-Type", "text/plain; charset=UTF-8");
+				responseString = newStructureCompoundTag.toString();
+
+				resolveRequest(httpExchange, responseString);
+			} else if (returnJson) {
+				JsonObject tagsAsJsonObject = JsonParser.parseString(new JsonTagVisitor().visit(newStructureCompoundTag)).getAsJsonObject();
+				responseString = new Gson().toJson(tagsAsJsonObject);
+				responseHeaders.add("Content-Type", "application/json; charset=UTF-8");
+
+				resolveRequest(httpExchange, responseString);
+			} else {
+				responseHeaders.add("Content-Type", "application/octet-stream");
+				ByteArrayOutputStream boas = new ByteArrayOutputStream();
+				DataOutputStream dos = new DataOutputStream(boas);
+				NbtIo.writeCompressed(newStructureCompoundTag, dos);
+				dos.flush();
+				byte[] responseBytes = boas.toByteArray();
+
+				resolveRequest(httpExchange, responseBytes);
+			}
+
+		} else {
+			throw new HandlerBase.HttpException("Method not allowed. Only POST and GET requests are supported.", 405);
+		}
 	}
 }
