@@ -21,6 +21,7 @@ GET,PUT         /blocks     Modify blocks in the world
 POST            /command    Run Minecraft commands
 GET             /chunks     Get raw chunk nbt data
 GET             /biomes     Get biome of position in the world
+GET,POST        /structure  Generate NBT structure file from selection or place file into the world
 GET             /buildarea  Get the build area defined by the /setbuildarea chat command
 GET             /version    Get Minecraft version
 ```
