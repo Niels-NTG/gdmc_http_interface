@@ -12,6 +12,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
@@ -106,11 +107,11 @@ public class BlocksHandler extends HandlerBase {
 
             List<String> returnValues = new LinkedList<>();
 
-            int blockFlags = customFlags >= 0? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
+            int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
             CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(x, y, z));
 
-            for(String line : body) {
+            for (String line : body) {
                 String returnValue;
                 try {
                     StringReader sr = new StringReader(line);
@@ -146,6 +147,7 @@ public class BlocksHandler extends HandlerBase {
                 }
                 returnValues.add(returnValue);
             }
+
             if (returnJson) {
                 JsonObject json = new JsonObject();
                 JsonArray resultsArray = new JsonArray();
@@ -215,7 +217,7 @@ public class BlocksHandler extends HandlerBase {
                 responseString = String.join("\n", responseList);
             }
         } else {
-            throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
+            throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
         //headers
@@ -244,6 +246,17 @@ public class BlocksHandler extends HandlerBase {
                     existingBlockEntity.deserializeNBT(blockEntityData);
                 }
             }
+
+            // If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
+            // in the north, west, south, east, up, down directions.
+            if ((flags & Block.UPDATE_NEIGHBORS) != 0 && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+                for (Direction direction : Direction.values()) {
+                    BlockPos neighbourPosition = pos.relative(direction);
+                    BlockState neighbourBlockState = serverLevel.getBlockState(neighbourPosition);
+                    neighbourBlockState.updateNeighbourShapes(serverLevel, neighbourPosition, flags);
+                }
+            }
+
             return 1;
         } else {
             return 0;
@@ -323,7 +336,7 @@ public class BlocksHandler extends HandlerBase {
                 * 64 will signify the block is being moved.
         */
         // construct flags
-        return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
+        return Block.UPDATE_CLIENTS | (doBlockUpdates ? Block.UPDATE_NEIGHBORS : (Block.UPDATE_SUPPRESS_DROPS | Block.UPDATE_KNOWN_SHAPE)) | (spawnDrops ? 0 : Block.UPDATE_SUPPRESS_DROPS);
     }
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
