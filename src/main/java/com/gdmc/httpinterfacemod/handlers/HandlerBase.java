@@ -15,6 +15,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.net.URLDecoder;
@@ -59,7 +60,7 @@ public abstract class HandlerBase implements HttpHandler {
             // create a response string with stacktrace
             String stackTrace = ExceptionUtils.getStackTrace(e);
 
-            String responseString = String.format("Internal server error: %s\n%s", e.toString(), stackTrace);
+            String responseString = String.format("Internal server error: %s\n%s", e, stackTrace);
             byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
             Headers headers = httpExchange.getResponseHeaders();
             headers.set("Content-Type", "text/plain; charset=UTF-8");
@@ -72,10 +73,6 @@ public abstract class HandlerBase implements HttpHandler {
             LOGGER.log(Level.ERROR, responseString);
             throw e;
         }
-    }
-
-    public ServerLevel getServerLevel() {
-        return getServerLevel(null);
     }
 
     public ServerLevel getServerLevel(String levelName) {
@@ -133,14 +130,10 @@ public abstract class HandlerBase implements HttpHandler {
 
             if (next > last) {
                 int eqPos = qs.indexOf('=', last);
-                try {
-                    if (eqPos < 0 || eqPos > next)
-                        result.put(URLDecoder.decode(qs.substring(last, next), "utf-8"), "");
-                    else
-                        result.put(URLDecoder.decode(qs.substring(last, eqPos), "utf-8"), URLDecoder.decode(qs.substring(eqPos + 1, next), "utf-8"));
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e); // will never happen, utf-8 support is mandatory for java
-                }
+                if (eqPos < 0 || eqPos > next)
+                    result.put(URLDecoder.decode(qs.substring(last, next), StandardCharsets.UTF_8), "");
+                else
+                    result.put(URLDecoder.decode(qs.substring(last, eqPos), StandardCharsets.UTF_8), URLDecoder.decode(qs.substring(eqPos + 1, next), StandardCharsets.UTF_8));
             }
             last = next + 1;
         }
@@ -150,7 +143,7 @@ public abstract class HandlerBase implements HttpHandler {
     protected CommandSourceStack createCommandSource(String name, MinecraftServer mcServer, String dimension) {
         CommandSource commandSource = new CommandSource() {
             @Override
-            public void sendSystemMessage(Component p_230797_) {
+            public void sendSystemMessage(@NotNull Component p_230797_) {
 
             }
 

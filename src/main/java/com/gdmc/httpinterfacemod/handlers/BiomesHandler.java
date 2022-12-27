@@ -71,6 +71,9 @@ public class BiomesHandler extends HandlerBase {
 					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+							if (serverLevel.getBiome(blockPos).unwrapKey().isEmpty()) {
+								continue;
+							}
 							String biomeName = serverLevel.getBiome(blockPos).unwrapKey().get().location().toString();
 							JsonObject json = new JsonObject();
 							json.addProperty("id", biomeName);
@@ -88,6 +91,9 @@ public class BiomesHandler extends HandlerBase {
 					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+							if (serverLevel.getBiome(blockPos).unwrapKey().isEmpty()) {
+								continue;
+							}
 							String biomeName = serverLevel.getBiome(blockPos).unwrapKey().get().location().toString();
 							biomesList.add(rangeX + " " + rangeY + " " + rangeZ + " " + biomeName);
 						}
@@ -96,7 +102,7 @@ public class BiomesHandler extends HandlerBase {
 				responseString = String.join("\n", biomesList);
 			}
 		} else {
-			throw new HandlerBase.HttpException("Method not allowed. Only GET requests are supported.", 405);
+			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
 		}
 
 		Headers headers = httpExchange.getResponseHeaders();

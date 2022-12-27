@@ -219,7 +219,7 @@ public class StructureHandler extends HandlerBase {
 			}
 
 		} else {
-			throw new HandlerBase.HttpException("Method not allowed. Only POST and GET requests are supported.", 405);
+			throw new HttpException("Method not allowed. Only POST and GET requests are supported.", 405);
 		}
 	}
 }

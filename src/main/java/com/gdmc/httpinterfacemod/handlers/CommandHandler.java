@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class CommandHandler extends HandlerBase {
     private static final Logger LOGGER = LogManager.getLogger();
@@ -33,7 +32,7 @@ public class CommandHandler extends HandlerBase {
         // execute command(s)
         InputStream bodyStream = httpExchange.getRequestBody();
         List<String> commands = new BufferedReader(new InputStreamReader(bodyStream))
-                .lines().filter(a -> a.length() > 0).collect(Collectors.toList());
+                .lines().filter(a -> a.length() > 0).toList();
 
         CommandSourceStack cmdSrc = createCommandSource("GDMC-CommandHandler", mcServer, dimension);
 

@@ -42,12 +42,12 @@ public class ChunkHandler extends HandlerBase {
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
-            throw new HandlerBase.HttpException(message, 400);
+            throw new HttpException(message, 400);
         }
 
         String method = httpExchange.getRequestMethod().toLowerCase();
         if(!method.equals("get")) {
-            throw new HandlerBase.HttpException("Method not allowed. Only GET requests are supported.", 405);
+            throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
         }
 
         // with this header we return pure NBT binary
