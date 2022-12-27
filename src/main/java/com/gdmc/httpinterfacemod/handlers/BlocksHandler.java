@@ -148,16 +148,9 @@ public class BlocksHandler extends HandlerBase {
                 returnValues.add(returnValue);
             }
 
+            // Set response as a list of "1" (block was placed), "0" (block was not placed) or an exception string if something went wrong placing the block.
             if (returnJson) {
-                JsonObject json = new JsonObject();
-                JsonArray resultsArray = new JsonArray();
-
-                for(String s : returnValues) {
-                    resultsArray.add(s);
-                }
-
-                json.add("results", resultsArray);
-                responseString = new Gson().toJson(json);
+                responseString = new Gson().toJson(returnValues);
             } else {
                 responseString = String.join("\n", returnValues);
             }
