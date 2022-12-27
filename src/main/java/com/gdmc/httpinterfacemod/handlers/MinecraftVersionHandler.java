@@ -12,6 +12,12 @@ public class MinecraftVersionHandler extends HandlerBase {
 
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
+		String method = httpExchange.getRequestMethod().toLowerCase();
+
+		if (!method.equals("get")) {
+			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
+		}
+
 		String responseString = mcServer.getServerVersion();
 		resolveRequest(httpExchange, responseString);
 	}
