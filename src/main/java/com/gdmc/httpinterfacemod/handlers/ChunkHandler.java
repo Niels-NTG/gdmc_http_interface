@@ -110,9 +110,12 @@ public class ChunkHandler extends HandlerBase {
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
-            CompoundTag containterNBT = new CompoundTag();
-            containterNBT.put("file", bodyNBT);
-            containterNBT.write(dos);
+            if (returnCompressed) {
+                responseHeaders.add("Content-Encoding", "gzip");
+                NbtIo.writeCompressed(bodyNBT, dos);
+            } else {
+                NbtIo.write(bodyNBT, dos);
+            }
             dos.flush();
             byte[] responseBytes = baos.toByteArray();
 
