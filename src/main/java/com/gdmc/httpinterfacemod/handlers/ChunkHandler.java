@@ -89,12 +89,12 @@ public class ChunkHandler extends HandlerBase {
         bodyNBT.putInt("ChunkDZ", chunkDZ);
 
         // Response header and response body
-        Headers headers = httpExchange.getResponseHeaders();
+        Headers responseHeaders = httpExchange.getResponseHeaders();
         if (returnBinary) {
-            headers.add("Content-Type", "application/octet-stream");
+            addResponseHeaderContentTypeBinary(responseHeaders);
+
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
-
             CompoundTag containterNBT = new CompoundTag();
             containterNBT.put("file", bodyNBT);
             containterNBT.write(dos);
@@ -103,12 +103,14 @@ public class ChunkHandler extends HandlerBase {
 
             resolveRequest(httpExchange, responseBytes);
         } else if (returnJson) {
-            headers.add("Content-Type", "application/json; charset=UTF-8");
+            addResponseHeaderContentTypeJson(responseHeaders);
+
             String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
 
             resolveRequest(httpExchange, responseString);
         } else {
-            headers.add("Content-Type", "text/plain; charset=UTF-8");
+            addResponseHeaderContentTypePlain(responseHeaders);
+
             String responseString = bodyNBT.toString();
 
             resolveRequest(httpExchange, responseString);

@@ -199,18 +199,21 @@ public class StructureHandler extends HandlerBase {
 			// Response header and response body
 			Headers responseHeaders = httpExchange.getResponseHeaders();
 			if (returnPlainText) {
-				responseHeaders.add("Content-Type", "text/plain; charset=UTF-8");
+				addResponseHeaderContentTypePlain(responseHeaders);
+
 				responseString = newStructureCompoundTag.toString();
 
 				resolveRequest(httpExchange, responseString);
 			} else if (returnJson) {
+				addResponseHeaderContentTypeJson(responseHeaders);
+
 				JsonObject tagsAsJsonObject = JsonParser.parseString(new JsonTagVisitor().visit(newStructureCompoundTag)).getAsJsonObject();
 				responseString = new Gson().toJson(tagsAsJsonObject);
-				responseHeaders.add("Content-Type", "application/json; charset=UTF-8");
 
 				resolveRequest(httpExchange, responseString);
 			} else {
-				responseHeaders.add("Content-Type", "application/octet-stream");
+				addResponseHeaderContentTypeBinary(responseHeaders);
+
 				ByteArrayOutputStream boas = new ByteArrayOutputStream();
 				DataOutputStream dos = new DataOutputStream(boas);
 				NbtIo.writeCompressed(newStructureCompoundTag, dos);

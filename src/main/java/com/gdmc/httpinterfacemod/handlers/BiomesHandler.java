@@ -105,13 +105,12 @@ public class BiomesHandler extends HandlerBase {
 			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
 		}
 
-		Headers headers = httpExchange.getResponseHeaders();
-		addDefaultHeaders(headers);
-
-		if(returnJson) {
-			headers.add("Content-Type", "application/json; charset=UTF-8");
+		Headers responseHeaders = httpExchange.getResponseHeaders();
+		addDefaultHeaders(responseHeaders);
+		if (returnJson) {
+			addResponseHeaderContentTypeJson(responseHeaders);
 		} else {
-			headers.add("Content-Type", "text/plain; charset=UTF-8");
+			addResponseHeaderContentTypePlain(requestHeaders);
 		}
 
 		resolveRequest(httpExchange, responseString);

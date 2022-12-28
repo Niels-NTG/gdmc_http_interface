@@ -261,14 +261,13 @@ public class BlocksHandler extends HandlerBase {
             throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
-        //headers
-        Headers headers = httpExchange.getResponseHeaders();
-        addDefaultHeaders(headers);
-
+        // Response headers
+        Headers responseHeaders = httpExchange.getResponseHeaders();
+        addDefaultHeaders(responseHeaders);
         if (returnJson) {
-            headers.add("Content-Type", "application/json; charset=UTF-8");
+            addResponseHeaderContentTypeJson(responseHeaders);
         } else {
-            headers.add("Content-Type", "text/plain; charset=UTF-8");
+            addResponseHeaderContentTypePlain(responseHeaders);
         }
 
         resolveRequest(httpExchange, responseString);

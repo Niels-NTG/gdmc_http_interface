@@ -97,6 +97,19 @@ public abstract class HandlerBase implements HttpHandler {
         headers.add("Content-Disposition", "inline");
     }
 
+    protected static void addResponseHeaderContentTypeJson(Headers headers) {
+        headers.add("Content-Type", "application/json; charset=UTF-8");
+    }
+
+    protected static void addResponseHeaderContentTypePlain(Headers headers) {
+        headers.add("Content-Type", "text/plain; charset=UTF-8");
+    }
+
+    protected static void addResponseHeaderContentTypeBinary(Headers headers) {
+        headers.add("Content-Type", "application/octet-stream");
+        headers.add("Content-Disposition", "attachment");
+    }
+
     protected static void resolveRequest(HttpExchange httpExchange, String responseString) throws IOException {
         byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
         resolveRequest(httpExchange, responseBytes);
