@@ -20,13 +20,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 public class StructureHandler extends HandlerBase {
+
+	String dimension;
 	public StructureHandler(MinecraftServer mcServer) {
 		super(mcServer);
 	}
@@ -35,6 +38,7 @@ public class StructureHandler extends HandlerBase {
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
 		// query parameters
 		Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
+
 		int x;
 		int y;
 		int z;
@@ -49,8 +53,6 @@ public class StructureHandler extends HandlerBase {
 		int pivotY;
 		int pivotZ;
 		boolean includeEntities;
-
-		String dimension;
 
 		try {
 			x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
@@ -79,23 +81,37 @@ public class StructureHandler extends HandlerBase {
 		Headers requestHeaders = httpExchange.getRequestHeaders();
 		String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
 		boolean returnPlainText = acceptHeader.equals("text/plain");
-		boolean returnJson = acceptHeader.equals("application/json") || acceptHeader.equals("text/json");
+		boolean returnJson = hasJsonTypeInHeader(acceptHeader);
+		String acceptEncodingHeader = getHeader(requestHeaders, "Accept-Encoding", "gzip");
+		boolean returnCompressed = acceptEncodingHeader.equals("gzip");
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
 		String responseString;
 
 		if (method.equals("post")) {
-//			TODO Content-Type header to allow JSON files as well
+			String contentEncodingHeader = getHeader(requestHeaders, "Content-Encoding", "*");
+			boolean inputShouldBeCompressed = contentEncodingHeader.equals("gzip");
 
 			CompoundTag structureCompound;
+			ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+			httpExchange.getRequestBody().transferTo(outputStream);
 			try {
 				// Read request body into NBT data compound that can be placed in the world.
-				InputStream bodyStream = httpExchange.getRequestBody();
-				structureCompound = NbtIo.readCompressed(bodyStream);
-//				TODO detect if file is not GZIPped and parse it some different way.
+				structureCompound = NbtIo.readCompressed(new ByteArrayInputStream(outputStream.toByteArray()));
 			} catch (Exception exception) {
-				String message = "Could not process request body: " + exception.getMessage();
-				throw new HandlerBase.HttpException(message, 400);
+				// If header states the content should be compressed but it isn't, throw an error. Otherwise, try
+				// reading the content again, assuming it is not compressed.
+				if (inputShouldBeCompressed) {
+					String message = "Could not process request body: " + exception.getMessage();
+					throw new HttpException(message, 400);
+				}
+				try {
+					DataInputStream dataInputStream = new DataInputStream(new ByteArrayInputStream(outputStream.toByteArray()));
+					structureCompound = NbtIo.read(dataInputStream);
+				} catch (Exception exception1) {
+					String message = "Could not process request body: " + exception1.getMessage();
+					throw new HttpException(message, 400);
+				}
 			}
 
 			// Prepare transformations to the structure
@@ -149,11 +165,19 @@ public class StructureHandler extends HandlerBase {
 				} else {
 					responseString = "0";
 				}
-				resolveRequest(httpExchange, responseString);
 			} catch (Exception exception) {
 				String message = "Could place structure: " + exception.getMessage();
-				throw new HandlerBase.HttpException(message, 500);
+				throw new HttpException(message, 400);
 			}
+
+			Headers responseHeaders = httpExchange.getResponseHeaders();
+			if (returnJson) {
+				responseString = "[\"" + responseString + "\"]";
+				addResponseHeaderContentTypeJson(responseHeaders);
+			} else {
+				addResponseHeaderContentTypePlain(responseHeaders);
+			}
+			resolveRequest(httpExchange, responseString);
 		} else if (method.equals("get")) {
 			ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -216,7 +240,12 @@ public class StructureHandler extends HandlerBase {
 
 				ByteArrayOutputStream boas = new ByteArrayOutputStream();
 				DataOutputStream dos = new DataOutputStream(boas);
-				NbtIo.writeCompressed(newStructureCompoundTag, dos);
+				if (returnCompressed) {
+					responseHeaders.add("Content-Encoding", "gzip");
+					NbtIo.writeCompressed(newStructureCompoundTag, dos);
+				} else {
+					NbtIo.write(newStructureCompoundTag, dos);
+				}
 				dos.flush();
 				byte[] responseBytes = boas.toByteArray();
 
