@@ -46,8 +46,8 @@ public class BiomesHandler extends HandlerBase {
 		}
 
 		Headers requestHeaders = httpExchange.getRequestHeaders();
-		String contentType = getHeader(requestHeaders, "Accept", "*/*");
-		boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
+		String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
+		boolean returnJson = hasJsonTypeInHeader(acceptHeader);
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
 		String responseString;

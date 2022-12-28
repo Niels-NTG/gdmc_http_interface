@@ -117,6 +117,10 @@ public abstract class HandlerBase implements HttpHandler {
             return list.get(0);
     }
 
+    protected static boolean hasJsonTypeInHeader(String header) {
+        return header.equals("application/json") || header.equals("text/json");
+    }
+
     protected static Map<String, String> parseQueryString(String qs) {
         Map<String, String> result = new HashMap<>();
         if (qs == null)

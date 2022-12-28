@@ -77,14 +77,16 @@ public class StructureHandler extends HandlerBase {
 		// with this header we return pure NBT binary
 		// if content type is application/json use that otherwise return text
 		Headers requestHeaders = httpExchange.getRequestHeaders();
-		String contentType = getHeader(requestHeaders, "Accept", "*/*");
-		boolean returnPlainText = contentType.equals("text/plain");
-		boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
+		String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
+		boolean returnPlainText = acceptHeader.equals("text/plain");
+		boolean returnJson = acceptHeader.equals("application/json") || acceptHeader.equals("text/json");
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
 		String responseString;
 
 		if (method.equals("post")) {
+//			TODO Content-Type header to allow JSON files as well
+
 			CompoundTag structureCompound;
 			try {
 				// Read request body into NBT data compound that can be placed in the world.

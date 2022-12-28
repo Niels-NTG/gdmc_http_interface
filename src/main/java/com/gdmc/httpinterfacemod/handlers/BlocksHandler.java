@@ -92,9 +92,9 @@ public class BlocksHandler extends HandlerBase {
         }
 
         // if content type is application/json use that otherwise return text
-        Headers reqestHeaders = httpExchange.getRequestHeaders();
-        String contentType = getHeader(reqestHeaders, "Accept", "*/*");
-        boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
+        Headers requestHeaders = httpExchange.getRequestHeaders();
+        String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
+        boolean returnJson = hasJsonTypeInHeader(acceptHeader);
 
         // construct response
         String method = httpExchange.getRequestMethod().toLowerCase();
@@ -217,7 +217,7 @@ public class BlocksHandler extends HandlerBase {
         Headers headers = httpExchange.getResponseHeaders();
         addDefaultHeaders(headers);
 
-        if(returnJson) {
+        if (returnJson) {
             headers.add("Content-Type", "application/json; charset=UTF-8");
         } else {
             headers.add("Content-Type", "text/plain; charset=UTF-8");
@@ -226,6 +226,10 @@ public class BlocksHandler extends HandlerBase {
         resolveRequest(httpExchange, responseString);
     }
 
+    private BlockState getBlockStateAtPosition(BlockPos pos) {
+        ServerLevel serverLevel = getServerLevel(dimension);
+        return serverLevel.getBlockState(pos);
+    }
     private int setBlock(BlockPos pos, BlockState blockState, CompoundTag blockEntityData, int flags) {
         ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -257,31 +261,24 @@ public class BlocksHandler extends HandlerBase {
     }
 
     private String getBlockAsStr(BlockPos pos) {
-        ServerLevel serverLevel = getServerLevel(dimension);
-
-        BlockState bs = serverLevel.getBlockState(pos);
+        BlockState bs = getBlockStateAtPosition(pos);
         return Objects.requireNonNull(getBlockRegistryName(bs));
     }
 
     private JsonObject getBlockStateAsJsonObject(BlockPos pos) {
-        ServerLevel serverLevel = getServerLevel(dimension);
-
-        BlockState bs = serverLevel.getBlockState(pos);
+        BlockState bs = getBlockStateAtPosition(pos);
 
         JsonObject stateJsonObject = new JsonObject();
-
         bs.getValues().entrySet().stream().map(propertyToStringPairFunction).filter(Objects::nonNull).forEach(pair -> stateJsonObject.add(pair.getKey(), new JsonPrimitive(pair.getValue())));
         return stateJsonObject;
     }
 
     private String getBlockStateAsStr(BlockPos pos) {
-        ServerLevel serverLevel = getServerLevel(dimension);
-
-        BlockState bs = serverLevel.getBlockState(pos);
+        BlockState bs = getBlockStateAtPosition(pos);
 
         return '[' +
             bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
-            ']';
+        ']';
     }
 
     private JsonObject getBlockDataAsJsonObject(BlockPos pos) {
