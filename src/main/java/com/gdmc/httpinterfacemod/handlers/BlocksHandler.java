@@ -16,6 +16,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
@@ -101,51 +102,98 @@ public class BlocksHandler extends HandlerBase {
         String responseString;
 
         if (method.equals("put")) {
-            InputStream bodyStream = httpExchange.getRequestBody();
-            List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
-                    .lines().toList();
-
-            List<String> returnValues = new LinkedList<>();
+            String contentTypeHeader = getHeader(requestHeaders,"Content-Type", "*/*");
+            boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
 
             int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
             CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(x, y, z));
 
-            for (String line : body) {
-                String returnValue;
-                try {
-                    StringReader sr = new StringReader(line);
-                    Coordinates li = null;
+            List<String> returnValues = new LinkedList<>();
+
+            InputStream bodyStream = httpExchange.getRequestBody();
+
+            if (parseRequestAsJson) {
+                JsonArray blockPlacementList = JsonParser.parseReader(new InputStreamReader(bodyStream)).getAsJsonArray();
+                for (JsonElement blockPlacement : blockPlacementList) {
+                    String returnValue;
+                    JsonObject blockPlacementItem = blockPlacement.getAsJsonObject();
                     try {
-                        li = BlockPosArgument.blockPos().parse(sr);
-                        sr.skip();
+
+                        // Parse block position x y z. Use the position of the command source (set with the URL query parameters) if not defined in
+                        // the block placement item JsonObject. Valid values may be any positive or negative integer and can use tilde or caret notation
+                        // (see: https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
+                        String posXString = blockPlacementItem.has("x") ? blockPlacementItem.get("x").getAsString() : String.valueOf(x);
+                        String posYString = blockPlacementItem.has("y") ? blockPlacementItem.get("y").getAsString() : String.valueOf(y);
+                        String posZString = blockPlacementItem.has("z") ? blockPlacementItem.get("z").getAsString() : String.valueOf(z);
+                        BlockPos blockPos = getBlockPosFromString(
+                            "%s %s %s".formatted(posXString, posYString, posZString),
+                            commandSourceStack
+                        );
+
+                        // Skip if block id is missing
+                        if (!blockPlacementItem.has("id")) {
+                            returnValues.add("block id is missing in " + blockPlacement);
+                            continue;
+                        }
+                        String blockId = blockPlacementItem.get("id").getAsString();
+
+                        // Check if JSON contains an JsonObject or string for block state. Use an empty block state string ("[]") if nothing suitable is found.
+                        String blockStateString = "[]";
+                        if (blockPlacementItem.has("state")) {
+                            if (blockPlacementItem.get("state").isJsonObject()) {
+                                blockStateString = getBlockStateStringFromJSONObject(blockPlacementItem.get("state").getAsJsonObject());
+                            } else if (blockPlacementItem.get("state").isJsonPrimitive()) {
+                                blockStateString = blockPlacementItem.get("state").getAsString();
+                            }
+                        }
+
+                        // Pass block Id and block state string into a Stringreader with the the block state parser.
+                        HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+                        BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, new StringReader(
+                             blockId + blockStateString
+                        ), true);
+                        BlockState blockState = parsedBlockState.blockState();
+
+                        // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
+                        // for this block placement.
+                        CompoundTag compoundTag = null;
+                        if (blockPlacementItem.has("data")) {
+                            compoundTag = TagParser.parseTag(blockPlacementItem.get("data").toString());
+                        }
+
+                        // Attempt to place block in the world.
+                        returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
+
                     } catch (CommandSyntaxException e) {
-                        sr = new StringReader(line); // TODO maybe delete this
+                        returnValue = e.getMessage();
                     }
 
-                    int xx, yy, zz;
-                    if (li != null) {
-                        xx = (int)Math.round(li.getPosition(commandSourceStack).x);
-                        yy = (int)Math.round(li.getPosition(commandSourceStack).y);
-                        zz = (int)Math.round(li.getPosition(commandSourceStack).z);
-                    } else {
-                        xx = x;
-                        yy = y;
-                        zz = z;
-                    }
-                    BlockPos blockPos = new BlockPos(xx, yy, zz);
-
-                    HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
-                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, sr, true);
-                    BlockState blockState = parsedBlockState.blockState();
-                    CompoundTag compoundTag = parsedBlockState.nbt();
-
-                    returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
-
-                } catch (CommandSyntaxException e) {
-                    returnValue = e.getMessage();
+                    returnValues.add(returnValue);
                 }
-                returnValues.add(returnValue);
+
+            } else {
+                List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
+                    .lines().toList();
+
+                for (String line : body) {
+                    String returnValue;
+                    try {
+                        StringReader sr = new StringReader(line);
+                        BlockPos blockPos = getBlockPosFromString(sr, commandSourceStack);
+
+                        HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+                        BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, sr, true);
+                        BlockState blockState = parsedBlockState.blockState();
+                        CompoundTag compoundTag = parsedBlockState.nbt();
+
+                        returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
+
+                    } catch (CommandSyntaxException e) {
+                        returnValue = e.getMessage();
+                    }
+                    returnValues.add(returnValue);
+                }
             }
 
             // Set response as a list of "1" (block was placed), "0" (block was not placed) or an exception string if something went wrong placing the block.
@@ -230,6 +278,25 @@ public class BlocksHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
         return serverLevel.getBlockState(pos);
     }
+
+    private static BlockPos getBlockPosFromString(String s, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+        return getBlockPosFromString(new StringReader(s), commandSourceStack);
+    }
+
+    private static BlockPos getBlockPosFromString(StringReader blockPosStringReader, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+        Coordinates coordinates = BlockPosArgument.blockPos().parse(blockPosStringReader);
+        blockPosStringReader.skip();
+        return coordinates.getBlockPos(commandSourceStack);
+    }
+
+    private static String getBlockStateStringFromJSONObject(JsonObject json) {
+        LinkedList<String> blockStateList = new LinkedList<>();
+        for (Map.Entry<String, JsonElement> element : json.entrySet()) {
+            blockStateList.add(element.getKey() + "=" + element.getValue());
+        }
+        return '[' + String.join(",", blockStateList) + ']';
+    }
+
     private int setBlock(BlockPos pos, BlockState blockState, CompoundTag blockEntityData, int flags) {
         ServerLevel serverLevel = getServerLevel(dimension);
 
