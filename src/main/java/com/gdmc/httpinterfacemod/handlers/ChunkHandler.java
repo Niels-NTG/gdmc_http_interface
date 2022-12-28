@@ -6,6 +6,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -54,8 +55,10 @@ public class ChunkHandler extends HandlerBase {
         // if content type is application/json use that otherwise return text
         Headers requestHeaders = httpExchange.getRequestHeaders();
         String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
-        boolean returnBinary = acceptHeader.equals("application/octet-stream");
+        boolean returnPlainText = acceptHeader.equals("text/plain");
         boolean returnJson = hasJsonTypeInHeader(acceptHeader);
+        String acceptEncodingHeader = getHeader(requestHeaders, "Accept-Encoding", "*");
+        boolean returnCompressed = acceptEncodingHeader.equals("gzip");
 
         // construct response
         ServerLevel serverLevel = getServerLevel(dimension);
@@ -90,7 +93,19 @@ public class ChunkHandler extends HandlerBase {
 
         // Response header and response body
         Headers responseHeaders = httpExchange.getResponseHeaders();
-        if (returnBinary) {
+        if (returnPlainText) {
+            addResponseHeaderContentTypePlain(responseHeaders);
+
+            String responseString = bodyNBT.toString();
+
+            resolveRequest(httpExchange, responseString);
+        } else if (returnJson) {
+            addResponseHeaderContentTypeJson(responseHeaders);
+
+            String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
+
+            resolveRequest(httpExchange, responseString);
+        } else {
             addResponseHeaderContentTypeBinary(responseHeaders);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -102,18 +117,6 @@ public class ChunkHandler extends HandlerBase {
             byte[] responseBytes = baos.toByteArray();
 
             resolveRequest(httpExchange, responseBytes);
-        } else if (returnJson) {
-            addResponseHeaderContentTypeJson(responseHeaders);
-
-            String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
-
-            resolveRequest(httpExchange, responseString);
-        } else {
-            addResponseHeaderContentTypePlain(responseHeaders);
-
-            String responseString = bodyNBT.toString();
-
-            resolveRequest(httpExchange, responseString);
         }
     }
 }
