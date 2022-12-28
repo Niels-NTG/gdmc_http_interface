@@ -76,8 +76,8 @@ public class StructureHandler extends HandlerBase {
 
 		// with this header we return pure NBT binary
 		// if content type is application/json use that otherwise return text
-		Headers reqestHeaders = httpExchange.getRequestHeaders();
-		String contentType = getHeader(reqestHeaders, "Accept", "*/*");
+		Headers requestHeaders = httpExchange.getRequestHeaders();
+		String contentType = getHeader(requestHeaders, "Accept", "*/*");
 		boolean returnPlainText = contentType.equals("text/plain");
 		boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
 
