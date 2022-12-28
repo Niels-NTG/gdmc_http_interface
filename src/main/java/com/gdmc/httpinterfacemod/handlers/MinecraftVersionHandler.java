@@ -20,8 +20,8 @@ public class MinecraftVersionHandler extends HandlerBase {
 		}
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
-		addDefaultHeaders(responseHeaders);
-		addResponseHeaderContentTypePlain(responseHeaders);
+		addDefaultResponseHeaders(responseHeaders);
+		addResponseHeadersContentTypePlain(responseHeaders);
 
 		String responseString = mcServer.getServerVersion();
 		resolveRequest(httpExchange, responseString);

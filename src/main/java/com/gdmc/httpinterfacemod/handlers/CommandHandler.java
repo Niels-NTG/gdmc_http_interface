@@ -17,8 +17,6 @@ import java.util.concurrent.CompletableFuture;
 public class CommandHandler extends HandlerBase {
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private String dimension;
-
     public CommandHandler(MinecraftServer mcServer) {
         super(mcServer);
     }
@@ -27,7 +25,8 @@ public class CommandHandler extends HandlerBase {
     public void internalHandle(HttpExchange httpExchange) throws IOException {
 
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
-        dimension = queryParams.getOrDefault("dimension", null);
+
+        String dimension = queryParams.getOrDefault("dimension", null);
 
         // execute command(s)
         InputStream bodyStream = httpExchange.getRequestBody();
@@ -57,8 +56,8 @@ public class CommandHandler extends HandlerBase {
 
         // Response headers
         Headers responseHeaders = httpExchange.getResponseHeaders();
-        addDefaultHeaders(responseHeaders);
-        addResponseHeaderContentTypePlain(responseHeaders);
+        addDefaultResponseHeaders(responseHeaders);
+        addResponseHeadersContentTypePlain(responseHeaders);
 
         // body
         String responseString = String.join("\n", outputs);
