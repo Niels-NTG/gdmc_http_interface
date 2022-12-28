@@ -59,18 +59,19 @@ public class BuildAreaHandler extends HandlerBase {
     public void internalHandle(HttpExchange httpExchange) throws IOException {
         // throw errors when appropriate
         String method = httpExchange.getRequestMethod().toLowerCase();
-        if(!method.equals("get")) {
-            throw new HandlerBase.HttpException("Please use GET method to request the build area.", 405);
+        if (!method.equals("get")) {
+            throw new HttpException("Please use GET method to request the build area.", 405);
         }
 
-        if(buildArea == null) {
-            throw new HandlerBase.HttpException("No build area is specified. Use the buildarea command inside Minecraft to set a build area.",404);
+        if (buildArea == null) {
+            throw new HttpException("No build area is specified. Use the buildarea command inside Minecraft to set a build area.", 404);
         }
 
         String responseString = new Gson().toJson(buildArea);
 
-        Headers headers = httpExchange.getResponseHeaders();
-        headers.add("Content-Type", "application/json; charset=UTF-8");
+        Headers responseHeaders = httpExchange.getResponseHeaders();
+        addDefaultResponseHeaders(responseHeaders);
+        addResponseHeadersContentTypeJson(responseHeaders);
 
         resolveRequest(httpExchange, responseString);
     }

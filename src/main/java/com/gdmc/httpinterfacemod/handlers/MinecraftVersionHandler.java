@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.server.MinecraftServer;
 
@@ -12,6 +13,16 @@ public class MinecraftVersionHandler extends HandlerBase {
 
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
+		String method = httpExchange.getRequestMethod().toLowerCase();
+
+		if (!method.equals("get")) {
+			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
+		}
+
+		Headers responseHeaders = httpExchange.getResponseHeaders();
+		addDefaultResponseHeaders(responseHeaders);
+		addResponseHeadersContentTypePlain(responseHeaders);
+
 		String responseString = mcServer.getServerVersion();
 		resolveRequest(httpExchange, responseString);
 	}

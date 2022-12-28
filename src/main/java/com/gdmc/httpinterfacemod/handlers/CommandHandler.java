@@ -13,12 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 public class CommandHandler extends HandlerBase {
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private String dimension;
 
     public CommandHandler(MinecraftServer mcServer) {
         super(mcServer);
@@ -28,12 +25,13 @@ public class CommandHandler extends HandlerBase {
     public void internalHandle(HttpExchange httpExchange) throws IOException {
 
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
-        dimension = queryParams.getOrDefault("dimension", null);
+
+        String dimension = queryParams.getOrDefault("dimension", null);
 
         // execute command(s)
         InputStream bodyStream = httpExchange.getRequestBody();
         List<String> commands = new BufferedReader(new InputStreamReader(bodyStream))
-                .lines().filter(a -> a.length() > 0).collect(Collectors.toList());
+                .lines().filter(a -> a.length() > 0).toList();
 
         CommandSourceStack cmdSrc = createCommandSource("GDMC-CommandHandler", mcServer, dimension);
 
@@ -56,9 +54,10 @@ public class CommandHandler extends HandlerBase {
             outputs.add(result);
         }
 
-        //headers
-        Headers headers = httpExchange.getResponseHeaders();
-        headers.add("Content-Type", "text/plain; charset=UTF-8");
+        // Response headers
+        Headers responseHeaders = httpExchange.getResponseHeaders();
+        addDefaultResponseHeaders(responseHeaders);
+        addResponseHeadersContentTypePlain(responseHeaders);
 
         // body
         String responseString = String.join("\n", outputs);

@@ -12,9 +12,11 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
@@ -32,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -56,16 +57,31 @@ public class BlocksHandler extends HandlerBase {
 
         // query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
+
+        // PUT/GET: x, y, z positions
         int x;
         int y;
         int z;
+
+        // GET: Ranges in the x, y, z directions (can be negative). Defaults to 1.
         int dx;
         int dy;
         int dz;
-        boolean includeData;
+
+        // GET: Whether to include block state https://minecraft.fandom.com/wiki/Block_states
         boolean includeState;
+
+        // GET: Whether to include block entity data https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format
+        boolean includeData;
+
+        // PUT: Defaults to true. If true, update neighbouring blocks after placement.
         boolean doBlockUpdates;
+
+        // PUT: Defaults to false. If true, block updates cause item drops after placement.
         boolean spawnDrops;
+
+        // PUT: Overrides both doBlockUpdates and spawnDrops if set. For more information see #getBlockFlags and
+        // https://minecraft.fandom.com/wiki/Block_update
         int customFlags; // -1 == no custom flags
 
         try {
@@ -77,89 +93,136 @@ public class BlocksHandler extends HandlerBase {
             dy = Integer.parseInt(queryParams.getOrDefault("dy", "1"));
             dz = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
 
-            includeData = Boolean.parseBoolean(queryParams.getOrDefault("includeData", "false"));
             includeState = Boolean.parseBoolean(queryParams.getOrDefault("includeState", "false"));
 
+            includeData = Boolean.parseBoolean(queryParams.getOrDefault("includeData", "false"));
+
             doBlockUpdates = Boolean.parseBoolean(queryParams.getOrDefault("doBlockUpdates", "true"));
+
             spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", "false"));
+
             customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
 
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
-            throw new HandlerBase.HttpException(message, 400);
+            throw new HttpException(message, 400);
         }
 
-        // if content type is application/json use that otherwise return text
-        Headers reqestHeaders = httpExchange.getRequestHeaders();
-        String contentType = getHeader(reqestHeaders, "Accept", "*/*");
-        boolean returnJson = contentType.equals("application/json") || contentType.equals("text/json");
+        // Check if clients wants a response in a JSON format. If not, return response in plain text.
+        Headers requestHeaders = httpExchange.getRequestHeaders();
+        String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
+        boolean returnJson = hasJsonTypeInHeader(acceptHeader);
 
-        // construct response
         String method = httpExchange.getRequestMethod().toLowerCase();
+
         String responseString;
 
         if (method.equals("put")) {
-            InputStream bodyStream = httpExchange.getRequestBody();
-            List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
-                    .lines().toList();
+            String contentTypeHeader = getHeader(requestHeaders,"Content-Type", "*/*");
+            boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
 
-            List<String> returnValues = new LinkedList<>();
+            int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
-            int blockFlags = customFlags >= 0? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
-
+            // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
             CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(x, y, z));
 
-            for(String line : body) {
-                String returnValue;
-                try {
-                    StringReader sr = new StringReader(line);
-                    Coordinates li = null;
+            ArrayList<String> returnValues = new ArrayList<>();
+
+            InputStream bodyStream = httpExchange.getRequestBody();
+
+            if (parseRequestAsJson) {
+                JsonArray blockPlacementList = JsonParser.parseReader(new InputStreamReader(bodyStream)).getAsJsonArray();
+                for (JsonElement blockPlacement : blockPlacementList) {
+                    String returnValue;
+                    JsonObject blockPlacementItem = blockPlacement.getAsJsonObject();
                     try {
-                        li = BlockPosArgument.blockPos().parse(sr);
-                        sr.skip();
+
+                        // Parse block position x y z. Use the position of the command source (set with the URL query parameters) if not defined in
+                        // the block placement item JsonObject. Valid values may be any positive or negative integer and can use tilde or caret notation
+                        // (see: https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
+                        String posXString = blockPlacementItem.has("x") ? blockPlacementItem.get("x").getAsString() : String.valueOf(x);
+                        String posYString = blockPlacementItem.has("y") ? blockPlacementItem.get("y").getAsString() : String.valueOf(y);
+                        String posZString = blockPlacementItem.has("z") ? blockPlacementItem.get("z").getAsString() : String.valueOf(z);
+                        BlockPos blockPos = getBlockPosFromString(
+                            "%s %s %s".formatted(posXString, posYString, posZString),
+                            commandSourceStack
+                        );
+
+                        // Skip if block id is missing
+                        if (!blockPlacementItem.has("id")) {
+                            returnValues.add("block id is missing in " + blockPlacement);
+                            continue;
+                        }
+                        String blockId = blockPlacementItem.get("id").getAsString();
+
+                        // Check if JSON contains an JsonObject or string for block state. Use an empty block state string ("[]") if nothing suitable is found.
+                        String blockStateString = "[]";
+                        if (blockPlacementItem.has("state")) {
+                            if (blockPlacementItem.get("state").isJsonObject()) {
+                                blockStateString = getBlockStateStringFromJSONObject(blockPlacementItem.get("state").getAsJsonObject());
+                            } else if (blockPlacementItem.get("state").isJsonPrimitive()) {
+                                blockStateString = blockPlacementItem.get("state").getAsString();
+                            }
+                        }
+
+                        // Pass block Id and block state string into a Stringreader with the the block state parser.
+                        HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+                        BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, new StringReader(
+                             blockId + blockStateString
+                        ), true);
+                        BlockState blockState = parsedBlockState.blockState();
+
+                        // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
+                        // for this block placement.
+                        CompoundTag compoundTag = null;
+                        if (blockPlacementItem.has("data")) {
+                            compoundTag = TagParser.parseTag(blockPlacementItem.get("data").toString());
+                        }
+
+                        // Attempt to place block in the world.
+                        returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
+
                     } catch (CommandSyntaxException e) {
-                        sr = new StringReader(line); // TODO maybe delete this
+                        returnValue = e.getMessage();
                     }
 
-                    int xx, yy, zz;
-                    if (li != null) {
-                        xx = (int)Math.round(li.getPosition(commandSourceStack).x);
-                        yy = (int)Math.round(li.getPosition(commandSourceStack).y);
-                        zz = (int)Math.round(li.getPosition(commandSourceStack).z);
-                    } else {
-                        xx = x;
-                        yy = y;
-                        zz = z;
-                    }
-                    BlockPos blockPos = new BlockPos(xx, yy, zz);
-
-                    HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
-                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, sr, true);
-                    BlockState blockState = parsedBlockState.blockState();
-                    CompoundTag compoundTag = parsedBlockState.nbt();
-
-                    returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
-
-                } catch (CommandSyntaxException e) {
-                    returnValue = e.getMessage();
+                    returnValues.add(returnValue);
                 }
-                returnValues.add(returnValue);
+
+            } else {
+                List<String> body = new BufferedReader(new InputStreamReader(bodyStream))
+                    .lines().toList();
+
+                for (String line : body) {
+                    String returnValue;
+                    try {
+                        StringReader sr = new StringReader(line);
+                        BlockPos blockPos = getBlockPosFromString(sr, commandSourceStack);
+
+                        HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+                        BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, sr, true);
+                        BlockState blockState = parsedBlockState.blockState();
+                        CompoundTag compoundTag = parsedBlockState.nbt();
+
+                        returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
+
+                    } catch (CommandSyntaxException e) {
+                        returnValue = e.getMessage();
+                    }
+                    returnValues.add(returnValue);
+                }
             }
+
+            // Set response as a list of "1" (block was placed), "0" (block was not placed) or an exception string if something went wrong placing the block.
             if (returnJson) {
-                JsonObject json = new JsonObject();
-                JsonArray resultsArray = new JsonArray();
-
-                for(String s : returnValues) {
-                    resultsArray.add(s);
-                }
-
-                json.add("results", resultsArray);
-                responseString = new Gson().toJson(json);
+                responseString = new Gson().toJson(returnValues);
             } else {
                 responseString = String.join("\n", returnValues);
             }
         } else if (method.equals("get")) {
+
+            // Calculate boundaries of area of blocks to gather information on.
             int xOffset = x + dx;
             int xMin = Math.min(x, xOffset);
             int xMax = Math.max(x, xOffset);
@@ -173,6 +236,9 @@ public class BlocksHandler extends HandlerBase {
             int zMax = Math.max(z, zOffset);
 
             if (returnJson) {
+                // Create a JsonArray with JsonObject, each contain a key-value pair for
+                // the x, y, z position, the block ID, the block state (if requested and available)
+                // and the block entity data (if requested and available).
                 JsonArray jsonArray = new JsonArray();
                 for (int rangeX = xMin; rangeX < xMax; rangeX++) {
                     for (int rangeY = yMin; rangeY < yMax; rangeY++) {
@@ -196,6 +262,9 @@ public class BlocksHandler extends HandlerBase {
                 }
                 responseString = new Gson().toJson(jsonArray);
             } else {
+                // Create list of \n-separated strings containing the x, y, z position space-separated,
+                // the block ID, the block state (if requested and available) between square brackets
+                // and the block entity data (if requested and available) between curly brackets.
                 ArrayList<String> responseList = new ArrayList<>();
                 for (int rangeX = xMin; rangeX < xMax; rangeX++) {
                     for (int rangeY = yMin; rangeY < yMax; rangeY++) {
@@ -215,22 +284,75 @@ public class BlocksHandler extends HandlerBase {
                 responseString = String.join("\n", responseList);
             }
         } else {
-            throw new HandlerBase.HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
+            throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
-        //headers
-        Headers headers = httpExchange.getResponseHeaders();
-        addDefaultHeaders(headers);
-
-        if(returnJson) {
-            headers.add("Content-Type", "application/json; charset=UTF-8");
+        // Response headers
+        Headers responseHeaders = httpExchange.getResponseHeaders();
+        addDefaultResponseHeaders(responseHeaders);
+        if (returnJson) {
+            addResponseHeadersContentTypeJson(responseHeaders);
         } else {
-            headers.add("Content-Type", "text/plain; charset=UTF-8");
+            addResponseHeadersContentTypePlain(responseHeaders);
         }
 
         resolveRequest(httpExchange, responseString);
     }
 
+    private BlockState getBlockStateAtPosition(BlockPos pos) {
+        ServerLevel serverLevel = getServerLevel(dimension);
+        return serverLevel.getBlockState(pos);
+    }
+
+    /**
+     * Parse block position x y z.
+     * Valid values may be any positive or negative integer and can use tilde or caret notation.
+     * see: <a href="https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>
+     *
+     * @param s                         {@code String} which may or may not contain a valid block position coordinate.
+     * @param commandSourceStack        Origin for relative coordinates.
+     * @return Valid {@link BlockPos}.
+     * @throws CommandSyntaxException   If input string cannot be parsed into a valid {@link BlockPos}.
+     */
+    private static BlockPos getBlockPosFromString(String s, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+        return getBlockPosFromString(new StringReader(s), commandSourceStack);
+    }
+
+    /**
+     * Parse block position x y z.
+     * Valid values may be any positive or negative integer and can use tilde or caret notation.
+     * see: <a href="https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>
+     *
+     * @param blockPosStringReader      {@code StringReader} which may or may not contain a valid block position coordinate.
+     * @param commandSourceStack        Origin for relative coordinates.
+     * @return Valid {@link BlockPos}.
+     * @throws CommandSyntaxException   If input string reader cannot be parsed into a valid {@link BlockPos}.
+     */
+    private static BlockPos getBlockPosFromString(StringReader blockPosStringReader, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+        Coordinates coordinates = BlockPosArgument.blockPos().parse(blockPosStringReader);
+        blockPosStringReader.skip();
+        return coordinates.getBlockPos(commandSourceStack);
+    }
+
+    /**
+     * @param json  Valid flat {@link JsonObject} of keys with primitive values (Strings, numbers, booleans)
+     * @return      {@code String} which can be parsed by {@link BlockStateParser} and should be the same as the return value of {@link BlockState#toString()} of the {@link BlockState} resulting from that parser.
+     */
+    private static String getBlockStateStringFromJSONObject(JsonObject json) {
+        ArrayList<String> blockStateList = new ArrayList<>();
+        for (Map.Entry<String, JsonElement> element : json.entrySet()) {
+            blockStateList.add(element.getKey() + "=" + element.getValue());
+        }
+        return '[' + String.join(",", blockStateList) + ']';
+    }
+
+    /**
+     * @param pos                   Position in the world the block should be placed.
+     * @param blockState            Contains both the state as well as the material of the block.
+     * @param blockEntityData       Optional tag of NBT data to be associated with the block (eg. contents of a chest).
+     * @param flags                 Block placement flags (see {@link #getBlockFlags(boolean, boolean)} and {@link Block} for more information).
+     * @return                      return 1 if block has been placed or 0 if it couldn't be placed at the given location.
+     */
     private int setBlock(BlockPos pos, BlockState blockState, CompoundTag blockEntityData, int flags) {
         ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -244,40 +366,58 @@ public class BlocksHandler extends HandlerBase {
                     existingBlockEntity.deserializeNBT(blockEntityData);
                 }
             }
+
+            // If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
+            // in the north, west, south, east, up, down directions.
+            if ((flags & Block.UPDATE_NEIGHBORS) != 0 && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+                for (Direction direction : Direction.values()) {
+                    BlockPos neighbourPosition = pos.relative(direction);
+                    BlockState neighbourBlockState = serverLevel.getBlockState(neighbourPosition);
+                    neighbourBlockState.updateNeighbourShapes(serverLevel, neighbourPosition, flags);
+                }
+            }
+
             return 1;
         } else {
             return 0;
         }
     }
 
+    /**
+     * @param pos   Position of block in the world.
+     * @return      Namespaced name of the block material.
+     */
     private String getBlockAsStr(BlockPos pos) {
-        ServerLevel serverLevel = getServerLevel(dimension);
-
-        BlockState bs = serverLevel.getBlockState(pos);
+        BlockState bs = getBlockStateAtPosition(pos);
         return Objects.requireNonNull(getBlockRegistryName(bs));
     }
 
+    /**
+     * @param pos   Position of block in the world.
+     * @return      {@link JsonObject} containing the block state data of the block at the given position.
+     */
     private JsonObject getBlockStateAsJsonObject(BlockPos pos) {
-        ServerLevel serverLevel = getServerLevel(dimension);
-
-        BlockState bs = serverLevel.getBlockState(pos);
-
+        BlockState bs = getBlockStateAtPosition(pos);
         JsonObject stateJsonObject = new JsonObject();
-
         bs.getValues().entrySet().stream().map(propertyToStringPairFunction).filter(Objects::nonNull).forEach(pair -> stateJsonObject.add(pair.getKey(), new JsonPrimitive(pair.getValue())));
         return stateJsonObject;
     }
 
+    /**
+     * @param pos   Position of block in the world.
+     * @return      {@link String} containing the block state data of the block at the given position.
+     */
     private String getBlockStateAsStr(BlockPos pos) {
-        ServerLevel serverLevel = getServerLevel(dimension);
-
-        BlockState bs = serverLevel.getBlockState(pos);
-
+        BlockState bs = getBlockStateAtPosition(pos);
         return '[' +
             bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
-            ']';
+        ']';
     }
 
+    /**
+     * @param pos   Position of block in the world.
+     * @return      {@link JsonObject} containing the block entity data of the block at the given position.
+     */
     private JsonObject getBlockDataAsJsonObject(BlockPos pos) {
         ServerLevel serverLevel = getServerLevel(dimension);
         JsonObject dataJsonObject = new JsonObject();
@@ -293,6 +433,10 @@ public class BlocksHandler extends HandlerBase {
         return dataJsonObject;
     }
 
+    /**
+     * @param pos   Position of block in the world.
+     * @return      {@link String} containing the block entity data of the block at the given position.
+     */
     private String getBlockDataAsStr(BlockPos pos) {
         ServerLevel serverLevel = getServerLevel(dimension);
         String str = "{}";
@@ -304,9 +448,18 @@ public class BlocksHandler extends HandlerBase {
         return str;
     }
 
+    /**
+     * @param blockState    Instance of {@link BlockState} to extract {@link Block} from.
+     * @return              Namespaced name of the block material.
+     */
     public static String getBlockRegistryName(BlockState blockState) {
         return getBlockRegistryName(blockState.getBlock());
     }
+
+    /**
+     * @param block         Instance of {@link Block} to find in {@link ForgeRegistries#BLOCKS}.
+     * @return              Namespaced name of the block material.
+     */
     public static String getBlockRegistryName(Block block) {
         return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block)).toString();
     }
@@ -323,7 +476,7 @@ public class BlocksHandler extends HandlerBase {
                 * 64 will signify the block is being moved.
         */
         // construct flags
-        return 2 | ( doBlockUpdates? 1 : (32 | 16) ) | ( spawnDrops? 0 : 32 );
+        return Block.UPDATE_CLIENTS | (doBlockUpdates ? Block.UPDATE_NEIGHBORS : (Block.UPDATE_SUPPRESS_DROPS | Block.UPDATE_KNOWN_SHAPE)) | (spawnDrops ? 0 : Block.UPDATE_SUPPRESS_DROPS);
     }
 
     // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
