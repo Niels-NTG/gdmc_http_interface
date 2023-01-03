@@ -196,10 +196,14 @@ public class BlocksHandler extends HandlerBase {
 
                 for (String line : body) {
                     String returnValue;
+                    StringReader sr = new StringReader(line);
+                    BlockPos blockPos;
                     try {
-                        StringReader sr = new StringReader(line);
-                        BlockPos blockPos = getBlockPosFromString(sr, commandSourceStack);
-
+                        try {
+                            blockPos = getBlockPosFromString(sr, commandSourceStack);
+                        } catch (CommandSyntaxException e1) {
+                            blockPos = new BlockPos(x, y, z);
+                        }
                         HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
                         BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, sr, true);
                         BlockState blockState = parsedBlockState.blockState();
@@ -210,6 +214,7 @@ public class BlocksHandler extends HandlerBase {
                     } catch (CommandSyntaxException e) {
                         returnValue = e.getMessage();
                     }
+
                     returnValues.add(returnValue);
                 }
             }
