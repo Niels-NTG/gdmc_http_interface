@@ -132,7 +132,13 @@ public class BlocksHandler extends HandlerBase {
             InputStream bodyStream = httpExchange.getRequestBody();
 
             if (parseRequestAsJson) {
-                JsonArray blockPlacementList = JsonParser.parseReader(new InputStreamReader(bodyStream)).getAsJsonArray();
+                JsonArray blockPlacementList;
+                try {
+                    blockPlacementList = JsonParser.parseReader(new InputStreamReader(bodyStream)).getAsJsonArray();
+                } catch (JsonSyntaxException jsonSyntaxException) {
+                    throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
+                }
+
                 for (JsonElement blockPlacement : blockPlacementList) {
                     String returnValue;
                     JsonObject blockPlacementItem = blockPlacement.getAsJsonObject();
