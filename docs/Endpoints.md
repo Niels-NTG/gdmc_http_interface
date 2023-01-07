@@ -41,7 +41,7 @@ The request body should be formatted as plain-text and can contain multiple comm
 
 ## Response headers
 
-[Default](#Response headers)
+[Default](#Response-headers)
 
 ## Response body
 
@@ -101,7 +101,7 @@ N/A
 
 ## Response headers
 
-[Default](#Response headers)
+[Default](#Response-headers)
 
 ## Response body
 
@@ -268,7 +268,7 @@ If request has the header `Content-Type: text/plain` it will parse the request b
 
 ## Response headers
 
-[Default](#Response headers)
+[Default](#Response-headers)
 
 ## Response body
 
@@ -354,7 +354,7 @@ N/A
 
 ## Response headers
 
-[Default](#Response headers)
+[Default](#Response-headers)
 
 ## Response body
 
@@ -450,7 +450,7 @@ N/A
 
 ## Response headers
 
-Table below only applies if the request header `Accept: application/octet-stream` is present. Otherwise it returns with the [Default](#Response headers) response headers.
+Table below only applies if the request header `Accept: application/octet-stream` is present. Otherwise it returns with the [Default](#Response-headers) response headers.
 
 | key                         | value                      | description                                                  |
 | --------------------------- | -------------------------- | ------------------------------------------------------------ |
@@ -505,7 +505,7 @@ A valid [NBT file](https://minecraft.fandom.com/wiki/NBT_format).
 
 ## Response headers
 
-[Default](#Response headers)
+[Default](#Response-headers)
 
 ## Response body
 
@@ -541,7 +541,7 @@ Create an [NBT](https://minecraft.fandom.com/wiki/NBT_format) structure file fro
 | key             | valid values                                                 | defaults to                | description                                                  |
 | --------------- | ------------------------------------------------------------ | -------------------------- | ------------------------------------------------------------ |
 | Accept          | `application/json`, `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns the contents that makes a real NBT file. Use `text/plain` for a more human readable lossless version of the data in the [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) format, and `application/json` for better readable data at the cost of losing some data type precision, refer to [JSON and NBT](https://minecraft.fandom.com/wiki/NBT_format#Conversion_from_JSON) for more information. |
-| Accept-Encoding | gzip, *                                                      | `gzip`                     | If set to `gzip`, compress resulting file using gzip compression. |
+| Accept-Encoding | `gzip`, `*`                                                  | `gzip`                     | If set to `gzip`, compress resulting file using gzip compression. |
 
 ## Request body
 
@@ -619,7 +619,7 @@ N/A
 
 ## Response headers
 
-[Default](#Response headers)
+[Default](#Response-headers)
 
 ## Response body
 
