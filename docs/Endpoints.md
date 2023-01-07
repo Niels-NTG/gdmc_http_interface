@@ -1,3 +1,5 @@
+[TOC]
+
 # General
 
 By default all endpoints are located at `localhost:9000`. So for example a call to place blocks would have the URL `http://localhost:9000/blocks?x=-82&y=1&z=40`.
