@@ -2,7 +2,7 @@
 
 A Minecraft Forge Mod that implements an http interface for reading and writing blocks.
 
-To install it, download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and follow these [installation instructions](./docs/Installation.md) it.
+To install it, download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and follow these [installation instructions](./docs/Installation.md).
 
 ## What it's all about
 
