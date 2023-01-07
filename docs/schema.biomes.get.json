@@ -1,0 +1,50 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/BiomeInformationElement"
+    },
+    "definitions": {
+        "BiomeInformationElement": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Biome ID",
+                    "description": "Any namespaced biome ID",
+                    "examples": [
+                        "minecraft:plains",
+                        "minecraft:wooded_badlands",
+                        "minecraft:dripstone_caves"
+                    ]
+                },
+                "x": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "y": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "z": {
+                    "$ref": "#/definitions/PosAxis"
+                }
+            },
+            "required": [
+                "id",
+                "x",
+                "y",
+                "z"
+            ],
+            "title": "Biome information element"
+        },
+        "PosAxis": {
+            "type": "integer",
+            "title": "Position Axis",
+            "description": "Describe x/y/z absolute position of block",
+            "examples": [
+                -2,
+                781
+            ]
+        }
+    }
+}

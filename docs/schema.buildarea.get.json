@@ -1,0 +1,48 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "$ref": "#/definitions/BuildArea",
+    "definitions": {
+        "BuildArea": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "xFrom": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "yFrom": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "zFrom": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "xTo": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "yTo": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "zTo": {
+                    "$ref": "#/definitions/PosAxis"
+                }
+            },
+            "required": [
+                "xFrom",
+                "xTo",
+                "yFrom",
+                "yTo",
+                "zFrom",
+                "zTo"
+            ],
+            "title": "Build area rectangle"
+        },
+        "PosAxis": {
+            "type": "integer",
+            "title": "Position Axis",
+            "description": "Describe absolute x/y/z position of build area boundary",
+            "examples": [
+                -2,
+                781
+            ]
+        }
+    }
+}

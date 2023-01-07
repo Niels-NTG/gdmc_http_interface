@@ -1,3 +1,9 @@
+# GDMC-HTTP 0.7.3 (Minecraft 1.19.2)
+- NEW: Improved user-facing documentation.
+
+# GDMC-HTTP 0.7.2 (Minecraft 1.19.2)
+- FIX: Add proper exception handling for malformed JSON input at `PUT /blocks`.
+
 # GDMC-HTTP 0.7.1 (Minecraft 1.19.2)
 - FIX: Allow endpoint `PUT /blocks` to process block placement instructions without (valid) coordinates. It places it at the URL query coordinates instead.
 
@@ -6,8 +12,8 @@
   - For each placement instruction, `x`, `y` and `z` are optional. If omitted, it uses the coordinate set in the request's URL query as a fallback, or 0 if these aren't set.
   - For each placement instruction, `x`, `y` and `z` can be a integer ("x": `32`) or use tilde (`"x": "~32"`) or caret (`"x": "^32"`) notation in a string.
   - Block state (`"state"`) and block entity data (`"data"`) can be an JSON object, a single string or can be omitted all together.
-  - When placing blocks with `PUT /blocks`, the "shapes" of directly adjacent blocks are updated, unless the `doBlockUpdates` flag is explicitly disabled. This means that placing a fence block 
-    directly adjacent to an existing block changes the shape of the fence 
+  - When placing blocks with `PUT /blocks`, the "shapes" of directly adjacent blocks are updated, unless the `doBlockUpdates` flag is explicitly disabled. This means that placing a fence block
+    directly adjacent to an existing block changes the shape of the fence
     such that it makes the appropriate connections.
 - NEW:`POST /structure` can now accept both GZIP-compressed and uncompressed NBT files.
 - NEW:`GET /structure` can now output GZIP-compressed (default) or uncompressed NBT files. The latter can be achieved by setting the request header `"Accept-Encoding": "*"`.

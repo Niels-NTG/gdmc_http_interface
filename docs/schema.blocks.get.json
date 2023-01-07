@@ -1,0 +1,87 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/BlockInformationElement"
+    },
+    "definitions": {
+        "BlockInformationElement": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Block ID",
+                    "description": "Any namespaced block ID",
+                    "examples": [
+                        "minecraft:stone",
+                        "minecraft:clay",
+                        "minecraft:green_stained_glass"
+                    ]
+                },
+                "x": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "y": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "z": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "state": {
+                    "type": "object",
+                    "title": "Block State",
+                    "description": "Object containing block state (https://minecraft.fandom.com/wiki/Block_states) information. This is only included if URL parameter `includeState=true` is present.",
+                    "examples": [
+                        {
+                            "facing": "east",
+                            "lit": "false"
+                        }
+                    ],
+                    "default": null
+                },
+                "data": {
+                    "type": "object",
+                    "title": "Block Entity Data",
+                    "description": "Object containing block entity data (https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) information. This is only included if URL parameter `includeData=true` is present.",
+                    "examples": [
+                        {
+                            "Items": [
+                                {
+                                    "Count": 48,
+                                    "Slot": 0,
+                                    "id": "minecraft:lantern"
+                                },
+                                {
+                                    "Count": 1,
+                                    "Slot": 1,
+                                    "id": "minecraft:golden_axe",
+                                    "tag": {
+                                        "Damage": 0
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "default": null
+                }
+            },
+            "required": [
+                "id",
+                "x",
+                "y",
+                "z"
+            ],
+            "title": "Block information element"
+        },
+        "PosAxis": {
+            "type": "integer",
+            "title": "Position Axis",
+            "description": "Describe x/y/z absolute position of block",
+            "examples": [
+                -2,
+                781
+            ]
+        }
+    }
+}

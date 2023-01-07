@@ -1,21 +1,22 @@
 # Minecraft HTTP Interface Mod (Minecraft 1.19.2)
 
-This repo is based on a fork of [Niki Gawlik's GDMC HTTP Interface](https://github.com/nilsgawlik/gdmc_http_interface) for Minecraft 1.16.5, which in turn is based on [this Forge SDK template](https://github.com/Lasbleic/gdmc_java_mod).
+A Minecraft Forge Mod that implements an http interface for reading and writing blocks.
 
-You can download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and [install](#Installation) it.
+To install it, download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and follow these [installation instructions](./docs/Installation.md) it.
 
 ## What it's all about
 
 (Disclaimer: This mod is in active development, and things might still change)
 
-This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is meant as a tool to be used for the [Generative Design in Minecraft Competition](http://gendesignmc.engineering.nyu.edu/).
+This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is designed as a tool to be used for the [Generative Design in Minecraft Competition (GDMC)](http://gendesignmc.engineering.nyu.edu/).
 
-When you open a Minecraft world, this mod opens an HTTP Server on localhost:9000. I recommend using Postman or a similar application to test out the http interface. A Python example of how to use the interface can be found [here](https://github.com/avdstaaij/gdpc).
+When you open a Minecraft world, this mod opens an HTTP Server on `localhost:9000`. I recommend using [Insomnia](https://insomnia.rest/) or a similar application to test out the http interface. A Python example of how to use the interface can be found [here](https://github.com/avdstaaij/gdpc).
+
+This repo is based on a fork of [Niki Gawlik's GDMC HTTP Interface](https://github.com/nilsgawlik/gdmc_http_interface) (Minecraft 1.16.5).
 
 ## Features / HTTP Endpoints
 
-The current endpoints of the interface are 
-
+The current endpoints of the interface are:
 ```
 GET,PUT         /blocks     Modify blocks in the world
 POST            /command    Run Minecraft commands
@@ -26,9 +27,4 @@ GET             /buildarea  Get the build area defined by the /setbuildarea chat
 GET             /version    Get Minecraft version
 ```
 
-A detailed documentation of the endpoints can be found [over here](https://github.com/Niels-NTG/gdmc_http_interface/wiki/Interface-Endpoints).
-
-## Installation
-
-Install instructions are [over here](https://github.com/Niels-NTG/gdmc_http_interface/wiki/Installation).
-You need to own a copy of Minecraft to use the http interface!
+A detailed documentation of the endpoints can be found [over here](./docs/Endpoints.md).

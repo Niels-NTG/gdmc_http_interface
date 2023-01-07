@@ -1,0 +1,98 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/PlacementInstructionElement"
+    },
+    "definitions": {
+        "PlacementInstructionElement": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Block ID",
+                    "description": "Any namespaced block ID",
+                    "examples": [
+                        "minecraft:stone",
+                        "minecraft:clay",
+                        "minecraft:green_stained_glass"
+                    ]
+                },
+                "x": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "y": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "z": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "state": {
+                    "type": "object",
+                    "title": "Block State",
+                    "description": "Object containing block state (https://minecraft.fandom.com/wiki/Block_states) information",
+                    "examples": [
+                        {
+                            "facing": "east",
+                            "lit": "false"
+                        }
+                    ],
+                    "default": null
+                },
+                "data": {
+                    "type": "object",
+                    "title": "Block Entity Data",
+                    "description": "Object containing block entity data (https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) information",
+                    "examples": [
+                        {
+                            "Items": [
+                                {
+                                    "Count": 48,
+                                    "Slot": 0,
+                                    "id": "minecraft:lantern"
+                                },
+                                {
+                                    "Count": 1,
+                                    "Slot": 1,
+                                    "id": "minecraft:golden_axe",
+                                    "tag": {
+                                        "Damage": 0
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "default": null
+                }
+            },
+            "required": [
+                "id"
+            ],
+            "title": "Placement Instruction Element"
+        },
+        "PosAxis": {
+            "anyOf": [
+                {
+                    "type": "integer",
+                    "description": "Any negative or positive whole number to represent absolute world coordinates",
+                    "examples": [
+                        -2,
+                        781
+                    ]
+                },
+                {
+                    "type": "string",
+                    "description": "Any negative or positive whole number to represent absolute world coordinates, a relative coordinate (https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates) or a local coordinate (https://minecraft.fandom.com/wiki/Coordinates#Local_coordinates)",
+                    "examples": [
+                        "-2",
+                        "~84",
+                        "^-412"
+                    ]
+                }
+            ],
+            "title": "Position Axis",
+            "description": "Describe x/y/z placement position for block. If omitted, axis value defaults to the corresponding axis in the request URL."
+        }
+    }
+}
