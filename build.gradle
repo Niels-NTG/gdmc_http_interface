@@ -13,7 +13,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = '0.7.3'
+version = '0.7.4'
 group = 'com.nilsgawlik.gdmchttp' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'gdmchttp'
 
@@ -120,7 +120,7 @@ jar {
             "Specification-Vendor": "gdmchttpsareus",
             "Specification-Version": "1", // We are version 1 of ourselves
             "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
+            "Implementation-Version": project.jar.archiveVersion,
             "Implementation-Vendor" :"gdmchttpsareus",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])

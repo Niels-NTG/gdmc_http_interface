@@ -23,15 +23,15 @@ displayName="GDMC HTTP Interface Mod" #mandatory
 # A URL to query for updates for this mod. See the JSON update specification <here>
 #updateJSONURL="http://myurl.me/" #optional
 # A URL for the "homepage" for this mod, displayed in the mod UI
-#displayURL="http://example.com/" #optional
+displayURL="https://github.com/Niels-NTG/gdmc_http_interface" #optional
 # A file name (in the root of the mod JAR) containing a logo for display
 #logoFile="examplemod.png" #optional
 # A text field displayed in the mod UI
 credits="Thanks to the GDMC community and organizers" #optional
 # A text field displayed in the mod UI
-authors="Nils Gawlik, Niels NTG Poldervaart" #optional
+authors="Niki Gawlik, Niels NTG Poldervaart" #optional
 # The description text for the mod (multi line!) (#mandatory)
 description='''
-This is a mod that provides an http interface for things such as setting/getting blocks,
-running commands and getting chunk data
+This is a mod that provides an HTTP interface for things such as setting/getting blocks,
+running commands, getting chunk data and creating/placing structures.
 '''
