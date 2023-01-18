@@ -1,3 +1,6 @@
+# GDMC-HTTP 0.7.4 (Minecraft 1.19.2)
+- FIX: Placement of multi-part blocks such as beds and doors.
+
 # GDMC-HTTP 0.7.3 (Minecraft 1.19.2)
 - NEW: Improved user-facing documentation.
 

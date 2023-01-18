@@ -9,6 +9,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -17,10 +22,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class HandlerBase implements HttpHandler {
 
@@ -208,16 +216,15 @@ public abstract class HandlerBase implements HttpHandler {
     }
 
     /**
-     * Helper to create a {@code CommandSourceStack}, which serves as the source to dispatch
+     * Helper to create a {@link CommandSourceStack}, which serves as the source to dispatch
      * commands from (See {@link CommandHandler}) or as a point of origin to place blocks
      * relative from (See {@link BlocksHandler}).
      *
      * @param name          Some unique identifier.
-     * @param mcServer      The Minecraft server in which the {@code CommandSourceStack} is going to be placed.
-     * @param dimension     The dimension (also known as level) on the world of {@code mcServer} in which the {@code CommandSourceStack} is going to be placed.
-     * @return              An instance of {@code CommandSourceStack}.
+     * @param dimension     The dimension (also known as level) in the world of {@code mcServer} in which the {@link CommandSourceStack} is going to be placed.
+     * @return              An instance of {@link CommandSourceStack}.
      */
-    protected CommandSourceStack createCommandSource(String name, MinecraftServer mcServer, String dimension) {
+    protected CommandSourceStack createCommandSource(String name, String dimension) {
         CommandSource commandSource = new CommandSource() {
             @Override
             public void sendSystemMessage(@NotNull Component p_230797_) {
@@ -251,5 +258,38 @@ public abstract class HandlerBase implements HttpHandler {
             mcServer,
             null
         );
+    }
+
+    /**
+     * Helper to create a {@link LivingEntity}, which can be used block placement context.
+     * Such a context is required for doing operations after placing certain blocks that have an implementation of the {@code setPlacedBy} method.
+     * This applies to blocks that come in multiple parts such as beds ({@link net.minecraft.world.level.block.BedBlock}) and doors ({@link net.minecraft.world.level.block.DoorBlock}).
+     *
+     * @param dimension The dimension (also known as level) in the world of {@code mcServer} in which the {@link LivingEntity} is going to be placed.
+     * @return An instance of {@link LivingEntity}
+     */
+    protected LivingEntity createLivingEntity(String dimension) {
+        return new LivingEntity(EntityType.PLAYER, getServerLevel(dimension)) {
+
+            @Override
+            public Iterable<ItemStack> getArmorSlots() {
+                return null;
+            }
+
+            @Override
+            public ItemStack getItemBySlot(EquipmentSlot p_21127_) {
+                return null;
+            }
+
+            @Override
+            public void setItemSlot(EquipmentSlot p_21036_, ItemStack p_21037_) {
+
+            }
+
+            @Override
+            public HumanoidArm getMainArm() {
+                return null;
+            }
+        };
     }
 }
