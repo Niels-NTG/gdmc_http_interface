@@ -33,7 +33,7 @@ public class CommandHandler extends HandlerBase {
         List<String> commands = new BufferedReader(new InputStreamReader(bodyStream))
                 .lines().filter(a -> a.length() > 0).toList();
 
-        CommandSourceStack cmdSrc = createCommandSource("GDMC-CommandHandler", mcServer, dimension);
+        CommandSourceStack cmdSrc = createCommandSource("GDMC-CommandHandler", dimension);
 
         List<String> outputs = new ArrayList<>();
         for (String command: commands) {

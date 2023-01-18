@@ -20,6 +20,8 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,12 +46,14 @@ import java.util.stream.Collectors;
 public class BlocksHandler extends HandlerBase {
 
     private final CommandSourceStack cmdSrc;
+    private final LivingEntity blockPlaceEntity;
 
     private String dimension;
 
     public BlocksHandler(MinecraftServer mcServer) {
         super(mcServer);
-        cmdSrc = createCommandSource("GDMC-BlockHandler", mcServer, dimension);
+        cmdSrc = createCommandSource("GDMC-BlockHandler", dimension);
+        blockPlaceEntity = createLivingEntity(dimension);
     }
 
     @Override
@@ -411,9 +415,15 @@ public class BlocksHandler extends HandlerBase {
                 }
             }
 
+            // If block placement flags allow for updating the shape of placed blocks, resolve placing the block as if it was placed by a player.
+            // This is applicable to certain blocks that form an object larger than just a single block, such as doors and beds.
+            if ((flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+                blockState.getBlock().setPlacedBy(serverLevel, pos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
+            }
+
             // If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
             // in the north, west, south, east, up, down directions.
-            if ((flags & Block.UPDATE_NEIGHBORS) != 0 && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+            if ((flags & Block.UPDATE_NEIGHBORS) != 0) {
                 for (Direction direction : Direction.values()) {
                     BlockPos neighbourPosition = pos.relative(direction);
                     BlockState neighbourBlockState = serverLevel.getBlockState(neighbourPosition);
