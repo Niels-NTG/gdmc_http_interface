@@ -1,7 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
 import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
-import com.gdmc.httpinterfacemod.utils.SummonCommandArgumentsBuilder;
 import com.google.gson.*;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
@@ -47,6 +46,9 @@ public class EntitiesHandler extends HandlerBase {
 		int dy;
 		int dz;
 
+		// GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
+		boolean includeData;
+
 //		TODO add includeData parameter
 
 		try {
@@ -57,6 +59,8 @@ public class EntitiesHandler extends HandlerBase {
 			dx = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
 			dy = Integer.parseInt(queryParams.getOrDefault("dy", "1"));
 			dz = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+
+			includeData = Boolean.parseBoolean(queryParams.getOrDefault("includeData", "false"));
 
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
@@ -80,7 +84,7 @@ public class EntitiesHandler extends HandlerBase {
 				responseString = putEntitiesHandler(httpExchange.getRequestBody(), parseRequestAsJson, x, y, z, returnJson);
 			}
 			case "get" -> {
-				responseString = getEntitiesHandler(x, y, z, dx, dy, dz, returnJson);
+				responseString = getEntitiesHandler(x, y, z, dx, dy, dz, includeData, returnJson);
 			}
 			case "delete" -> {
 				//		TODO DELETE /entities to clear out entities in an area. Look if there are any commands that already do this.
@@ -110,7 +114,7 @@ public class EntitiesHandler extends HandlerBase {
 	private String putEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, int x, int y, int z, boolean returnJson) {
 		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
 
-		ArrayList<SummonCommandArgumentsBuilder> summonCommands = new ArrayList<>();
+		ArrayList<String> summonCommands = new ArrayList<>();
 		if (parseRequestAsJson) {
 			JsonArray entityDescriptionList;
 			try {
@@ -120,26 +124,29 @@ public class EntitiesHandler extends HandlerBase {
 			}
 
 			for (JsonElement entityDescription : entityDescriptionList) {
-				summonCommands.add(new SummonCommandArgumentsBuilder(cmdSrc, entityDescription.getAsJsonObject()));
+				JsonObject json = entityDescription.getAsJsonObject();
+				String entityName = json.has("id") ? json.get("id").getAsString() : "";
+				Vec3 referencePosition = cmdSrc.getPosition();
+				String posXString = json.has("x") ? json.get("x").getAsString() : String.valueOf(referencePosition.x);
+				String posYString = json.has("y") ? json.get("y").getAsString() : String.valueOf(referencePosition.y);
+				String posZString = json.has("z") ? json.get("z").getAsString() : String.valueOf(referencePosition.z);
+				String entityData = json.has("data") ? json.get("data").toString() : "";
+				summonCommands.add("%s %s %s %s %s".formatted(entityName, posXString, posYString, posZString, entityData));
 			}
 		} else {
-			List<String> entityDescriptionList = new BufferedReader(new InputStreamReader(requestBody)).lines().toList();
-			for (String entityDescription : entityDescriptionList) {
-				summonCommands.add(new SummonCommandArgumentsBuilder(cmdSrc, entityDescription));
-			}
+			summonCommands.addAll(new BufferedReader(new InputStreamReader(requestBody)).lines().toList());
 		}
 
 		ArrayList<String> returnValues = new ArrayList<>();
-		for (SummonCommandArgumentsBuilder command : summonCommands) {
+		for (String summonCommand : summonCommands) {
+			if (summonCommand.length() == 0) {
+				continue;
+			}
 			CompletableFuture<String> cfs = CompletableFuture.supplyAsync(() -> {
 				String str;
 				try {
 					str = "" + mcServer.getCommands().getDispatcher().execute(
-						"summon %s %s %s".formatted(
-							command.getResourceIdArgument(),
-							command.getPositionArgument(),
-							command.getDataArgument()
-						),
+						"summon " + summonCommand,
 						cmdSrc
 					);
 				} catch (CommandSyntaxException e) {
@@ -158,7 +165,7 @@ public class EntitiesHandler extends HandlerBase {
 		return String.join("\n", returnValues);
 	}
 
-	private String getEntitiesHandler(int x, int y, int z, int dx, int dy, int dz, boolean returnJson) {
+	private String getEntitiesHandler(int x, int y, int z, int dx, int dy, int dz, boolean includeData, boolean returnJson) {
 
 		// Calculate boundaries of area of blocks to gather information on.
 		int xOffset = x + dx;
@@ -188,8 +195,10 @@ public class EntitiesHandler extends HandlerBase {
 				json.addProperty("x", entity.getX());
 				json.addProperty("y", entity.getY());
 				json.addProperty("z", entity.getZ());
-				json.addProperty("uuid", entity.getUUID().toString());
-				json.add("data", getEntityDataAsJsonObject(entity));
+				json.addProperty("uuid", entity.getStringUUID());
+				if (includeData) {
+					json.add("data", getEntityDataAsJsonObject(entity));
+				}
 				jsonArray.add(json);
 			}
 			return new Gson().toJson(jsonArray);
@@ -198,7 +207,12 @@ public class EntitiesHandler extends HandlerBase {
 		ArrayList<String> responseList = new ArrayList<>();
 		for (Entity entity : entityList) {
 			responseList.add(
-				entity.getEncodeId() + " " + entity.getX() + " " + entity.getY() + " " + entity.getZ() + " " + getEntityDataAsStr(entity)
+				"%s %s %s %s %s%s".formatted(
+					entity.getEncodeId(),
+					entity.getX(), entity.getY(), entity.getZ(),
+					includeData ? getEntityDataAsStr(entity) : "",
+					entity.getStringUUID()
+				)
 			);
 		}
 		return String.join("\n", responseList);
@@ -256,7 +270,7 @@ public class EntitiesHandler extends HandlerBase {
 	}
 
 	private String getEntityDataAsStr(Entity entity) {
-		String str = "{}";
+		String str = "{} ";
 		CompoundTag tags = entity.serializeNBT();
 		if (tags != null) {
 			str = tags.getAsString();
