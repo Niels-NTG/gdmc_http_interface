@@ -2,11 +2,14 @@ package com.gdmc.httpinterfacemod.handlers;
 
 import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
 import com.google.gson.*;
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -17,11 +20,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class EntitiesHandler extends HandlerBase {
@@ -50,8 +49,6 @@ public class EntitiesHandler extends HandlerBase {
 		// GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
 		boolean includeData;
 
-//		TODO add includeData parameter
-
 		try {
 			x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
 			y = Integer.parseInt(queryParams.getOrDefault("y", "0"));
@@ -76,25 +73,26 @@ public class EntitiesHandler extends HandlerBase {
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
 
+		String contentTypeHeader = getHeader(requestHeaders, "Content-Type", "*/*");
+		boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
+
 		String responseString;
 
 		switch (method) {
 			case "put" -> {
-				String contentTypeHeader = getHeader(requestHeaders, "Content-Type", "*/*");
-				boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
 				responseString = putEntitiesHandler(httpExchange.getRequestBody(), parseRequestAsJson, x, y, z, returnJson);
 			}
 			case "get" -> {
 				responseString = getEntitiesHandler(x, y, z, dx, dy, dz, includeData, returnJson);
 			}
 			case "delete" -> {
-				//		TODO DELETE /entities to clear out entities in an area. Look if there are any commands that already do this.
-				String contentTypeHeader = getHeader(requestHeaders, "Content-Type", "*/*");
-				boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
 				responseString = deleteEntitiesHandler(httpExchange.getRequestBody(), parseRequestAsJson, returnJson);
 			}
+			case "patch" -> {
+				responseString = patchEntitiesHandler(httpExchange.getRequestBody(), parseRequestAsJson, returnJson);
+			}
 			default -> {
-				throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
+				throw new HttpException("Method not allowed. Only PUT, GET, DELETE and PATCH requests are supported.", 405);
 			}
 		}
 
@@ -278,6 +276,68 @@ public class EntitiesHandler extends HandlerBase {
 		return String.join("\n", returnValues);
 	}
 
+	private String patchEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, boolean returnJson) {
+
+		ServerLevel level = getServerLevel(dimension);
+
+		List<String> returnValues = new ArrayList<>();
+
+		if (parseRequestAsJson) {
+			JsonArray jsonList;
+			try {
+				jsonList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
+			} catch (JsonSyntaxException jsonSyntaxException) {
+				throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
+			}
+			for (JsonElement entityDescription : jsonList) {
+				JsonObject json = entityDescription.getAsJsonObject();
+				PatchEntityInstruction patchEntityInstruction;
+				try {
+					patchEntityInstruction = new PatchEntityInstruction(json);
+				} catch (IllegalArgumentException | CommandSyntaxException e) {
+					returnValues.add(e.getMessage());
+					continue;
+				}
+				try {
+					if (patchEntityInstruction.applyPatch(level)) {
+						returnValues.add("1");
+						continue;
+					}
+				} catch (ReportedException e) {
+					returnValues.add(e.getMessage());
+					continue;
+				}
+				returnValues.add("0");
+			}
+		} else {
+			List<String> textList = new BufferedReader(new InputStreamReader(requestBody)).lines().toList();
+			for (String entityDescription : textList) {
+				PatchEntityInstruction patchEntityInstruction;
+				try {
+					patchEntityInstruction = new PatchEntityInstruction(entityDescription);
+				} catch (IllegalArgumentException | CommandSyntaxException e) {
+					returnValues.add(e.getMessage());
+					continue;
+				}
+				try {
+					if (patchEntityInstruction.applyPatch(level)) {
+						returnValues.add("1");
+						continue;
+					}
+				} catch (ReportedException e) {
+					returnValues.add(e.getMessage());
+					continue;
+				}
+				returnValues.add("0");
+			}
+		}
+
+		if (returnJson) {
+			return new Gson().toJson(returnValues);
+		}
+		return String.join("\n", returnValues);
+	}
+
 	private JsonObject getEntityDataAsJsonObject(Entity entity) {
 		JsonObject json = new JsonObject();
 		CompoundTag tags = entity.serializeNBT();
@@ -298,5 +358,37 @@ public class EntitiesHandler extends HandlerBase {
 			str = tags.getAsString();
 		}
 		return str;
+	}
+
+	private final static class PatchEntityInstruction {
+		private final UUID uuid;
+		private final CompoundTag patchData;
+
+		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException {
+			uuid = UUID.fromString(inputData.get("uuid").getAsString());
+			patchData = TagParser.parseTag(inputData.get("data").toString());
+		}
+
+		PatchEntityInstruction(String inputData) throws IllegalArgumentException, CommandSyntaxException {
+			StringReader sr = new StringReader(inputData);
+			uuid = UUID.fromString(sr.readStringUntil(' '));
+			patchData = TagParser.parseTag(sr.getRemaining());
+		}
+
+		public boolean applyPatch(ServerLevel level) throws ReportedException {
+			if (uuid == null) {
+				return false;
+			}
+			Entity entity = level.getEntity(uuid);
+			if (entity == null) {
+				return false;
+			}
+			CompoundTag patchedData = entity.serializeNBT().merge(patchData);
+			if (entity.serializeNBT().equals(patchedData)) {
+				return false;
+			}
+			entity.load(patchedData);
+			return true;
+		}
 	}
 }
