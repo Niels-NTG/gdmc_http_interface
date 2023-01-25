@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -190,8 +191,12 @@ public class EntitiesHandler extends HandlerBase {
 			// and the block entity data (if requested and available).
 			JsonArray jsonArray = new JsonArray();
 			for (Entity entity : entityList) {
+				String entityId = entity.getEncodeId();
+				if (entityId == null) {
+					continue;
+				}
 				JsonObject json = new JsonObject();
-				json.addProperty("id", entity.getEncodeId());
+				json.addProperty("id", entityId);
 				json.addProperty("x", entity.getX());
 				json.addProperty("y", entity.getY());
 				json.addProperty("z", entity.getZ());
@@ -206,9 +211,13 @@ public class EntitiesHandler extends HandlerBase {
 
 		ArrayList<String> responseList = new ArrayList<>();
 		for (Entity entity : entityList) {
+			String entityId = entity.getEncodeId();
+			if (entityId == null) {
+				continue;
+			}
 			responseList.add(
 				"%s %s %s %s %s%s".formatted(
-					entity.getEncodeId(),
+					entityId,
 					entity.getX(), entity.getY(), entity.getZ(),
 					includeData ? getEntityDataAsStr(entity) : "",
 					entity.getStringUUID()
@@ -223,23 +232,34 @@ public class EntitiesHandler extends HandlerBase {
 
 		ServerLevel level = getServerLevel(dimension);
 
-		List<String> commands;
+		List<String> entityUUIDToBeRemoved;
 
 		List<String> returnValues = new ArrayList<>();
 
-//		TODO allow parsing JSON array
 		if (parseRequestAsJson) {
-			commands = new ArrayList<>();
+			JsonArray jsonListUUID;
+			try {
+				jsonListUUID = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
+			} catch (JsonSyntaxException jsonSyntaxException) {
+				throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
+			}
+			entityUUIDToBeRemoved = Arrays.asList(new Gson().fromJson(jsonListUUID, String[].class));
 		} else {
-			commands = new BufferedReader(new InputStreamReader(requestBody)).lines().toList();
+			entityUUIDToBeRemoved = new BufferedReader(new InputStreamReader(requestBody)).lines().toList();
 		}
 
-		for (String command : commands) {
-			if (command.length() == 0) {
+		for (String stringUUID : entityUUIDToBeRemoved) {
+			if (stringUUID.length() == 0) {
+				continue;
+			}
+			Entity entityToBeRemoved;
+			try {
+				entityToBeRemoved = level.getEntity(UUID.fromString(stringUUID));
+			} catch (IllegalArgumentException e) {
+				returnValues.add("0");
 				continue;
 			}
 
-			Entity entityToBeRemoved = level.getEntity(UUID.fromString(command));
 			if (entityToBeRemoved != null) {
 				if (entityToBeRemoved.isRemoved()) {
 					returnValues.add("0");
@@ -247,7 +267,9 @@ public class EntitiesHandler extends HandlerBase {
 					entityToBeRemoved.remove(Entity.RemovalReason.DISCARDED);
 					returnValues.add("1");
 				}
+				continue;
 			}
+			returnValues.add("0");
 		}
 
 		if (returnJson) {
