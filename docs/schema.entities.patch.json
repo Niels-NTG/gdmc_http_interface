@@ -1,0 +1,37 @@
+{
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/EntityPatchInstructionElement"
+	},
+	"definitions": {
+		"EntityPatchInstructionElement": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"uuid" {
+                    "type": "string",
+                    "title": "UUID",
+                    "description": "Universally unique identifier (https://minecraft.fandom.com/wiki/Universally_unique_identifier) of an entity in the world"
+                },
+				"data": {
+					"type": "object",
+                    "title": "Entity Data",
+                    "description": "Object containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information",
+                    "examples": [
+                        {
+                            "variant": "minecraft:red",
+                            "HasVisualFire": true,
+                            "Invulnerable": true
+                        }
+                    ]
+				}
+			},
+			"required": [
+				"data",
+				"uuid"
+			],
+			"title": "Entity Patch Instruction Element"
+		}
+	}
+}

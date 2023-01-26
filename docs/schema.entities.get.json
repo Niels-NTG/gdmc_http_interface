@@ -1,0 +1,68 @@
+{
+    "$schema": "http://json-schema.org/draft-06/schema#",
+    "type": "array",
+    "items": {
+        "$ref": "#/definitions/EntityInformationElement"
+    },
+    "definitions": {
+        "EntityInformationElement": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "title": "Entity ID",
+                    "description": "Any namespaced entity ID",
+                    "examples": [
+                        "minecraft:cat",
+                        "minecraft:cow",
+                        "minecraft:painting"
+                    ]
+                },
+                "x": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "y": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "z": {
+                    "$ref": "#/definitions/PosAxis"
+                },
+                "uuid": {
+                    "type": "string",
+                    "format": "uuid"
+                },
+                "data": {
+                    "type": "object",
+                    "title": "Entity Data",
+                    "description": "Object containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information. This is only included if URL parameter `includeData=true` is present.",
+                    "examples": [
+                        {
+                            "variant": "minecraft:red",
+                            "HasVisualFire": true,
+                            "Invulnerable": true
+                        }
+                    ]
+                }
+            },
+            "required": [
+                "id",
+                "uuid",
+                "x",
+                "y",
+                "z"
+            ],
+            "title": "Entity Information Element"
+        },
+        "PosAxis": {
+            "type": "integer",
+            "title": "Position Axis",
+            "description": "Describe x/y/z absolute position of entity",
+            "examples": [
+                -2,
+                781,
+                97.44
+            ]
+        }
+    }
+}

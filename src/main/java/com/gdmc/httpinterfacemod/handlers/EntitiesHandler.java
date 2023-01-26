@@ -110,6 +110,15 @@ public class EntitiesHandler extends HandlerBase {
 
 	}
 
+	/**
+	 * @param requestBody request body of entity summon instructions
+	 * @param parseRequestAsJson if true, treat input as JSON
+	 * @param x absolute x coordinate of origin
+	 * @param y absolute y coordinate of origin
+	 * @param z absolute z coordinate of origin
+	 * @param returnJson if true, return result in JSON format
+	 * @return summon results
+	 */
 	private String putEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, int x, int y, int z, boolean returnJson) {
 		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
 
@@ -164,6 +173,17 @@ public class EntitiesHandler extends HandlerBase {
 		return String.join("\n", returnValues);
 	}
 
+	/**
+	 * @param x absolute x coordinate of origin
+	 * @param y absolute y coordinate of origin
+	 * @param z absolute z coordinate of origin
+	 * @param dx range of blocks on x-axis
+	 * @param dy range of blocks on y-axis
+	 * @param dz range of blocks on z-axis
+	 * @param includeData if true, include entity data information in response
+	 * @param returnJson if true, return resposne in JSON formatted string
+	 * @return list of entity information
+	 */
 	private String getEntitiesHandler(int x, int y, int z, int dx, int dy, int dz, boolean includeData, boolean returnJson) {
 
 		// Calculate boundaries of area of blocks to gather information on.
@@ -226,6 +246,12 @@ public class EntitiesHandler extends HandlerBase {
 
 	}
 
+	/**
+	 * @param requestBody request body of entity removal instructions
+	 * @param parseRequestAsJson if true, treat input as JSON
+	 * @param returnJson if true, return result in JSON format
+	 * @return entity removal results
+	 */
 	private String deleteEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, boolean returnJson) {
 
 		ServerLevel level = getServerLevel(dimension);
@@ -276,6 +302,12 @@ public class EntitiesHandler extends HandlerBase {
 		return String.join("\n", returnValues);
 	}
 
+	/**
+	 * @param requestBody request body of entity patch instructions
+	 * @param parseRequestAsJson if true, treat input as JSON
+	 * @param returnJson if true, return result in JSON-formatted string
+	 * @return entity patch status results
+	 */
 	private String patchEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, boolean returnJson) {
 
 		ServerLevel level = getServerLevel(dimension);
@@ -352,14 +384,17 @@ public class EntitiesHandler extends HandlerBase {
 	}
 
 	private String getEntityDataAsStr(Entity entity) {
-		String str = "{} ";
+		String str = "{}";
 		CompoundTag tags = entity.serializeNBT();
 		if (tags != null) {
 			str = tags.getAsString();
 		}
-		return str;
+		return " " + str + " ";
 	}
 
+	/**
+	 * Model to encapsulate parsing of data patches, finding existing entities with that {@link UUID}, applying the patch and returning a success/fail status.
+	 */
 	private final static class PatchEntityInstruction {
 		private final UUID uuid;
 		private final CompoundTag patchData;
