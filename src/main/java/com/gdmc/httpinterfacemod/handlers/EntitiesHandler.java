@@ -214,10 +214,10 @@ public class EntitiesHandler extends HandlerBase {
 				continue;
 			}
 			responseList.add(
-				"%s %s %s %s %s%s".formatted(
+				"%s %s %s %s%s%s".formatted(
 					entityId,
 					entity.getX(), entity.getY(), entity.getZ(),
-					includeData ? getEntityDataAsStr(entity) : "",
+					includeData ? getEntityDataAsStr(entity) : " ",
 					entity.getStringUUID()
 				)
 			);
