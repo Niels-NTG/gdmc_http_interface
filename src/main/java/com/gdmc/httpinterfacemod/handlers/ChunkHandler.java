@@ -104,19 +104,19 @@ public class ChunkHandler extends HandlerBase {
         // Response header and response body
         Headers responseHeaders = httpExchange.getResponseHeaders();
         if (returnPlainText) {
-            addResponseHeadersContentTypePlain(responseHeaders);
+            setResponseHeadersContentTypePlain(responseHeaders);
 
             String responseString = bodyNBT.toString();
 
             resolveRequest(httpExchange, responseString);
         } else if (returnJson) {
-            addResponseHeadersContentTypeJson(responseHeaders);
+            setResponseHeadersContentTypeJson(responseHeaders);
 
             String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
 
             resolveRequest(httpExchange, responseString);
         } else {
-            addResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
+            setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);

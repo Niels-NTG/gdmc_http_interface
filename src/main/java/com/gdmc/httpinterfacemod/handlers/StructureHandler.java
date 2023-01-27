@@ -217,12 +217,12 @@ public class StructureHandler extends HandlerBase {
 		}
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
-		addDefaultResponseHeaders(responseHeaders);
+		setDefaultResponseHeaders(responseHeaders);
 		if (returnJson) {
 			responseString = new Gson().toJson(responseString);
-			addResponseHeadersContentTypeJson(responseHeaders);
+			setResponseHeadersContentTypeJson(responseHeaders);
 		} else {
-			addResponseHeadersContentTypePlain(responseHeaders);
+			setResponseHeadersContentTypePlain(responseHeaders);
 		}
 
 		resolveRequest(httpExchange, responseString);
@@ -274,10 +274,10 @@ public class StructureHandler extends HandlerBase {
 		}
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
-		addDefaultResponseHeaders(responseHeaders);
+		setDefaultResponseHeaders(responseHeaders);
 
 		if (returnPlainText) {
-			addResponseHeadersContentTypePlain(responseHeaders);
+			setResponseHeadersContentTypePlain(responseHeaders);
 			resolveRequest(httpExchange, newStructureCompoundTag.toString());
 			return;
 		}
@@ -285,7 +285,7 @@ public class StructureHandler extends HandlerBase {
 		if (returnJson) {
 			JsonObject tagsAsJsonObject = JsonParser.parseString(new JsonTagVisitor().visit(newStructureCompoundTag)).getAsJsonObject();
 
-			addResponseHeadersContentTypeJson(responseHeaders);
+			setResponseHeadersContentTypeJson(responseHeaders);
 			resolveRequest(httpExchange, new Gson().toJson(tagsAsJsonObject));
 			return;
 		}
@@ -300,7 +300,7 @@ public class StructureHandler extends HandlerBase {
 		dos.flush();
 		byte[] responseBytes = boas.toByteArray();
 
-		addResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
+		setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
 		resolveRequest(httpExchange, responseBytes);
 	}
 }

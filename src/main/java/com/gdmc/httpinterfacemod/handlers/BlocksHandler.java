@@ -109,8 +109,7 @@ public class BlocksHandler extends HandlerBase {
 
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
-            String message = "Could not parse query parameter: " + e.getMessage();
-            throw new HttpException(message, 400);
+            throw new HttpException("Could not parse query parameter: " + e.getMessage(), 400);
         }
 
         // Check if clients wants a response in a JSON format. If not, return response in plain text.
@@ -122,30 +121,34 @@ public class BlocksHandler extends HandlerBase {
 
         String responseString;
 
-        if (method.equals("put")) {
-            String contentTypeHeader = getHeader(requestHeaders,"Content-Type", "*/*");
-            boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
-            responseString = putBlocksHandler(httpExchange.getRequestBody(), parseRequestAsJson, x, y, z, doBlockUpdates, spawnDrops, customFlags, returnJson);
-        } else if (method.equals("get")) {
-            responseString = getBlocksHandler(x, y, z, dx, dy, dz, includeState, includeData, returnJson);
-        } else {
-            throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
+        switch (method) {
+            case "put" -> {
+                String contentTypeHeader = getHeader(requestHeaders, "Content-Type", "*/*");
+                boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
+                responseString = putBlocksHandler(httpExchange.getRequestBody(), parseRequestAsJson, x, y, z, doBlockUpdates, spawnDrops, customFlags, returnJson);
+            }
+            case "get" -> {
+                responseString = getBlocksHandler(x, y, z, dx, dy, dz, includeState, includeData, returnJson);
+            }
+            default -> throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
         // Response headers
         Headers responseHeaders = httpExchange.getResponseHeaders();
-        addDefaultResponseHeaders(responseHeaders);
+        setDefaultResponseHeaders(responseHeaders);
         if (returnJson) {
-            addResponseHeadersContentTypeJson(responseHeaders);
+            setResponseHeadersContentTypeJson(responseHeaders);
         } else {
-            addResponseHeadersContentTypePlain(responseHeaders);
+            setResponseHeadersContentTypePlain(responseHeaders);
         }
 
         resolveRequest(httpExchange, responseString);
     }
 
     /**
-     * @param bodyStream request body of block placement instructions
+     * Place blocks any number of blocks into the world
+     *
+     * @param requestBody request body of block placement instructions
      * @param parseRequestAsJson if true, treat input as JSON
      * @param x absolute x coordinate of origin
      * @param y absolute y coordinate of origin
@@ -153,10 +156,10 @@ public class BlocksHandler extends HandlerBase {
      * @param doBlockUpdates if true, update neighbouring blocks after placement
      * @param spawnDrops if true, block updates cause item drops after placement
      * @param customFlags if not -1, overrides doBlockUpdates and spawnDrops with custom placement flags (see {@link #getBlockFlags(boolean, boolean)}
-     * @param returnJson if true, return result in JSON format
-     * @return placement result
+     * @param returnJson if true, return result as JSON-formatted string
+     * @return block placement results
      */
-    private String putBlocksHandler(InputStream bodyStream, boolean parseRequestAsJson, int x, int y, int z, boolean doBlockUpdates, boolean spawnDrops, int customFlags, boolean returnJson) {
+    private String putBlocksHandler(InputStream requestBody, boolean parseRequestAsJson, int x, int y, int z, boolean doBlockUpdates, boolean spawnDrops, int customFlags, boolean returnJson) {
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
         // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
@@ -167,7 +170,7 @@ public class BlocksHandler extends HandlerBase {
         if (parseRequestAsJson) {
             JsonArray blockPlacementList;
             try {
-                blockPlacementList = JsonParser.parseReader(new InputStreamReader(bodyStream)).getAsJsonArray();
+                blockPlacementList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
             } catch (JsonSyntaxException jsonSyntaxException) {
                 throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
             }
@@ -230,7 +233,7 @@ public class BlocksHandler extends HandlerBase {
             }
 
         } else {
-            List<String> blockPlacementList = new BufferedReader(new InputStreamReader(bodyStream))
+            List<String> blockPlacementList = new BufferedReader(new InputStreamReader(requestBody))
                 .lines().toList();
 
             for (String blockPlacementItem : blockPlacementList) {
@@ -281,7 +284,6 @@ public class BlocksHandler extends HandlerBase {
      * @return list of block information
      */
     private String getBlocksHandler(int x, int y, int z, int dx, int dy, int dz, boolean includeState, boolean includeData, boolean returnJson) {
-        String responseString;
 
         // Calculate boundaries of area of blocks to gather information on.
         int xOffset = x + dx;
@@ -321,30 +323,29 @@ public class BlocksHandler extends HandlerBase {
                     }
                 }
             }
-            responseString = new Gson().toJson(jsonArray);
-        } else {
-            // Create list of \n-separated strings containing the x, y, z position space-separated,
-            // the block ID, the block state (if requested and available) between square brackets
-            // and the block entity data (if requested and available) between curly brackets.
-            ArrayList<String> responseList = new ArrayList<>();
-            for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-                for (int rangeY = yMin; rangeY < yMax; rangeY++) {
-                    for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
-                        BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                        String listItem = rangeX + " " + rangeY + " " + rangeZ + " " + getBlockAsStr(blockPos);
-                        if (includeState) {
-                            listItem += getBlockStateAsStr(blockPos);
-                        }
-                        if (includeData) {
-                            listItem += getBlockDataAsStr(blockPos);
-                        }
-                        responseList.add(listItem);
+            return new Gson().toJson(jsonArray);
+        }
+
+        // Create list of \n-separated strings containing the x, y, z position space-separated,
+        // the block ID, the block state (if requested and available) between square brackets
+        // and the block entity data (if requested and available) between curly brackets.
+        ArrayList<String> responseList = new ArrayList<>();
+        for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+            for (int rangeY = yMin; rangeY < yMax; rangeY++) {
+                for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
+                    BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+                    String listItem = rangeX + " " + rangeY + " " + rangeZ + " " + getBlockAsStr(blockPos);
+                    if (includeState) {
+                        listItem += getBlockStateAsStr(blockPos);
                     }
+                    if (includeData) {
+                        listItem += getBlockDataAsStr(blockPos);
+                    }
+                    responseList.add(listItem);
                 }
             }
-            responseString = String.join("\n", responseList);
         }
-        return responseString;
+        return String.join("\n", responseList);
     }
 
     private BlockState getBlockStateAtPosition(BlockPos pos) {

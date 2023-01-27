@@ -30,13 +30,15 @@ public class CommandHandler extends HandlerBase {
 
         // execute command(s)
         InputStream bodyStream = httpExchange.getRequestBody();
-        List<String> commands = new BufferedReader(new InputStreamReader(bodyStream))
-                .lines().filter(a -> a.length() > 0).toList();
+        List<String> commands = new BufferedReader(new InputStreamReader(bodyStream)).lines().toList();
 
         CommandSourceStack cmdSrc = createCommandSource("GDMC-CommandHandler", dimension);
 
         List<String> outputs = new ArrayList<>();
         for (String command: commands) {
+            if (command.length() == 0) {
+                continue;
+            }
             // requests to run the actual command execution on the main thread
             CompletableFuture<String> cfs = CompletableFuture.supplyAsync(() -> {
                 String str;
@@ -56,8 +58,8 @@ public class CommandHandler extends HandlerBase {
 
         // Response headers
         Headers responseHeaders = httpExchange.getResponseHeaders();
-        addDefaultResponseHeaders(responseHeaders);
-        addResponseHeadersContentTypePlain(responseHeaders);
+        setDefaultResponseHeaders(responseHeaders);
+        setResponseHeadersContentTypePlain(responseHeaders);
 
         // body
         String responseString = String.join("\n", outputs);
