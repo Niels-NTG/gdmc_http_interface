@@ -116,12 +116,11 @@ public class ChunkHandler extends HandlerBase {
 
             resolveRequest(httpExchange, responseString);
         } else {
-            addResponseHeadersContentTypeBinary(responseHeaders);
+            addResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             DataOutputStream dos = new DataOutputStream(baos);
             if (returnCompressed) {
-                responseHeaders.add("Content-Encoding", "gzip");
                 NbtIo.writeCompressed(bodyNBT, dos);
             } else {
                 NbtIo.write(bodyNBT, dos);
