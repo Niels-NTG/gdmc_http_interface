@@ -17,6 +17,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.zip.GZIPOutputStream;
 
 public class ChunkHandler extends HandlerBase {
 
@@ -104,31 +105,38 @@ public class ChunkHandler extends HandlerBase {
         // Response header and response body
         Headers responseHeaders = httpExchange.getResponseHeaders();
         if (returnPlainText) {
-            setResponseHeadersContentTypePlain(responseHeaders);
-
             String responseString = bodyNBT.toString();
 
+            setResponseHeadersContentTypePlain(responseHeaders);
             resolveRequest(httpExchange, responseString);
-        } else if (returnJson) {
-            setResponseHeadersContentTypeJson(responseHeaders);
+            return;
+        }
 
+        if (returnJson) {
             String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
 
+            setResponseHeadersContentTypeJson(responseHeaders);
             resolveRequest(httpExchange, responseString);
-        } else {
-            setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
+            return;
+        }
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            DataOutputStream dos = new DataOutputStream(baos);
-            if (returnCompressed) {
-                NbtIo.writeCompressed(bodyNBT, dos);
-            } else {
-                NbtIo.write(bodyNBT, dos);
-            }
+        setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        if (returnCompressed) {
+            GZIPOutputStream dos = new GZIPOutputStream(baos);
+            NbtIo.writeCompressed(bodyNBT, dos);
             dos.flush();
             byte[] responseBytes = baos.toByteArray();
 
             resolveRequest(httpExchange, responseBytes);
+            return;
         }
+        DataOutputStream dos = new DataOutputStream(baos);
+        NbtIo.write(bodyNBT, dos);
+        dos.flush();
+        byte[] responseBytes = baos.toByteArray();
+
+        resolveRequest(httpExchange, responseBytes);
     }
 }

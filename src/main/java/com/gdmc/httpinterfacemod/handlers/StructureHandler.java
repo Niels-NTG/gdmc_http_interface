@@ -26,6 +26,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
+import java.util.zip.GZIPOutputStream;
 
 public class StructureHandler extends HandlerBase {
 
@@ -277,8 +278,10 @@ public class StructureHandler extends HandlerBase {
 		setDefaultResponseHeaders(responseHeaders);
 
 		if (returnPlainText) {
+			String responseString = newStructureCompoundTag.toString();
+
 			setResponseHeadersContentTypePlain(responseHeaders);
-			resolveRequest(httpExchange, newStructureCompoundTag.toString());
+			resolveRequest(httpExchange, responseString);
 			return;
 		}
 
@@ -290,17 +293,23 @@ public class StructureHandler extends HandlerBase {
 			return;
 		}
 
+		setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
+
 		ByteArrayOutputStream boas = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(boas);
 		if (returnCompressed) {
+			GZIPOutputStream dos = new GZIPOutputStream(boas);
 			NbtIo.writeCompressed(newStructureCompoundTag, dos);
-		} else {
-			NbtIo.write(newStructureCompoundTag, dos);
+			dos.flush();
+			byte[] responseBytes = boas.toByteArray();
+
+			resolveRequest(httpExchange, responseBytes);
+			return;
 		}
+		DataOutputStream dos = new DataOutputStream(boas);
+		NbtIo.write(newStructureCompoundTag, dos);
 		dos.flush();
 		byte[] responseBytes = boas.toByteArray();
 
-		setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
 		resolveRequest(httpExchange, responseBytes);
 	}
 }
