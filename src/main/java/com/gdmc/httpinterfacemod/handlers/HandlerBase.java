@@ -141,9 +141,9 @@ public abstract class HandlerBase implements HttpHandler {
      *
      * @param headers request or response headers
      */
-    protected static void addDefaultResponseHeaders(Headers headers) {
-        headers.add("Access-Control-Allow-Origin", "*");
-        headers.add("Content-Disposition", "inline");
+    protected static void setDefaultResponseHeaders(Headers headers) {
+        headers.set("Access-Control-Allow-Origin", "*");
+        headers.set("Content-Disposition", "inline");
     }
 
     /**
@@ -151,8 +151,8 @@ public abstract class HandlerBase implements HttpHandler {
      *
      * @param headers request or response headers
      */
-    protected static void addResponseHeadersContentTypeJson(Headers headers) {
-        headers.add("Content-Type", "application/json; charset=UTF-8");
+    protected static void setResponseHeadersContentTypeJson(Headers headers) {
+        headers.set("Content-Type", "application/json; charset=UTF-8");
     }
 
     /**
@@ -160,18 +160,22 @@ public abstract class HandlerBase implements HttpHandler {
      *
      * @param headers request or response headers
      */
-    protected static void addResponseHeadersContentTypePlain(Headers headers) {
-        headers.add("Content-Type", "text/plain; charset=UTF-8");
+    protected static void setResponseHeadersContentTypePlain(Headers headers) {
+        headers.set("Content-Type", "text/plain; charset=UTF-8");
     }
 
     /**
      * Helper to tell clients that response is in a binary format that should be treated as an attachment.
      *
      * @param headers request or response headers
+     * @param isCompressed true if file is gzip-compressed
      */
-    protected static void addResponseHeadersContentTypeBinary(Headers headers) {
-        headers.add("Content-Type", "application/octet-stream");
-        headers.add("Content-Disposition", "attachment");
+    protected static void setResponseHeadersContentTypeBinary(Headers headers, boolean isCompressed) {
+        headers.set("Content-Type", "application/octet-stream");
+        headers.set("Content-Disposition", "attachment");
+        if (isCompressed) {
+            headers.set("Content-Encoding", "gzip");
+        }
     }
 
     protected static void resolveRequest(HttpExchange httpExchange, String responseString) throws IOException {

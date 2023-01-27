@@ -1,3 +1,12 @@
+# GDMC-HTTP 0.7.5 (Minecraft 1.19.2)
+- NEW: `GET /entities` for reading entities within a certain area.
+- NEW: `PUT /entities` for creating any number of entities.
+- NEW: `PATCH /entities` for editing existing entities in the world.
+- NEW: `DELETE /entities` for removing existing entities from the world.
+- NEW: Add parameters `doBlockUpdates`, `spawnDrops` and `customFlags` from the `PUT /blocks` endpoint to the `POST /structure` endpoint as well.
+- FIX: Issue where output with the response header `Content-Encoding: gzip` didn't actually return gzipped response for the endpoints `GET /chunks` and `GET /structures`.
+- FIX: Partial refactor for improved readability and decreased branching.
+
 # GDMC-HTTP 0.7.4 (Minecraft 1.19.2)
 - FIX: Placement of multi-part blocks such as beds and doors.
 

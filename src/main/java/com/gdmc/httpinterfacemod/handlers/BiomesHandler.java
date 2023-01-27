@@ -122,11 +122,11 @@ public class BiomesHandler extends HandlerBase {
 
 		// Response headers
 		Headers responseHeaders = httpExchange.getResponseHeaders();
-		addDefaultResponseHeaders(responseHeaders);
+		setDefaultResponseHeaders(responseHeaders);
 		if (returnJson) {
-			addResponseHeadersContentTypeJson(responseHeaders);
+			setResponseHeadersContentTypeJson(responseHeaders);
 		} else {
-			addResponseHeadersContentTypePlain(responseHeaders);
+			setResponseHeadersContentTypePlain(responseHeaders);
 		}
 
 		resolveRequest(httpExchange, responseString);

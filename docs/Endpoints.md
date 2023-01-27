@@ -524,19 +524,21 @@ Get a single chunk at position x=0, z=8 in the Nether with the request `GET /chu
 Place an [NBT](https://minecraft.fandom.com/wiki/NBT_format) structure file into the world. These files can be created by the [Structure Block](https://minecraft.fandom.com/wiki/Structure_Block) as well as other means.
 
 ## URL parameters
-
-| key       | valid values                                          | required | defaults to | description                                                                                                                              |
-|-----------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| x         | integer                                               | yes      | `0`         | X coordinate                                                                                                                             |
-| y         | integer                                               | yes      | `0`         | Y coordinate                                                                                                                             |
-| z         | integer                                               | yes      | `0`         | Z coordinate                                                                                                                             |
-| mirror    | `x`, `y`                                              | no       | `0`         | `x` = mirror structure front to back; `y` = mirror structure left to right                                                               |
-| rotate    | `0`, `1`, `2`, `3`                                    | no       | `0`         | `0` = apply no rotation; `1` = rotate structure 90° clockwise; `2` = rotate structure 180°; `3` = rotate structure 90° counter-clockwise |
-| pivotX    | integer                                               | no       | `0`         | relative X coordinate to use as pivot for rotation                                                                                       |
-| pivotY    | integer                                               | no       | `0`         | relative Y coordinate to use as pivot for rotation                                                                                       |
-| pivotZ    | integer                                               | no       | `0`         | relative Z coordinate to use as pivot for rotation                                                                                       |
-| entities  | `true`, `false`                                       | no       | `false`     | `true` = also place all [entities](https://minecraft.fandom.com/wiki/Entity) (mobs, villagers, etc.) saved with the file                 |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world to place the structure in                                                                           |
+| key            | valid values                                          | required | defaults to | description                                                                                                                              |
+|----------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------------------------|
+| x              | integer                                               | yes      | `0`         | X coordinate                                                                                                                             |
+| y              | integer                                               | yes      | `0`         | Y coordinate                                                                                                                             |
+| z              | integer                                               | yes      | `0`         | Z coordinate                                                                                                                             |
+| mirror         | `x`, `y`                                              | no       | `0`         | `x` = mirror structure front to back; `y` = mirror structure left to right                                                               |
+| rotate         | `0`, `1`, `2`, `3`                                    | no       | `0`         | `0` = apply no rotation; `1` = rotate structure 90° clockwise; `2` = rotate structure 180°; `3` = rotate structure 90° counter-clockwise |
+| pivotX         | integer                                               | no       | `0`         | relative X coordinate to use as pivot for rotation                                                                                       |
+| pivotY         | integer                                               | no       | `0`         | relative Y coordinate to use as pivot for rotation                                                                                       |
+| pivotZ         | integer                                               | no       | `0`         | relative Z coordinate to use as pivot for rotation                                                                                       |
+| entities       | `true`, `false`                                       | no       | `false`     | `true` = also place all [entities](https://minecraft.fandom.com/wiki/Entity) (mobs, villagers, etc.) saved with the file                 |
+| doBlockUpdates | `true`, `false`                                       | no       | `true`      | See doBlockUpdates in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                  |
+| spawnDrops     | `true`, `false`                                       | no       | `false`     | See spawnBlocks in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                     |
+| customFlags    | bit string                                            | no       | `0100011`   | See customFlags in [`PUT /blocks` block placement flags](#controlling-block-update-behavior)                                             |
+| dimension      | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world to place the structure in                                                                           |
 
 ## Request headers
 
