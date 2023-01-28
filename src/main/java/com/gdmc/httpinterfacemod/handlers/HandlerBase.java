@@ -33,8 +33,8 @@ import java.util.Map;
 public abstract class HandlerBase implements HttpHandler {
 
     public static class HttpException extends RuntimeException {
-        public String message;
-        public int statusCode;
+        public final String message;
+        public final int statusCode;
         public HttpException(String message, int statusCode) {
             this.message = message;
             this.statusCode = statusCode;
@@ -43,7 +43,7 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
-    MinecraftServer mcServer;
+    final MinecraftServer mcServer;
     public HandlerBase(MinecraftServer mcServer) {
         this.mcServer = mcServer;
     }

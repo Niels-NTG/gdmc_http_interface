@@ -5,8 +5,6 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.MinecraftServer;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -15,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 public class CommandHandler extends HandlerBase {
-    private static final Logger LOGGER = LogManager.getLogger();
 
     public CommandHandler(MinecraftServer mcServer) {
         super(mcServer);
@@ -41,14 +38,11 @@ public class CommandHandler extends HandlerBase {
             }
             // requests to run the actual command execution on the main thread
             CompletableFuture<String> cfs = CompletableFuture.supplyAsync(() -> {
-                String str;
                 try {
-                    str = "" + mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
+                    return "" + mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
                 } catch (CommandSyntaxException e) {
-                    LOGGER.error(e.getMessage());
-                    str = e.getMessage();
+                    return e.getMessage();
                 }
-                return str;
             }, mcServer);
 
             // block this thread until the above code has run on the main thread
