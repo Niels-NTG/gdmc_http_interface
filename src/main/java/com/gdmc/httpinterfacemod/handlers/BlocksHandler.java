@@ -48,6 +48,32 @@ public class BlocksHandler extends HandlerBase {
     private final CommandSourceStack cmdSrc;
     private final LivingEntity blockPlaceEntity;
 
+    // PUT/GET: x, y, z positions
+    private int x;
+    private int y;
+    private int z;
+
+    // GET: Ranges in the x, y, z directions (can be negative). Defaults to 1.
+    private int dx;
+    private int dy;
+    private int dz;
+
+    // GET: Whether to include block state https://minecraft.fandom.com/wiki/Block_states
+    private boolean includeState;
+
+    // GET: Whether to include block entity data https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format
+    private boolean includeData;
+
+    // PUT: Defaults to true. If true, update neighbouring blocks after placement.
+    private boolean doBlockUpdates;
+
+    // PUT: Defaults to false. If true, block updates cause item drops after placement.
+    private boolean spawnDrops;
+
+    // PUT: Overrides both doBlockUpdates and spawnDrops if set. For more information see #getBlockFlags and
+    // https://minecraft.fandom.com/wiki/Block_update
+    private int customFlags; // -1 == no custom flags
+
     private String dimension;
 
     public BlocksHandler(MinecraftServer mcServer) {
@@ -61,32 +87,6 @@ public class BlocksHandler extends HandlerBase {
 
         // query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
-
-        // PUT/GET: x, y, z positions
-        int x;
-        int y;
-        int z;
-
-        // GET: Ranges in the x, y, z directions (can be negative). Defaults to 1.
-        int dx;
-        int dy;
-        int dz;
-
-        // GET: Whether to include block state https://minecraft.fandom.com/wiki/Block_states
-        boolean includeState;
-
-        // GET: Whether to include block entity data https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format
-        boolean includeData;
-
-        // PUT: Defaults to true. If true, update neighbouring blocks after placement.
-        boolean doBlockUpdates;
-
-        // PUT: Defaults to false. If true, block updates cause item drops after placement.
-        boolean spawnDrops;
-
-        // PUT: Overrides both doBlockUpdates and spawnDrops if set. For more information see #getBlockFlags and
-        // https://minecraft.fandom.com/wiki/Block_update
-        int customFlags; // -1 == no custom flags
 
         try {
             x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
@@ -117,18 +117,16 @@ public class BlocksHandler extends HandlerBase {
         String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
         boolean returnJson = hasJsonTypeInHeader(acceptHeader);
 
-        String method = httpExchange.getRequestMethod().toLowerCase();
-
         String responseString;
 
-        switch (method) {
+        switch (httpExchange.getRequestMethod().toLowerCase()) {
             case "put" -> {
                 String contentTypeHeader = getHeader(requestHeaders, "Content-Type", "*/*");
                 boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
-                responseString = putBlocksHandler(httpExchange.getRequestBody(), parseRequestAsJson, x, y, z, doBlockUpdates, spawnDrops, customFlags, returnJson);
+                responseString = putBlocksHandler(httpExchange.getRequestBody(), parseRequestAsJson, returnJson);
             }
             case "get" -> {
-                responseString = getBlocksHandler(x, y, z, dx, dy, dz, includeState, includeData, returnJson);
+                responseString = getBlocksHandler(returnJson);
             }
             default -> throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
@@ -150,16 +148,10 @@ public class BlocksHandler extends HandlerBase {
      *
      * @param requestBody request body of block placement instructions
      * @param parseRequestAsJson if true, treat input as JSON
-     * @param x absolute x coordinate of origin
-     * @param y absolute y coordinate of origin
-     * @param z absolute z coordinate of origin
-     * @param doBlockUpdates if true, update neighbouring blocks after placement
-     * @param spawnDrops if true, block updates cause item drops after placement
-     * @param customFlags if not -1, overrides doBlockUpdates and spawnDrops with custom placement flags (see {@link #getBlockFlags(boolean, boolean)}
      * @param returnJson if true, return result as JSON-formatted string
      * @return block placement results
      */
-    private String putBlocksHandler(InputStream requestBody, boolean parseRequestAsJson, int x, int y, int z, boolean doBlockUpdates, boolean spawnDrops, int customFlags, boolean returnJson) {
+    private String putBlocksHandler(InputStream requestBody, boolean parseRequestAsJson, boolean returnJson) {
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
         // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
@@ -272,18 +264,10 @@ public class BlocksHandler extends HandlerBase {
     /**
      * Get information on one of more blocks in the world.
      *
-     * @param x absolute X coordinate
-     * @param y absolute Y coordinate
-     * @param z absolute Z coordinate
-     * @param dx range in x-direction (can be negative)
-     * @param dy range in y-direction (can be negative)
-     * @param dz range in z-direction (can be negative)
-     * @param includeState if true, include block state information in response
-     * @param includeData if true, include block entity information in response
      * @param returnJson if true, return response in JSON format
      * @return list of block information
      */
-    private String getBlocksHandler(int x, int y, int z, int dx, int dy, int dz, boolean includeState, boolean includeData, boolean returnJson) {
+    private String getBlocksHandler(boolean returnJson) {
 
         // Calculate boundaries of area of blocks to gather information on.
         int xOffset = x + dx;
