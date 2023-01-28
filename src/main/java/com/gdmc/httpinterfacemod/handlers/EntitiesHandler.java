@@ -8,11 +8,17 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntitySummonArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -21,10 +27,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.concurrent.CompletableFuture;
 
 public class EntitiesHandler extends HandlerBase {
 
+	// PUT/GET: x, y, z positions
+	private int x;
+	private int y;
+	private int z;
+
+	// GET: Ranges in the x, y, z directions (can be negative). Defaults to 1.
+	private int dx;
+	private int dy;
+	private int dz;
+
+	// GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
+	private boolean includeData;
 	private String dimension;
 
 	public EntitiesHandler(MinecraftServer mcServer) {
@@ -35,19 +52,6 @@ public class EntitiesHandler extends HandlerBase {
 
 		// query parameters
 		Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
-
-		// PUT/GET: x, y, z positions
-		int x;
-		int y;
-		int z;
-
-		// GET: Ranges in the x, y, z directions (can be negative). Defaults to 1.
-		int dx;
-		int dy;
-		int dz;
-
-		// GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
-		boolean includeData;
 
 		try {
 			x = Integer.parseInt(queryParams.getOrDefault("x", "0"));
@@ -80,10 +84,10 @@ public class EntitiesHandler extends HandlerBase {
 
 		switch (method) {
 			case "put" -> {
-				responseString = putEntitiesHandler(httpExchange.getRequestBody(), parseRequestAsJson, x, y, z, returnJson);
+				responseString = putEntitiesHandler(httpExchange.getRequestBody(), parseRequestAsJson, returnJson);
 			}
 			case "get" -> {
-				responseString = getEntitiesHandler(x, y, z, dx, dy, dz, includeData, returnJson);
+				responseString = getEntitiesHandler(returnJson);
 			}
 			case "delete" -> {
 				responseString = deleteEntitiesHandler(httpExchange.getRequestBody(), parseRequestAsJson, returnJson);
@@ -96,30 +100,25 @@ public class EntitiesHandler extends HandlerBase {
 			}
 		}
 
-
 		// Response headers
 		Headers responseHeaders = httpExchange.getResponseHeaders();
-		addDefaultResponseHeaders(responseHeaders);
+		setDefaultResponseHeaders(responseHeaders);
 		if (returnJson) {
-			addResponseHeadersContentTypeJson(responseHeaders);
+			setResponseHeadersContentTypeJson(responseHeaders);
 		} else {
-			addResponseHeadersContentTypePlain(responseHeaders);
+			setResponseHeadersContentTypePlain(responseHeaders);
 		}
 
 		resolveRequest(httpExchange, responseString);
-
 	}
 
 	/**
 	 * @param requestBody request body of entity summon instructions
 	 * @param parseRequestAsJson if true, treat input as JSON
-	 * @param x absolute x coordinate of origin
-	 * @param y absolute y coordinate of origin
-	 * @param z absolute z coordinate of origin
 	 * @param returnJson if true, return result in JSON format
 	 * @return summon results
 	 */
-	private String putEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, int x, int y, int z, boolean returnJson) {
+	private String putEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, boolean returnJson) {
 		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
 
 		ArrayList<String> summonCommands = new ArrayList<>();
@@ -135,6 +134,7 @@ public class EntitiesHandler extends HandlerBase {
 				JsonObject json = entityDescription.getAsJsonObject();
 				String entityName = json.has("id") ? json.get("id").getAsString() : "";
 				Vec3 referencePosition = cmdSrc.getPosition();
+				// TODO extract position from "Pos"
 				String posXString = json.has("x") ? json.get("x").getAsString() : String.valueOf(referencePosition.x);
 				String posYString = json.has("y") ? json.get("y").getAsString() : String.valueOf(referencePosition.y);
 				String posZString = json.has("z") ? json.get("z").getAsString() : String.valueOf(referencePosition.z);
@@ -145,25 +145,61 @@ public class EntitiesHandler extends HandlerBase {
 			summonCommands.addAll(new BufferedReader(new InputStreamReader(requestBody)).lines().toList());
 		}
 
+		ServerLevel serverLevel = getServerLevel(dimension);
+
 		ArrayList<String> returnValues = new ArrayList<>();
 		for (String summonCommand : summonCommands) {
 			if (summonCommand.length() == 0) {
 				continue;
 			}
-			CompletableFuture<String> cfs = CompletableFuture.supplyAsync(() -> {
-				String str;
-				try {
-					str = "" + mcServer.getCommands().getDispatcher().execute(
-						"summon " + summonCommand,
-						cmdSrc
-					);
-				} catch (CommandSyntaxException e) {
-					str = e.getMessage();
-				}
-				return str;
-			}, mcServer);
-			String results = cfs.join();
-			returnValues.add(results);
+
+			StringReader sr = new StringReader(summonCommand);
+			ResourceLocation entityResource;
+			try {
+				entityResource = EntitySummonArgument.id().parse(sr);
+				sr.skip();
+			} catch (CommandSyntaxException e) {
+				returnValues.add("EntitySummonArgument: " + e.getMessage());
+				continue;
+			}
+			Coordinates position;
+			try {
+				position = Vec3Argument.vec3().parse(sr);
+				sr.skip();
+			} catch (CommandSyntaxException e) {
+				returnValues.add("Vec3Argument: " + e.getMessage());
+				continue;
+			}
+
+			CompoundTag compoundTag;
+			try {
+				compoundTag = TagParser.parseTag(sr.getRemaining());
+			} catch (CommandSyntaxException | StringIndexOutOfBoundsException e) {
+				compoundTag = new CompoundTag();
+			}
+
+			if (!Level.isInSpawnableBounds(position.getBlockPos(cmdSrc))) {
+				returnValues.add("Invalid position");
+				continue;
+			}
+
+			compoundTag.putString("id", entityResource.toString());
+
+			Entity entity = EntityType.loadEntityRecursive(compoundTag, serverLevel, (_entity) -> {
+				Vec3 positionVector = position.getPosition(cmdSrc);
+				_entity.moveTo(positionVector.x, positionVector.y, positionVector.z, _entity.getYRot(), _entity.getXRot());
+				return _entity;
+			});
+			if (entity == null || entity.isRemoved()) {
+				returnValues.add("Cannot be spawned");
+				continue;
+			}
+
+			if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {
+				returnValues.add("UUID already exists");
+				continue;
+			}
+			returnValues.add(entity.getStringUUID());
 		}
 
 		// Set response as a list of "1" (entity was placed), "0" (entity was not placed) or an exception string if something went wrong.
@@ -174,17 +210,10 @@ public class EntitiesHandler extends HandlerBase {
 	}
 
 	/**
-	 * @param x absolute x coordinate of origin
-	 * @param y absolute y coordinate of origin
-	 * @param z absolute z coordinate of origin
-	 * @param dx range of blocks on x-axis
-	 * @param dy range of blocks on y-axis
-	 * @param dz range of blocks on z-axis
-	 * @param includeData if true, include entity data information in response
 	 * @param returnJson if true, return resposne in JSON formatted string
 	 * @return list of entity information
 	 */
-	private String getEntitiesHandler(int x, int y, int z, int dx, int dy, int dz, boolean includeData, boolean returnJson) {
+	private String getEntitiesHandler(boolean returnJson) {
 
 		// Calculate boundaries of area of blocks to gather information on.
 		int xOffset = x + dx;
@@ -234,16 +263,15 @@ public class EntitiesHandler extends HandlerBase {
 				continue;
 			}
 			responseList.add(
-				"%s %s %s %s%s%s".formatted(
+				"%s %s %s %s %s %s".formatted(
+					entity.getStringUUID(),
 					entityId,
 					entity.getX(), entity.getY(), entity.getZ(),
-					includeData ? getEntityDataAsStr(entity) : " ",
-					entity.getStringUUID()
+					getEntityDataAsStr(entity)
 				)
 			);
 		}
 		return String.join("\n", responseList);
-
 	}
 
 	/**
@@ -384,12 +412,14 @@ public class EntitiesHandler extends HandlerBase {
 	}
 
 	private String getEntityDataAsStr(Entity entity) {
-		String str = "{}";
+		if (!includeData) {
+			return "";
+		}
 		CompoundTag tags = entity.serializeNBT();
 		if (tags != null) {
-			str = tags.getAsString();
+			return tags.getAsString();
 		}
-		return " " + str + " ";
+		return "{}";
 	}
 
 	/**
