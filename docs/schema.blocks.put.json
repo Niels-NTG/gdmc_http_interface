@@ -2,10 +2,10 @@
     "$schema": "http://json-schema.org/draft-06/schema#",
     "type": "array",
     "items": {
-        "$ref": "#/definitions/PlacementInstructionElement"
+        "$ref": "#/definitions/BlockPlacementInstructionElement"
     },
     "definitions": {
-        "PlacementInstructionElement": {
+        "BlockPlacementInstructionElement": {
             "type": "object",
             "additionalProperties": false,
             "properties": {
@@ -69,7 +69,7 @@
             "required": [
                 "id"
             ],
-            "title": "Placement Instruction Element"
+            "title": "Block Placement Instruction Element"
         },
         "PosAxis": {
             "anyOf": [

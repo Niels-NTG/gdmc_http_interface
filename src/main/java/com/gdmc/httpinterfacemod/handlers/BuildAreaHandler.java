@@ -70,8 +70,8 @@ public class BuildAreaHandler extends HandlerBase {
         String responseString = new Gson().toJson(buildArea);
 
         Headers responseHeaders = httpExchange.getResponseHeaders();
-        addDefaultResponseHeaders(responseHeaders);
-        addResponseHeadersContentTypeJson(responseHeaders);
+        setDefaultResponseHeaders(responseHeaders);
+        setResponseHeadersContentTypeJson(responseHeaders);
 
         resolveRequest(httpExchange, responseString);
     }
