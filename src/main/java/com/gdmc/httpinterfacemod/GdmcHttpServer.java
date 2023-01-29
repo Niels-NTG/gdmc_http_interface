@@ -34,5 +34,6 @@ public class GdmcHttpServer {
         httpServer.createContext("/version", new MinecraftVersionHandler(mcServer));
         httpServer.createContext("/biomes", new BiomesHandler(mcServer));
         httpServer.createContext("/structure", new StructureHandler(mcServer));
+        httpServer.createContext("/entities", new EntitiesHandler(mcServer));
     }
 }
