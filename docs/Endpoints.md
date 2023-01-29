@@ -654,21 +654,19 @@ If request header has `Accept: application/json` set, the response follows this 
 ### Plain-text format
 
 ```
-<id> <x> <y> <z> {<entityData>} <uuid>
+<uuid> {<entityData>} 
 ```
 
-- `id`: namespaced entity ID. Always present. Examples: `minecraft:cat`, `minecraft:cow`, `minecraft:painting`.
-- `x`, `y`, `z`: entity position. Should be negative or positive floating point numbers.
-- `{entityData}`: if URL includes `includeData=true`, this has [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) for this entity, written inside curly brackets. Example: `{variant: "minecraft:red", HasVisualFire: true, Invulnerable: true}`
 - `uuid`: [Universally unique identifier](https://minecraft.fandom.com/wiki/Universally_unique_identifier) of this entity.
+- `{entityData}`: if URL includes `includeData=true`, this has [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) for this entity, written inside curly brackets. Example: `{variant: "minecraft:red", HasVisualFire: true, Invulnerable: true}`
 
 ## Example
 
 Given a pit with 3 cats in it, the request `GET /entities?x=196&y=-2&z=33&dx=10&dy=10&dz=10` may return:
 ```
-minecraft:cat 196.4293379832027 -2.0 34.104441099645236 475fb218-68f1-4464-8ac5-e559afd8e00d
-minecraft:cat 198.5221960161812 -2.0 33.51004849842309 2ab7aad5-f575-4b34-97e3-38f877d59274
-minecraft:cat 197.2251875129669 -2.0 34.10310354993393 aee053b6-621a-4b84-85e4-2217feaac140
+61e86e73-bdf9-40a1-9c84-2583b915923a {AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:"forge:entity_gravity"},{Base:0.0d,Name:"forge:step_height_addition"},{Base:0.30000001192092896d,Name:"minecraft:generic.movement_speed"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,CollarColor:14b,DeathTime:0s,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:10.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[196.41771845279456d,-2.0d,35.69134625529584d],Rotation:[264.3099f,0.0f],Sitting:1b,UUID:[I;1642622579,-1107738463,-1669061245,-1189768646],id:"minecraft:cat",variant:"minecraft:white"}
+3654091e-c345-4b0e-b724-a432b84061c0 {AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:"forge:entity_gravity"},{Base:0.0d,Name:"forge:step_height_addition"},{Base:0.30000001192092896d,Name:"minecraft:generic.movement_speed"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,CollarColor:14b,DeathTime:0s,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:10.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.05596905643219711d,-0.0784000015258789d,0.04245116800847979d],OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[198.4937389760431d,-2.0d,33.95112349404843d],Rotation:[207.49457f,0.0f],Sitting:1b,UUID:[I;911477022,-1018868978,-1222335438,-1203740224],id:"minecraft:cat",variant:"minecraft:all_black"}
+7243531d-f7e2-4544-9b20-66e9ce048070 {AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:"forge:entity_gravity"},{Base:0.0d,Name:"forge:step_height_addition"},{Base:0.30000001192092896d,Name:"minecraft:generic.movement_speed"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,CollarColor:14b,DeathTime:0s,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:10.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[-0.09271304794030778d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[197.71203932496857d,-2.0d,33.30000001192093d],Rotation:[62.355515f,0.0f],Sitting:0b,UUID:[I;1917014813,-136166076,-1692375319,-838565776],id:"minecraft:cat",variant:"minecraft:red"}
 ```
 
 # Create entities `PUT /entities`
@@ -704,11 +702,11 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 If request has the header `Content-Type: text/plain` it will parse the request body as a plain-text, with each entity placement instruction on a new line.
 
 ```
-<id> <x> <y> <z> {<entityData>}
+<x> <y> <z> <id> {<entityData>}
 ```
 
-- `id`: namespaced entity ID. Always required. Examples: `minecraft:cat`, `minecraft:cow`, `minecraft:painting`.
 - `x`, `y`, `z`: entity position. Should be negative or positive floating point numbers. Use the `~` or `^` prefix to make these values [relative]((https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates)) to the position set in the request URL. If all are omitted, the corresponding coordinates from the request URL are used instead.
+- `id`: namespaced entity ID. Always required. Examples: `minecraft:cat`, `minecraft:cow`, `minecraft:painting`.
 - `{entityData}`: Optional [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) for this entity, written inside curly brackets. Example: `{variant: "minecraft:red", HasVisualFire: true, Invulnerable: true}`
 
 ## Response headers
@@ -717,7 +715,7 @@ If request has the header `Content-Type: text/plain` it will parse the request b
 
 ## Response body
 
-For each placement instruction in the request, it returns a list with a `"1"` if placement was successful, a `"0"` or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
+For each placement instruction in the request, it returns a list with a the entity's UUID if placement was successful or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
 
 If request header has `Accept: application/json`, these values are listed in a JSON array. Otherwise they are listed in plain-text, each on a separated line. In either format the order of these corresponds to the order the placement instruction was listed.
 
@@ -778,11 +776,15 @@ Endpoint for changing the properties of [entities](https://minecraft.fandom.com/
 
 ## Request body
 
+The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) and entities of a specific type for an overview of properties and their data types.
+
 ### JSON format
 
 If request has the header `Content-Type: application/json`, the response is expected to be valid JSON. It should be a single JSON array of JSON objects according to this [schema](./schema.entities.patch.json).
 
 After receiving the request, GDMC-HTTP will first to attempt to parse the whole request body into valid JSON. If this fails it will return a response with HTTP status `400`.
+
+Refer to [the conversion from JSON table](https://minecraft.fandom.com/wiki/NBT_format#Conversion_from_JSON) to ensure data types of property values match that of the target entity.
 
 ### Plain-text format
 
@@ -794,6 +796,8 @@ If request has the header `Content-Type: text/plain` it will parse the request b
 
 - `uuid`: [Universally unique identifier](https://minecraft.fandom.com/wiki/Universally_unique_identifier) of this entity.
 - `{entityData}`: Optional [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) for this entity, written inside curly brackets. Example: `{variant: "minecraft:red", HasVisualFire: true, Invulnerable: true}`
+
+Refer to the [NBT format data types table](https://minecraft.fandom.com/wiki/NBT_format#Data_types) for the correct [SNBT notation](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) to ensure data types of property values match that of the target entity.
 
 ## Response headers
 

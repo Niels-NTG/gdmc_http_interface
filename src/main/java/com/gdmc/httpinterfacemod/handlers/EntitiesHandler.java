@@ -1,6 +1,7 @@
 package com.gdmc.httpinterfacemod.handlers;
 
 import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
+import com.gdmc.httpinterfacemod.utils.TagMerger;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,8 +10,8 @@ import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntitySummonArgument;
-import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
@@ -120,8 +121,9 @@ public class EntitiesHandler extends HandlerBase {
 	 */
 	private String putEntitiesHandler(InputStream requestBody, boolean parseRequestAsJson, boolean returnJson) {
 		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
+		ServerLevel serverLevel = getServerLevel(dimension);
 
-		ArrayList<String> summonCommands = new ArrayList<>();
+		ArrayList<String> returnValues = new ArrayList<>();
 		if (parseRequestAsJson) {
 			JsonArray entityDescriptionList;
 			try {
@@ -132,74 +134,28 @@ public class EntitiesHandler extends HandlerBase {
 
 			for (JsonElement entityDescription : entityDescriptionList) {
 				JsonObject json = entityDescription.getAsJsonObject();
-				String entityName = json.has("id") ? json.get("id").getAsString() : "";
-				Vec3 referencePosition = cmdSrc.getPosition();
-				// TODO extract position from "Pos"
-				String posXString = json.has("x") ? json.get("x").getAsString() : String.valueOf(referencePosition.x);
-				String posYString = json.has("y") ? json.get("y").getAsString() : String.valueOf(referencePosition.y);
-				String posZString = json.has("z") ? json.get("z").getAsString() : String.valueOf(referencePosition.z);
-				String entityData = json.has("data") ? json.get("data").toString() : "";
-				summonCommands.add("%s %s %s %s %s".formatted(entityName, posXString, posYString, posZString, entityData));
+
+				SummonEntityInstruction summonEntityInstruction;
+				try {
+					summonEntityInstruction = new SummonEntityInstruction(json, cmdSrc);
+				} catch (CommandSyntaxException e) {
+					returnValues.add(e.getMessage());
+					continue;
+				}
+				returnValues.add(summonEntityInstruction.summon(serverLevel));
 			}
 		} else {
-			summonCommands.addAll(new BufferedReader(new InputStreamReader(requestBody)).lines().toList());
-		}
-
-		ServerLevel serverLevel = getServerLevel(dimension);
-
-		ArrayList<String> returnValues = new ArrayList<>();
-		for (String summonCommand : summonCommands) {
-			if (summonCommand.length() == 0) {
-				continue;
+			List<String> inputList = new BufferedReader(new InputStreamReader(requestBody)).lines().toList();
+			for (String inputSummonInstruction : inputList) {
+				SummonEntityInstruction summonEntityInstruction;
+				try {
+					summonEntityInstruction = new SummonEntityInstruction(inputSummonInstruction, cmdSrc);
+				} catch (CommandSyntaxException e) {
+					returnValues.add(e.getMessage());
+					continue;
+				}
+				returnValues.add(summonEntityInstruction.summon(serverLevel));
 			}
-
-			StringReader sr = new StringReader(summonCommand);
-			ResourceLocation entityResource;
-			try {
-				entityResource = EntitySummonArgument.id().parse(sr);
-				sr.skip();
-			} catch (CommandSyntaxException e) {
-				returnValues.add("EntitySummonArgument: " + e.getMessage());
-				continue;
-			}
-			Coordinates position;
-			try {
-				position = Vec3Argument.vec3().parse(sr);
-				sr.skip();
-			} catch (CommandSyntaxException e) {
-				returnValues.add("Vec3Argument: " + e.getMessage());
-				continue;
-			}
-
-			CompoundTag compoundTag;
-			try {
-				compoundTag = TagParser.parseTag(sr.getRemaining());
-			} catch (CommandSyntaxException | StringIndexOutOfBoundsException e) {
-				compoundTag = new CompoundTag();
-			}
-
-			if (!Level.isInSpawnableBounds(position.getBlockPos(cmdSrc))) {
-				returnValues.add("Invalid position");
-				continue;
-			}
-
-			compoundTag.putString("id", entityResource.toString());
-
-			Entity entity = EntityType.loadEntityRecursive(compoundTag, serverLevel, (_entity) -> {
-				Vec3 positionVector = position.getPosition(cmdSrc);
-				_entity.moveTo(positionVector.x, positionVector.y, positionVector.z, _entity.getYRot(), _entity.getXRot());
-				return _entity;
-			});
-			if (entity == null || entity.isRemoved()) {
-				returnValues.add("Cannot be spawned");
-				continue;
-			}
-
-			if (!serverLevel.tryAddFreshEntityWithPassengers(entity)) {
-				returnValues.add("UUID already exists");
-				continue;
-			}
-			returnValues.add(entity.getStringUUID());
 		}
 
 		// Set response as a list of "1" (entity was placed), "0" (entity was not placed) or an exception string if something went wrong.
@@ -243,10 +199,6 @@ public class EntitiesHandler extends HandlerBase {
 					continue;
 				}
 				JsonObject json = new JsonObject();
-				json.addProperty("id", entityId);
-				json.addProperty("x", entity.getX());
-				json.addProperty("y", entity.getY());
-				json.addProperty("z", entity.getZ());
 				json.addProperty("uuid", entity.getStringUUID());
 				if (includeData) {
 					json.add("data", getEntityDataAsJsonObject(entity));
@@ -262,14 +214,7 @@ public class EntitiesHandler extends HandlerBase {
 			if (entityId == null) {
 				continue;
 			}
-			responseList.add(
-				"%s %s %s %s %s %s".formatted(
-					entity.getStringUUID(),
-					entityId,
-					entity.getX(), entity.getY(), entity.getZ(),
-					getEntityDataAsStr(entity)
-				)
-			);
+			responseList.add(entity.getStringUUID() + " " + getEntityDataAsStr(entity));
 		}
 		return String.join("\n", responseList);
 	}
@@ -422,6 +367,80 @@ public class EntitiesHandler extends HandlerBase {
 		return "{}";
 	}
 
+	private final static class SummonEntityInstruction {
+
+		private ResourceLocation entityResourceLocation;
+		private Vec3 entityPosition;
+		private CompoundTag entityData;
+
+		SummonEntityInstruction(JsonObject inputData, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+			String positionArgumentString = "";
+			if (inputData.has("x") && inputData.has("y") && inputData.has("z")) {
+				positionArgumentString = inputData.get("x").getAsString() + " " + inputData.get("y").getAsString() + " " + inputData.get("z").getAsString();
+				inputData.remove("x");
+				inputData.remove("y");
+				inputData.remove("z");
+			} else if (inputData.has("Pos") && inputData.get("Pos").isJsonArray()) {
+				JsonArray positionInputData = inputData.get("Pos").getAsJsonArray();
+				if (positionInputData.size() == 3) {
+					positionArgumentString = "%s %s %s".formatted(
+						positionInputData.get(0).getAsString(),
+						positionInputData.get(1).getAsString(),
+						positionInputData.get(2).getAsString()
+					);
+				}
+			}
+			String entitySummonArgumentString = inputData.has("id") ? inputData.get("id").getAsString() : "";
+
+			parse(positionArgumentString + " " + entitySummonArgumentString + " " + inputData, commandSourceStack);
+		}
+
+		SummonEntityInstruction(String inputData, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+			parse(inputData, commandSourceStack);
+		}
+
+		private void parse(String inputData, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+			StringReader sr = new StringReader(inputData);
+
+			entityPosition = Vec3Argument.vec3().parse(sr).getPosition(commandSourceStack);
+			sr.skip();
+
+			entityResourceLocation = EntitySummonArgument.id().parse(sr);
+			sr.skip();
+
+			try {
+				entityData = TagParser.parseTag(sr.getRemaining());
+			} catch (StringIndexOutOfBoundsException e) {
+				entityData = new CompoundTag();
+			}
+		}
+
+		public String summon(ServerLevel level) {
+			if (!Level.isInSpawnableBounds(new BlockPos(entityPosition))) {
+				return "Position is not in spawnable bounds";
+			}
+
+			entityData.putString("id", entityResourceLocation.toString());
+
+			Entity entity = EntityType.loadEntityRecursive(entityData, level, (_entity) -> {
+				_entity.moveTo(entityPosition);
+				return _entity;
+			});
+			if (entity == null) {
+				return "Entity could not be spawned";
+			}
+			entity.checkDespawn();
+			if (entity.isRemoved()) {
+				return "Entity was removed right after spawn for reason: " + entity.getRemovalReason();
+			}
+			if (!level.tryAddFreshEntityWithPassengers(entity)) {
+				return "Entity with this UUID already exists";
+			}
+			return entity.getStringUUID();
+		}
+
+	}
+
 	/**
 	 * Model to encapsulate parsing of data patches, finding existing entities with that {@link UUID}, applying the patch and returning a success/fail status.
 	 */
@@ -448,7 +467,8 @@ public class EntitiesHandler extends HandlerBase {
 			if (entity == null) {
 				return false;
 			}
-			CompoundTag patchedData = entity.serializeNBT().merge(patchData);
+
+			CompoundTag patchedData = TagMerger.merge(entity.serializeNBT(), patchData);
 			if (entity.serializeNBT().equals(patchedData)) {
 				return false;
 			}

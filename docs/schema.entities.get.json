@@ -9,25 +9,6 @@
             "type": "object",
             "additionalProperties": false,
             "properties": {
-                "id": {
-                    "type": "string",
-                    "title": "Entity ID",
-                    "description": "Any namespaced entity ID",
-                    "examples": [
-                        "minecraft:cat",
-                        "minecraft:cow",
-                        "minecraft:painting"
-                    ]
-                },
-                "x": {
-                    "$ref": "#/definitions/PosAxis"
-                },
-                "y": {
-                    "$ref": "#/definitions/PosAxis"
-                },
-                "z": {
-                    "$ref": "#/definitions/PosAxis"
-                },
                 "uuid": {
                     "type": "string",
                     "format": "uuid"
@@ -38,6 +19,11 @@
                     "description": "Object containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information. This is only included if URL parameter `includeData=true` is present.",
                     "examples": [
                         {
+                            "Pos": [
+                                197.50701490860138,
+                                -2.0,
+                                35.512435215238455
+                            ],
                             "variant": "minecraft:red",
                             "HasVisualFire": true,
                             "Invulnerable": true
@@ -46,11 +32,7 @@
                 }
             },
             "required": [
-                "id",
-                "uuid",
-                "x",
-                "y",
-                "z"
+                "uuid"
             ],
             "title": "Entity Information Element"
         },
