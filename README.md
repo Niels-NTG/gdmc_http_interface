@@ -18,13 +18,14 @@ This repo is based on a fork of [Niki Gawlik's GDMC HTTP Interface](https://gith
 
 The current endpoints of the interface are:
 ```
-GET,PUT         /blocks     Modify blocks in the world
-POST            /command    Run Minecraft commands
-GET             /chunks     Get raw chunk nbt data
-GET             /biomes     Get biome of position in the world
-GET,POST        /structure  Generate NBT structure file from selection or place file into the world
-GET             /buildarea  Get the build area defined by the /setbuildarea chat command
-GET             /version    Get Minecraft version
+GET,PUT                 /blocks     Modify blocks in the world
+POST                    /command    Run Minecraft commands
+GET                     /chunks     Get raw chunk nbt data
+GET                     /biomes     Get biome of position in the world
+GET,POST                /structure  Generate NBT structure file from selection or place file into the world
+GET,PUT,PATCH,DELETE    /entities   Read, create, edit and remove entities from the world
+GET                     /buildarea  Get the build area defined by the /setbuildarea chat command
+GET                     /version    Get Minecraft version
 ```
 
 A detailed documentation of the endpoints can be found [over here](./docs/Endpoints.md).

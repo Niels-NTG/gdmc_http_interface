@@ -1,3 +1,6 @@
+# GDMC-HTTP 0.7.6 (Minecraft 1.19.2)
+- FIX: Return empty string for biomes outside build height with `GET /biomes`.
+
 # GDMC-HTTP 0.7.5 (Minecraft 1.19.2)
 - NEW: `GET /entities` for reading entities within a certain area.
 - NEW: `PUT /entities` for creating any number of entities.
