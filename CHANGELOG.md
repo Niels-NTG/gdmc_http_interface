@@ -1,5 +1,6 @@
 # GDMC-HTTP 0.7.6 (Minecraft 1.19.2)
-- FIX: Return empty string for biomes outside build height with `GET /biomes`.
+- FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside of the vertical boundaries of the world.
+- FIX: Typo in error message `POST /structure` handler.
 
 # GDMC-HTTP 0.7.5 (Minecraft 1.19.2)
 - NEW: `GET /entities` for reading entities within a certain area.

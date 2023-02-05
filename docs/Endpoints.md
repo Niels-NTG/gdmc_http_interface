@@ -407,7 +407,7 @@ If request has request header has `Accept: text/plain`, it will return a list of
 ```
 
 - `x`, `y`, `z`: block position. Should be negative or positive integer numbers indicating its absolute position and are always present.
-- `id`: namespaced biome ID. Always required. Examples: `minecraft:plains`, `minecraft:wooded_badlands`, `minecraft:dripstone_caves`.
+- `id`: namespaced biome ID. Always required. Examples: `minecraft:plains`, `minecraft:wooded_badlands`, `minecraft:dripstone_caves`. This value is empty if the requested position is outside of the vertical limits of the world.
 
 ## Example
 
