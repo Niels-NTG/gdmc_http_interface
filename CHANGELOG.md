@@ -1,3 +1,7 @@
+# GDMC-HTTP 0.7.6 (Minecraft 1.19.2)
+- FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside of the vertical boundaries of the world.
+- FIX: Typo in error message `POST /structure` handler.
+
 # GDMC-HTTP 0.7.5 (Minecraft 1.19.2)
 - NEW: `GET /entities` for reading entities within a certain area.
 - NEW: `PUT /entities` for creating any number of entities.

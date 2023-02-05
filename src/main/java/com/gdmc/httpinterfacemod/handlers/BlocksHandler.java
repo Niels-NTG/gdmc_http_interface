@@ -201,10 +201,11 @@ public class BlocksHandler extends HandlerBase {
                     }
 
                     // Pass block Id and block state string into a Stringreader with the the block state parser.
-                    HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
-                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, new StringReader(
-                        blockId + blockStateString
-                    ), true);
+                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
+                        getBlockRegisteryLookup(commandSourceStack),
+                        new StringReader(blockId + blockStateString),
+                        true
+                    );
                     BlockState blockState = parsedBlockState.blockState();
 
                     // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
@@ -239,8 +240,11 @@ public class BlocksHandler extends HandlerBase {
                     } catch (CommandSyntaxException e1) {
                         blockPos = new BlockPos(x, y, z);
                     }
-                    HolderLookup<Block> blockStateArgumetBlocks = new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
-                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(blockStateArgumetBlocks, sr, true);
+                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
+                        getBlockRegisteryLookup(commandSourceStack),
+                        sr,
+                        true
+                    );
                     BlockState blockState = parsedBlockState.blockState();
                     CompoundTag compoundTag = parsedBlockState.nbt();
 
@@ -501,6 +505,10 @@ public class BlocksHandler extends HandlerBase {
      */
     public static String getBlockRegistryName(Block block) {
         return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block)).toString();
+    }
+
+    public static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
+      return new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
     }
 
     public static int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {

@@ -200,8 +200,7 @@ public class StructureHandler extends HandlerBase {
 					if (tag.contains("nbt")) {
 						ListTag posTag = tag.getList("pos", Tag.TAG_INT);
 						BlockPos blockPosInStructure = new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2));
-						BlockPos transformedPosition = StructureTemplate.calculateRelativePosition(structurePlaceSettings, blockPosInStructure);
-						BlockPos transformedGlobalBlockPos = origin.offset(transformedPosition);
+						BlockPos transformedGlobalBlockPos = origin.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, blockPosInStructure));
 
 						BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(transformedGlobalBlockPos);
 						if (existingBlockEntity != null) {
@@ -214,7 +213,7 @@ public class StructureHandler extends HandlerBase {
 				responseString = "0";
 			}
 		} catch (Exception exception) {
-			throw new HttpException("Could place structure: " + exception.getMessage(), 400);
+			throw new HttpException("Could not place structure: " + exception.getMessage(), 400);
 		}
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();

@@ -6,12 +6,15 @@ import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.biome.Biome;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
 
 public class BiomesHandler extends HandlerBase {
 
@@ -84,10 +87,14 @@ public class BiomesHandler extends HandlerBase {
 					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-							if (serverLevel.getBiome(blockPos).unwrapKey().isEmpty()) {
+							Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
+							if (biomeResourceKey.isEmpty()) {
 								continue;
 							}
-							String biomeName = serverLevel.getBiome(blockPos).unwrapKey().get().location().toString();
+							String biomeName = "";
+							if (!serverLevel.isOutsideBuildHeight(blockPos)) {
+								biomeName = biomeResourceKey.get().location().toString();
+							}
 							JsonObject json = new JsonObject();
 							json.addProperty("id", biomeName);
 							json.addProperty("x", rangeX);
@@ -106,10 +113,14 @@ public class BiomesHandler extends HandlerBase {
 					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-							if (serverLevel.getBiome(blockPos).unwrapKey().isEmpty()) {
+							Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
+							if (biomeResourceKey.isEmpty()) {
 								continue;
 							}
-							String biomeName = serverLevel.getBiome(blockPos).unwrapKey().get().location().toString();
+							String biomeName = "";
+							if (!serverLevel.isOutsideBuildHeight(blockPos)) {
+								biomeName = biomeResourceKey.get().location().toString();
+							}
 							biomesList.add(rangeX + " " + rangeY + " " + rangeZ + " " + biomeName);
 						}
 					}
