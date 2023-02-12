@@ -41,27 +41,11 @@
                     "default": null
                 },
                 "data": {
-                    "type": "object",
+                    "type": "string",
                     "title": "Block Entity Data",
-                    "description": "Object containing block entity data (https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) information. This is only included if URL parameter `includeData=true` is present.",
+                    "description": "SNBT-formatted string (https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) containing block entity data (https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) information. This is only included if URL parameter `includeData=true` is present.",
                     "examples": [
-                        {
-                            "Items": [
-                                {
-                                    "Count": 48,
-                                    "Slot": 0,
-                                    "id": "minecraft:lantern"
-                                },
-                                {
-                                    "Count": 1,
-                                    "Slot": 1,
-                                    "id": "minecraft:golden_axe",
-                                    "tag": {
-                                        "Damage": 0
-                                    }
-                                }
-                            ]
-                        }
+                        "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
                     ],
                     "default": null
                 }

@@ -1,6 +1,5 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -211,8 +210,8 @@ public class BlocksHandler extends HandlerBase {
                     // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
                     // for this block placement.
                     CompoundTag compoundTag = null;
-                    if (blockPlacementItem.has("data")) {
-                        compoundTag = TagParser.parseTag(blockPlacementItem.get("data").toString());
+                    if (blockPlacementItem.has("data") && blockPlacementItem.get("data").isJsonPrimitive()) {
+                        compoundTag = TagParser.parseTag(blockPlacementItem.get("data").getAsString());
                     }
 
                     // Attempt to place block in the world.
@@ -305,7 +304,7 @@ public class BlocksHandler extends HandlerBase {
                             json.add("state", getBlockStateAsJsonObject(blockPos));
                         }
                         if (includeData) {
-                            json.add("data", getBlockDataAsJsonObject(blockPos));
+                            json.addProperty("data", getBlockDataAsStr(blockPos));
                         }
                         jsonArray.add(json);
                     }
@@ -455,25 +454,6 @@ public class BlocksHandler extends HandlerBase {
         return '[' +
             bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
         ']';
-    }
-
-    /**
-     * @param pos   Position of block in the world.
-     * @return      {@link JsonObject} containing the block entity data of the block at the given position.
-     */
-    private JsonObject getBlockDataAsJsonObject(BlockPos pos) {
-        ServerLevel serverLevel = getServerLevel(dimension);
-        JsonObject dataJsonObject = new JsonObject();
-        BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
-        if (blockEntity != null) {
-            CompoundTag tags = blockEntity.saveWithoutMetadata();
-            String tagsAsJsonString = (new JsonTagVisitor()).visit(tags);
-            JsonObject tagsAsJsonObject = JsonParser.parseString(tagsAsJsonString).getAsJsonObject();
-            if (tagsAsJsonObject != null) {
-                return tagsAsJsonObject;
-            }
-        }
-        return dataJsonObject;
     }
 
     /**

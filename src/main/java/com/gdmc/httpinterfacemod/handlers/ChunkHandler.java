@@ -1,7 +1,5 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
-import com.google.gson.JsonParser;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.nbt.CompoundTag;
@@ -113,7 +111,7 @@ public class ChunkHandler extends HandlerBase {
         }
 
         if (returnJson) {
-            String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
+            String responseString = bodyNBT.toString();
 
             setResponseHeadersContentTypeJson(responseHeaders);
             resolveRequest(httpExchange, responseString);

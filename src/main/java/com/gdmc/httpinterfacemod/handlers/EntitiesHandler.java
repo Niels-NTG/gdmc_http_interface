@@ -1,6 +1,5 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
 import com.gdmc.httpinterfacemod.utils.TagMerger;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -27,7 +26,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class EntitiesHandler extends HandlerBase {
 
@@ -201,7 +204,7 @@ public class EntitiesHandler extends HandlerBase {
 				JsonObject json = new JsonObject();
 				json.addProperty("uuid", entity.getStringUUID());
 				if (includeData) {
-					json.add("data", getEntityDataAsJsonObject(entity));
+					json.addProperty("data", getEntityDataAsStr(entity));
 				}
 				jsonArray.add(json);
 			}
@@ -299,7 +302,7 @@ public class EntitiesHandler extends HandlerBase {
 				PatchEntityInstruction patchEntityInstruction;
 				try {
 					patchEntityInstruction = new PatchEntityInstruction(json);
-				} catch (IllegalArgumentException | CommandSyntaxException e) {
+				} catch (IllegalArgumentException | CommandSyntaxException | UnsupportedOperationException e) {
 					returnValues.add(e.getMessage());
 					continue;
 				}
@@ -343,19 +346,6 @@ public class EntitiesHandler extends HandlerBase {
 		return String.join("\n", returnValues);
 	}
 
-	private JsonObject getEntityDataAsJsonObject(Entity entity) {
-		JsonObject json = new JsonObject();
-		CompoundTag tags = entity.serializeNBT();
-		if (tags != null) {
-			String tagAsJsonString = (new JsonTagVisitor()).visit(tags);
-			JsonObject tagsAsJsonObject = JsonParser.parseString(tagAsJsonString).getAsJsonObject();
-			if (tagsAsJsonObject != null) {
-				return tagsAsJsonObject;
-			}
-		}
-		return json;
-	}
-
 	private String getEntityDataAsStr(Entity entity) {
 		if (!includeData) {
 			return "";
@@ -373,26 +363,15 @@ public class EntitiesHandler extends HandlerBase {
 		private Vec3 entityPosition;
 		private CompoundTag entityData;
 
-		SummonEntityInstruction(JsonObject inputData, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+		SummonEntityInstruction(JsonObject summonInstructionInput, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
 			String positionArgumentString = "";
-			if (inputData.has("x") && inputData.has("y") && inputData.has("z")) {
-				positionArgumentString = inputData.get("x").getAsString() + " " + inputData.get("y").getAsString() + " " + inputData.get("z").getAsString();
-				inputData.remove("x");
-				inputData.remove("y");
-				inputData.remove("z");
-			} else if (inputData.has("Pos") && inputData.get("Pos").isJsonArray()) {
-				JsonArray positionInputData = inputData.get("Pos").getAsJsonArray();
-				if (positionInputData.size() == 3) {
-					positionArgumentString = "%s %s %s".formatted(
-						positionInputData.get(0).getAsString(),
-						positionInputData.get(1).getAsString(),
-						positionInputData.get(2).getAsString()
-					);
-				}
+			if (summonInstructionInput.has("x") && summonInstructionInput.has("y") && summonInstructionInput.has("z")) {
+				positionArgumentString = summonInstructionInput.get("x").getAsString() + " " + summonInstructionInput.get("y").getAsString() + " " + summonInstructionInput.get("z").getAsString();
 			}
-			String entitySummonArgumentString = inputData.has("id") ? inputData.get("id").getAsString() : "";
+			String entityIDString = summonInstructionInput.has("id") ? summonInstructionInput.get("id").getAsString() : "";
+			String entityDataString = summonInstructionInput.has("data") ? summonInstructionInput.get("data").getAsString() : "";
 
-			parse(positionArgumentString + " " + entitySummonArgumentString + " " + inputData, commandSourceStack);
+			parse(positionArgumentString + " " + entityIDString + " " + entityDataString, commandSourceStack);
 		}
 
 		SummonEntityInstruction(String inputData, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
@@ -409,7 +388,11 @@ public class EntitiesHandler extends HandlerBase {
 			sr.skip();
 
 			try {
-				entityData = TagParser.parseTag(sr.getRemaining());
+				String entityDataString = sr.getRemaining();
+				if (entityDataString.isBlank()) {
+					entityDataString = "{}";
+				}
+				entityData = TagParser.parseTag(entityDataString);
 			} catch (StringIndexOutOfBoundsException e) {
 				entityData = new CompoundTag();
 			}
@@ -448,9 +431,9 @@ public class EntitiesHandler extends HandlerBase {
 		private final UUID uuid;
 		private final CompoundTag patchData;
 
-		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException {
+		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException, UnsupportedOperationException {
 			uuid = UUID.fromString(inputData.get("uuid").getAsString());
-			patchData = TagParser.parseTag(inputData.get("data").toString());
+			patchData = TagParser.parseTag(inputData.get("data").getAsString());
 		}
 
 		PatchEntityInstruction(String inputData) throws IllegalArgumentException, CommandSyntaxException {

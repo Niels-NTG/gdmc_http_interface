@@ -481,10 +481,10 @@ Read [chunks](https://minecraft.fandom.com/wiki/Chunk) within a given range and 
 
 ## Request headers
 
-| key             | valid values                                                 | defaults to                | description                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-|-----------------|--------------------------------------------------------------|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Accept          | `application/json`, `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns as raw bytes of a [NBT](https://minecraft.fandom.com/wiki/NBT_format) file. Use `text/plain` for the same data, but in the human-readable [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) format. And use `application/json` for better readable data at the cost of losing some data type precision, refer to [JSON and NBT](https://minecraft.fandom.com/wiki/NBT_format#Conversion_from_JSON) for more information. |
-| Accept-Encoding | `gzip`, `*`                                                  | `*`                        | If set to `gzip`, any raw bytes NBT file is compressed using GZIP.                                                                                                                                                                                                                                                                                                                                                                                                             |
+| key             | valid values                             | defaults to                | description                                                                                                                                                                                                                                               |
+|-----------------|------------------------------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Accept          | `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns as raw bytes of a [NBT](https://minecraft.fandom.com/wiki/NBT_format) file. Use `text/plain` for the same data, but in the human-readable [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) format. |
+| Accept-Encoding | `gzip`, `*`                              | `*`                        | If set to `gzip`, any raw bytes NBT file is compressed using GZIP.                                                                                                                                                                                        |
 
 ## Request body
 
@@ -586,10 +586,10 @@ Create an [NBT](https://minecraft.fandom.com/wiki/NBT_format) structure file fro
 
 ## Request headers
 
-| key             | valid values                                                 | defaults to                | description                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-|-----------------|--------------------------------------------------------------|----------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Accept          | `application/json`, `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns the contents that makes a real NBT file. Use `text/plain` for a more human readable lossless version of the data in the [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) format, and `application/json` for better readable data at the cost of losing some data type precision, refer to [JSON and NBT](https://minecraft.fandom.com/wiki/NBT_format#Conversion_from_JSON) for more information. |
-| Accept-Encoding | `gzip`, `*`                                                  | `gzip`                     | If set to `gzip`, compress resulting file using gzip compression.                                                                                                                                                                                                                                                                                                                                                                                        |
+| key             | valid values                             | defaults to                | description                                                                                                                                                                                                                             |
+|-----------------|------------------------------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Accept          | `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns the contents that makes a real NBT file. Use `text/plain` for a more human readable lossless version of the data in the [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) format. |
+| Accept-Encoding | `gzip`, `*`                              | `gzip`                     | If set to `gzip`, compress resulting file using gzip compression.                                                                                                                                                                       |
 
 ## Request body
 
@@ -729,30 +729,21 @@ For placing a red cat that's invulnerable and permanently on fire, reproduction 
 		"x": "~2",
 		"y": "~",
 		"z": "~-1",
-		"data": {
-		    "variant": "minecraft:red",
-            "Invulnerable": true,
-            "HasVisualFire": true
-		}
+		"data": "{variant:\"minecraft:red\",Invulnerable: true,HasVisualFire: true}"
 	},
 	{
 		"id": "minecraft:painting",
 		"x": "~-1",
 		"y": 68,
 		"z": "~2",
-		"data": {
-		    "Facing": 2,
-		    "variant": "wanderer"
-		}
+		"data": "{Facing:2,variant:\"wanderer\"}"
 	},
 	{
 		"id": "minecraft:zombie",
 		"x": "~1",
 		"y": "~",
 		"z": "~-4",
-        "data": {
-            "CanBreakDoors": true
-        }
+        "data": "{CanBreakDoors:true}"
 	}
 ]
 ```
@@ -816,9 +807,7 @@ When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (ob
 [
 	{
 		"uuid": "475fb218-68f1-4464-8ac5-e559afd8e00d",
-		"data": {
-			"variant": "minecraft:red"
-		}
+		"data": "{variant:\"minecraft:red\"}"
 	}
 ]
 ```

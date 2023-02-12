@@ -1,9 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
@@ -127,7 +124,7 @@ public class StructureHandler extends HandlerBase {
 				// (both default) compress the result using GZIP before sending out the response.
 				String acceptEncodingHeader = getHeader(requestHeaders, "Accept-Encoding", "gzip");
 				boolean returnCompressed = acceptEncodingHeader.equals("gzip");
-				getStructureHandler(httpExchange, returnPlainText, returnJson, returnCompressed);
+				getStructureHandler(httpExchange, returnPlainText, returnCompressed);
 			}
 			default -> throw new HttpException("Method not allowed. Only POST and GET requests are supported.", 405);
 		}
@@ -228,7 +225,7 @@ public class StructureHandler extends HandlerBase {
 		resolveRequest(httpExchange, responseString);
 	}
 
-	private void getStructureHandler(HttpExchange httpExchange, boolean returnPlainText, boolean returnJson, boolean returnCompressed) throws IOException {
+	private void getStructureHandler(HttpExchange httpExchange, boolean returnPlainText, boolean returnCompressed) throws IOException {
 		// Calculate boundaries of area of blocks to gather information on.
 		int xOffset = x + dx;
 		int xMin = Math.min(x, xOffset);
@@ -281,14 +278,6 @@ public class StructureHandler extends HandlerBase {
 
 			setResponseHeadersContentTypePlain(responseHeaders);
 			resolveRequest(httpExchange, responseString);
-			return;
-		}
-
-		if (returnJson) {
-			JsonObject tagsAsJsonObject = JsonParser.parseString(new JsonTagVisitor().visit(newStructureCompoundTag)).getAsJsonObject();
-
-			setResponseHeadersContentTypeJson(responseHeaders);
-			resolveRequest(httpExchange, new Gson().toJson(tagsAsJsonObject));
 			return;
 		}
 
