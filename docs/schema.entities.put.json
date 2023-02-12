@@ -29,20 +29,15 @@
 					"$ref": "#/definitions/PosAxis"
 				},
 				"data": {
-					"type": "object",
+					"type": "string",
                     "title": "Entity Data",
-                    "description": "Object containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information",
+                    "description": "SNBT-formatted string (https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information",
                     "examples": [
-                        {
-                            "variant": "minecraft:red",
-                            "HasVisualFire": true,
-                            "Invulnerable": true
-                        }
+					  	"{variant:\"minecraft:red\",hasVisualFire:true,Invulnerable:true}"
                     ]
 				}
 			},
 			"required": [
-				"data",
 				"id",
 				"x",
 				"y",

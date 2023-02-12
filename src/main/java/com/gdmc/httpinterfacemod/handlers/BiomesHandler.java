@@ -1,6 +1,5 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
@@ -12,7 +11,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
 
@@ -54,14 +52,9 @@ public class BiomesHandler extends HandlerBase {
 			throw new HandlerBase.HttpException(message, 400);
 		}
 
-		// Check if clients wants a response in a JSON format. If not, return response in plain text.
-		Headers requestHeaders = httpExchange.getRequestHeaders();
-		String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
-		boolean returnJson = hasJsonTypeInHeader(acceptHeader);
-
 		String method = httpExchange.getRequestMethod().toLowerCase();
 
-		String responseString;
+		JsonArray responseList = new JsonArray();
 
 		if (method.equals("get")) {
 			ServerLevel serverLevel = getServerLevel(dimension);
@@ -79,53 +72,28 @@ public class BiomesHandler extends HandlerBase {
 			int zMin = Math.min(z, zOffset);
 			int zMax = Math.max(z, zOffset);
 
-			if (returnJson) {
-				// Create a JsonArray with JsonObject, each contain a key-value pair for
-				// the x, y, z position and the namespaced biome name.
-				JsonArray jsonArray = new JsonArray();
-				for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
-						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
-							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-							Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
-							if (biomeResourceKey.isEmpty()) {
-								continue;
-							}
-							String biomeName = "";
-							if (!serverLevel.isOutsideBuildHeight(blockPos)) {
-								biomeName = biomeResourceKey.get().location().toString();
-							}
-							JsonObject json = new JsonObject();
-							json.addProperty("id", biomeName);
-							json.addProperty("x", rangeX);
-							json.addProperty("y", rangeY);
-							json.addProperty("z", rangeZ);
-							jsonArray.add(json);
+			// Create a JsonArray with JsonObject, each contain a key-value pair for
+			// the x, y, z position and the namespaced biome name.
+			for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+				for (int rangeY = yMin; rangeY < yMax; rangeY++) {
+					for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
+						BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+						Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
+						if (biomeResourceKey.isEmpty()) {
+							continue;
 						}
+						String biomeName = "";
+						if (!serverLevel.isOutsideBuildHeight(blockPos)) {
+							biomeName = biomeResourceKey.get().location().toString();
+						}
+						JsonObject json = new JsonObject();
+						json.addProperty("id", biomeName);
+						json.addProperty("x", rangeX);
+						json.addProperty("y", rangeY);
+						json.addProperty("z", rangeZ);
+						responseList.add(json);
 					}
 				}
-				responseString = new Gson().toJson(jsonArray);
-			} else {
-				// Create list of \n-separated strings containing the space-separated
-				// x, y, z position and the namespaced biome name.
-				ArrayList<String> biomesList = new ArrayList<>();
-				for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-					for (int rangeY = yMin; rangeY < yMax; rangeY++) {
-						for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
-							BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-							Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
-							if (biomeResourceKey.isEmpty()) {
-								continue;
-							}
-							String biomeName = "";
-							if (!serverLevel.isOutsideBuildHeight(blockPos)) {
-								biomeName = biomeResourceKey.get().location().toString();
-							}
-							biomesList.add(rangeX + " " + rangeY + " " + rangeZ + " " + biomeName);
-						}
-					}
-				}
-				responseString = String.join("\n", biomesList);
 			}
 		} else {
 			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
@@ -134,12 +102,7 @@ public class BiomesHandler extends HandlerBase {
 		// Response headers
 		Headers responseHeaders = httpExchange.getResponseHeaders();
 		setDefaultResponseHeaders(responseHeaders);
-		if (returnJson) {
-			setResponseHeadersContentTypeJson(responseHeaders);
-		} else {
-			setResponseHeadersContentTypePlain(responseHeaders);
-		}
 
-		resolveRequest(httpExchange, responseString);
+		resolveRequest(httpExchange, responseList.toString());
 	}
 }

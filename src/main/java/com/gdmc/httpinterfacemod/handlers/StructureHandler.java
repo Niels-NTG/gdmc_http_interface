@@ -1,9 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
@@ -110,7 +107,6 @@ public class StructureHandler extends HandlerBase {
 		Headers requestHeaders = httpExchange.getRequestHeaders();
 		String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
 		boolean returnPlainText = acceptHeader.equals("text/plain");
-		boolean returnJson = hasJsonTypeInHeader(acceptHeader);
 
 		switch (httpExchange.getRequestMethod().toLowerCase()) {
 			case "post" -> {
@@ -120,21 +116,21 @@ public class StructureHandler extends HandlerBase {
 				// stored in this compressed format.
 				String contentEncodingHeader = getHeader(requestHeaders, "Content-Encoding", "*");
 				boolean inputShouldBeCompressed = contentEncodingHeader.equals("gzip");
-				postStructureHandler(httpExchange, inputShouldBeCompressed, returnJson);
+				postStructureHandler(httpExchange, inputShouldBeCompressed);
 			}
 			case "get" -> {
 				// If "Accept-Encoding" header is set to "gzip" and the client expects a binary format,
 				// (both default) compress the result using GZIP before sending out the response.
 				String acceptEncodingHeader = getHeader(requestHeaders, "Accept-Encoding", "gzip");
 				boolean returnCompressed = acceptEncodingHeader.equals("gzip");
-				getStructureHandler(httpExchange, returnPlainText, returnJson, returnCompressed);
+				getStructureHandler(httpExchange, returnPlainText, returnCompressed);
 			}
 			default -> throw new HttpException("Method not allowed. Only POST and GET requests are supported.", 405);
 		}
 	}
 
-	private void postStructureHandler(HttpExchange httpExchange, boolean parseRequestAsGzip, boolean returnJson) throws IOException {
-		String responseString;
+	private void postStructureHandler(HttpExchange httpExchange, boolean parseRequestAsGzip) throws IOException {
+		JsonObject responseValue;
 
 		CompoundTag structureCompound;
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -208,9 +204,9 @@ public class StructureHandler extends HandlerBase {
 						}
 					}
 				}
-				responseString = "1";
+				responseValue = instructionStatus(true);
 			} else {
-				responseString = "0";
+				responseValue = instructionStatus(false);
 			}
 		} catch (Exception exception) {
 			throw new HttpException("Could not place structure: " + exception.getMessage(), 400);
@@ -218,17 +214,11 @@ public class StructureHandler extends HandlerBase {
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
 		setDefaultResponseHeaders(responseHeaders);
-		if (returnJson) {
-			responseString = new Gson().toJson(responseString);
-			setResponseHeadersContentTypeJson(responseHeaders);
-		} else {
-			setResponseHeadersContentTypePlain(responseHeaders);
-		}
 
-		resolveRequest(httpExchange, responseString);
+		resolveRequest(httpExchange, responseValue.toString());
 	}
 
-	private void getStructureHandler(HttpExchange httpExchange, boolean returnPlainText, boolean returnJson, boolean returnCompressed) throws IOException {
+	private void getStructureHandler(HttpExchange httpExchange, boolean returnPlainText, boolean returnCompressed) throws IOException {
 		// Calculate boundaries of area of blocks to gather information on.
 		int xOffset = x + dx;
 		int xMin = Math.min(x, xOffset);
@@ -281,14 +271,6 @@ public class StructureHandler extends HandlerBase {
 
 			setResponseHeadersContentTypePlain(responseHeaders);
 			resolveRequest(httpExchange, responseString);
-			return;
-		}
-
-		if (returnJson) {
-			JsonObject tagsAsJsonObject = JsonParser.parseString(new JsonTagVisitor().visit(newStructureCompoundTag)).getAsJsonObject();
-
-			setResponseHeadersContentTypeJson(responseHeaders);
-			resolveRequest(httpExchange, new Gson().toJson(tagsAsJsonObject));
 			return;
 		}
 

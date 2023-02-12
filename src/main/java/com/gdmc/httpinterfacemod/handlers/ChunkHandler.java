@@ -1,7 +1,5 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.gdmc.httpinterfacemod.utils.JsonTagVisitor;
-import com.google.gson.JsonParser;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.nbt.CompoundTag;
@@ -59,12 +57,11 @@ public class ChunkHandler extends HandlerBase {
             throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
         }
 
-        // Check if clients wants a response in plain-text or JSON format. If not, return response
+        // Check if clients wants a response in plain-text. If not, return response
         // in a binary format.
         Headers requestHeaders = httpExchange.getRequestHeaders();
         String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
         boolean returnPlainText = acceptHeader.equals("text/plain");
-        boolean returnJson = hasJsonTypeInHeader(acceptHeader);
 
         // If "Accept-Encoding" header is set to "gzip" and the client expects a binary format,
         // compress the result using GZIP before sending out the response.
@@ -108,14 +105,6 @@ public class ChunkHandler extends HandlerBase {
             String responseString = bodyNBT.toString();
 
             setResponseHeadersContentTypePlain(responseHeaders);
-            resolveRequest(httpExchange, responseString);
-            return;
-        }
-
-        if (returnJson) {
-            String responseString = JsonParser.parseString((new JsonTagVisitor()).visit(bodyNBT)).toString();
-
-            setResponseHeadersContentTypeJson(responseHeaders);
             resolveRequest(httpExchange, responseString);
             return;
         }

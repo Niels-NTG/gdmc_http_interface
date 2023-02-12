@@ -9,21 +9,17 @@
 			"type": "object",
 			"additionalProperties": false,
 			"properties": {
-				"uuid" {
+				"uuid": {
                     "type": "string",
                     "title": "UUID",
                     "description": "Universally unique identifier (https://minecraft.fandom.com/wiki/Universally_unique_identifier) of an entity in the world"
                 },
 				"data": {
-					"type": "object",
+					"type": "string",
                     "title": "Entity Data",
-                    "description": "Object containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information",
+                    "description": "SNBT-formatted string (https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information that should be changed",
                     "examples": [
-                        {
-                            "variant": "minecraft:red",
-                            "HasVisualFire": true,
-                            "Invulnerable": true
-                        }
+					  "{variant:\"minecraft:red\",hasVisualFire:true,Invulnerable:true}"
                     ]
 				}
 			},

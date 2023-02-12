@@ -1,3 +1,11 @@
+# GDMC-HTTP 1.0.0 (Minecraft 1.19.2)
+- BREAKING: JSON-formatted NBT-like data is no longer supported in request bodies. Use [SNBT notation](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) instead.
+- BREAKING: Properties containing NBT values in JSON responses are no longer formatted as JSON, but as [SNBT strings](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format).
+- BREAKING: Plain-text formatted responses have been removed in favour of JSON.
+- BREAKING: Consistent error messages.
+- BREAKING: Plain-text request bodies are no longer accepted (except for `POST /command`). JSON-formatted request bodies are expected instead.
+- FIX: Improved performance!
+
 # GDMC-HTTP 0.7.6 (Minecraft 1.19.2)
 - FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside of the vertical boundaries of the world.
 - FIX: Typo in error message `POST /structure` handler.

@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -53,10 +54,13 @@ public abstract class HandlerBase implements HttpHandler {
         try {
             internalHandle(httpExchange);
         } catch (HttpException e) {
-            String responseString = e.message;
-            byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
+            JsonObject json = new JsonObject();
+            json.addProperty("status", e.statusCode);
+            json.addProperty("message", e.message);
+
+            byte[] responseBytes = json.toString().getBytes(StandardCharsets.UTF_8);
             Headers headers = httpExchange.getResponseHeaders();
-            headers.set("Content-Type", "text/plain; charset=UTF-8");
+            setResponseHeadersContentTypeJson(headers);
 
             httpExchange.sendResponseHeaders(e.statusCode, responseBytes.length);
             OutputStream outputStream = httpExchange.getResponseBody();
@@ -66,19 +70,21 @@ public abstract class HandlerBase implements HttpHandler {
             LOGGER.log(Level.ERROR, e.message);
         } catch (Exception e) {
             // create a response string with stacktrace
+            int statusCode = 500;
             String stackTrace = ExceptionUtils.getStackTrace(e);
-
-            String responseString = String.format("Internal server error: %s\n%s", e, stackTrace);
-            byte[] responseBytes = responseString.getBytes(StandardCharsets.UTF_8);
+            JsonObject json = new JsonObject();
+            json.addProperty("status", statusCode);
+            json.addProperty("message", stackTrace);
+            byte[] responseBytes = json.toString().getBytes(StandardCharsets.UTF_8);
             Headers headers = httpExchange.getResponseHeaders();
-            headers.set("Content-Type", "text/plain; charset=UTF-8");
+            setResponseHeadersContentTypeJson(headers);
 
             httpExchange.sendResponseHeaders(500, responseBytes.length);
             OutputStream outputStream = httpExchange.getResponseBody();
             outputStream.write(responseBytes);
             outputStream.close();
 
-            LOGGER.log(Level.ERROR, responseString);
+            LOGGER.log(Level.ERROR, stackTrace);
             throw e;
         }
     }
@@ -144,6 +150,7 @@ public abstract class HandlerBase implements HttpHandler {
     protected static void setDefaultResponseHeaders(Headers headers) {
         headers.set("Access-Control-Allow-Origin", "*");
         headers.set("Content-Disposition", "inline");
+        setResponseHeadersContentTypeJson(headers);
     }
 
     /**
@@ -217,6 +224,18 @@ public abstract class HandlerBase implements HttpHandler {
             last = next + 1;
         }
         return result;
+    }
+
+    protected static JsonObject instructionStatus(boolean isSuccess) {
+        return instructionStatus(isSuccess, null);
+    }
+    protected static JsonObject instructionStatus(boolean isSuccess, String message) {
+        JsonObject json = new JsonObject();
+        json.addProperty("status", isSuccess ? 1 : 0);
+        if (message != null) {
+            json.addProperty("message", message);
+        }
+        return json;
     }
 
     /**
