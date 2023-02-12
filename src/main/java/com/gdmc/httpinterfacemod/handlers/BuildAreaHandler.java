@@ -71,7 +71,6 @@ public class BuildAreaHandler extends HandlerBase {
 
         Headers responseHeaders = httpExchange.getResponseHeaders();
         setDefaultResponseHeaders(responseHeaders);
-        setResponseHeadersContentTypeJson(responseHeaders);
 
         resolveRequest(httpExchange, responseString);
     }

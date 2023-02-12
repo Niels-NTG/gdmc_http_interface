@@ -30,17 +30,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import javax.annotation.Nullable;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-
 
 public class BlocksHandler extends HandlerBase {
 
@@ -111,21 +107,14 @@ public class BlocksHandler extends HandlerBase {
             throw new HttpException("Could not parse query parameter: " + e.getMessage(), 400);
         }
 
-        // Check if clients wants a response in a JSON format. If not, return response in plain text.
-        Headers requestHeaders = httpExchange.getRequestHeaders();
-        String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
-        boolean returnJson = hasJsonTypeInHeader(acceptHeader);
-
-        String responseString;
+        JsonArray responseObject;
 
         switch (httpExchange.getRequestMethod().toLowerCase()) {
             case "put" -> {
-                String contentTypeHeader = getHeader(requestHeaders, "Content-Type", "*/*");
-                boolean parseRequestAsJson = hasJsonTypeInHeader(contentTypeHeader);
-                responseString = putBlocksHandler(httpExchange.getRequestBody(), parseRequestAsJson, returnJson);
+                responseObject = putBlocksHandler(httpExchange.getRequestBody());
             }
             case "get" -> {
-                responseString = getBlocksHandler(returnJson);
+                responseObject = getBlocksHandler();
             }
             default -> throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
@@ -133,144 +122,96 @@ public class BlocksHandler extends HandlerBase {
         // Response headers
         Headers responseHeaders = httpExchange.getResponseHeaders();
         setDefaultResponseHeaders(responseHeaders);
-        if (returnJson) {
-            setResponseHeadersContentTypeJson(responseHeaders);
-        } else {
-            setResponseHeadersContentTypePlain(responseHeaders);
-        }
 
-        resolveRequest(httpExchange, responseString);
+        resolveRequest(httpExchange, responseObject.toString());
     }
 
     /**
      * Place blocks any number of blocks into the world
      *
      * @param requestBody request body of block placement instructions
-     * @param parseRequestAsJson if true, treat input as JSON
-     * @param returnJson if true, return result as JSON-formatted string
      * @return block placement results
      */
-    private String putBlocksHandler(InputStream requestBody, boolean parseRequestAsJson, boolean returnJson) {
+    private JsonArray putBlocksHandler(InputStream requestBody) {
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
         // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
         CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(x, y, z));
 
-        ArrayList<String> returnValues = new ArrayList<>();
+        JsonArray returnValues = new JsonArray();
 
-        if (parseRequestAsJson) {
-            JsonArray blockPlacementList;
+        JsonArray blockPlacementList;
+        try {
+            blockPlacementList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
+        } catch (JsonSyntaxException jsonSyntaxException) {
+            throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
+        }
+
+        for (JsonElement blockPlacement : blockPlacementList) {
+            JsonObject blockPlacementItem = blockPlacement.getAsJsonObject();
             try {
-                blockPlacementList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-            } catch (JsonSyntaxException jsonSyntaxException) {
-                throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-            }
 
-            for (JsonElement blockPlacement : blockPlacementList) {
-                String returnValue;
-                JsonObject blockPlacementItem = blockPlacement.getAsJsonObject();
-                try {
+                // Parse block position x y z. Use the position of the command source (set with the URL query parameters) if not defined in
+                // the block placement item JsonObject. Valid values may be any positive or negative integer and can use tilde or caret notation
+                // (see: https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
+                String posXString = blockPlacementItem.has("x") ? blockPlacementItem.get("x").getAsString() : String.valueOf(x);
+                String posYString = blockPlacementItem.has("y") ? blockPlacementItem.get("y").getAsString() : String.valueOf(y);
+                String posZString = blockPlacementItem.has("z") ? blockPlacementItem.get("z").getAsString() : String.valueOf(z);
+                BlockPos blockPos = getBlockPosFromString(
+                    "%s %s %s".formatted(posXString, posYString, posZString),
+                    commandSourceStack
+                );
 
-                    // Parse block position x y z. Use the position of the command source (set with the URL query parameters) if not defined in
-                    // the block placement item JsonObject. Valid values may be any positive or negative integer and can use tilde or caret notation
-                    // (see: https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
-                    String posXString = blockPlacementItem.has("x") ? blockPlacementItem.get("x").getAsString() : String.valueOf(x);
-                    String posYString = blockPlacementItem.has("y") ? blockPlacementItem.get("y").getAsString() : String.valueOf(y);
-                    String posZString = blockPlacementItem.has("z") ? blockPlacementItem.get("z").getAsString() : String.valueOf(z);
-                    BlockPos blockPos = getBlockPosFromString(
-                        "%s %s %s".formatted(posXString, posYString, posZString),
-                        commandSourceStack
-                    );
+                // Skip if block id is missing
+                if (!blockPlacementItem.has("id")) {
+                    returnValues.add(instructionStatus(false, "block id is missing in " + blockPlacement));
+                    continue;
+                }
+                String blockId = blockPlacementItem.get("id").getAsString();
 
-                    // Skip if block id is missing
-                    if (!blockPlacementItem.has("id")) {
-                        returnValues.add("block id is missing in " + blockPlacement);
-                        continue;
+                // Check if JSON contains an JsonObject or string for block state. Use an empty block state string ("[]") if nothing suitable is found.
+                String blockStateString = "[]";
+                if (blockPlacementItem.has("state")) {
+                    if (blockPlacementItem.get("state").isJsonObject()) {
+                        blockStateString = getBlockStateStringFromJSONObject(blockPlacementItem.get("state").getAsJsonObject());
+                    } else if (blockPlacementItem.get("state").isJsonPrimitive()) {
+                        blockStateString = blockPlacementItem.get("state").getAsString();
                     }
-                    String blockId = blockPlacementItem.get("id").getAsString();
-
-                    // Check if JSON contains an JsonObject or string for block state. Use an empty block state string ("[]") if nothing suitable is found.
-                    String blockStateString = "[]";
-                    if (blockPlacementItem.has("state")) {
-                        if (blockPlacementItem.get("state").isJsonObject()) {
-                            blockStateString = getBlockStateStringFromJSONObject(blockPlacementItem.get("state").getAsJsonObject());
-                        } else if (blockPlacementItem.get("state").isJsonPrimitive()) {
-                            blockStateString = blockPlacementItem.get("state").getAsString();
-                        }
-                    }
-
-                    // Pass block Id and block state string into a Stringreader with the the block state parser.
-                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
-                        getBlockRegisteryLookup(commandSourceStack),
-                        new StringReader(blockId + blockStateString),
-                        true
-                    );
-                    BlockState blockState = parsedBlockState.blockState();
-
-                    // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
-                    // for this block placement.
-                    CompoundTag compoundTag = null;
-                    if (blockPlacementItem.has("data") && blockPlacementItem.get("data").isJsonPrimitive()) {
-                        compoundTag = TagParser.parseTag(blockPlacementItem.get("data").getAsString());
-                    }
-
-                    // Attempt to place block in the world.
-                    returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
-
-                } catch (CommandSyntaxException e) {
-                    returnValue = e.getMessage();
                 }
 
-                returnValues.add(returnValue);
-            }
+                // Pass block Id and block state string into a Stringreader with the the block state parser.
+                BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
+                    getBlockRegisteryLookup(commandSourceStack),
+                    new StringReader(blockId + blockStateString),
+                    true
+                );
+                BlockState blockState = parsedBlockState.blockState();
 
-        } else {
-            List<String> blockPlacementList = new BufferedReader(new InputStreamReader(requestBody))
-                .lines().toList();
-
-            for (String blockPlacementItem : blockPlacementList) {
-                String returnValue;
-                StringReader sr = new StringReader(blockPlacementItem);
-                BlockPos blockPos;
-                try {
-                    // Attempt to parse a block position from string. If no valid position is found, use the position of the URL query parameters instead.
-                    try {
-                        blockPos = getBlockPosFromString(sr, commandSourceStack);
-                    } catch (CommandSyntaxException e1) {
-                        blockPos = new BlockPos(x, y, z);
-                    }
-                    BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
-                        getBlockRegisteryLookup(commandSourceStack),
-                        sr,
-                        true
-                    );
-                    BlockState blockState = parsedBlockState.blockState();
-                    CompoundTag compoundTag = parsedBlockState.nbt();
-
-                    returnValue = setBlock(blockPos, blockState, compoundTag, blockFlags) + "";
-
-                } catch (CommandSyntaxException e) {
-                    returnValue = e.getMessage();
+                // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
+                // for this block placement.
+                CompoundTag compoundTag = null;
+                if (blockPlacementItem.has("data") && blockPlacementItem.get("data").isJsonPrimitive()) {
+                    compoundTag = TagParser.parseTag(blockPlacementItem.get("data").getAsString());
                 }
 
-                returnValues.add(returnValue);
+                // Attempt to place block in the world.
+                boolean isSuccess = setBlock(blockPos, blockState, compoundTag, blockFlags) == 1;
+                returnValues.add(instructionStatus(isSuccess));
+
+            } catch (CommandSyntaxException e) {
+                returnValues.add(instructionStatus(false, e.getMessage()));
             }
         }
 
-        // Set response as a list of "1" (block was placed), "0" (block was not placed) or an exception string if something went wrong placing the block.
-        if (returnJson) {
-            return new Gson().toJson(returnValues);
-        }
-        return String.join("\n", returnValues);
+        return returnValues;
     }
 
     /**
      * Get information on one of more blocks in the world.
      *
-     * @param returnJson if true, return response in JSON format
      * @return list of block information
      */
-    private String getBlocksHandler(boolean returnJson) {
+    private JsonArray getBlocksHandler() {
 
         // Calculate boundaries of area of blocks to gather information on.
         int xOffset = x + dx;
@@ -285,54 +226,31 @@ public class BlocksHandler extends HandlerBase {
         int zMin = Math.min(z, zOffset);
         int zMax = Math.max(z, zOffset);
 
-        if (returnJson) {
-            // Create a JsonArray with JsonObject, each contain a key-value pair for
-            // the x, y, z position, the block ID, the block state (if requested and available)
-            // and the block entity data (if requested and available).
-            JsonArray jsonArray = new JsonArray();
-            for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-                for (int rangeY = yMin; rangeY < yMax; rangeY++) {
-                    for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
-                        BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                        String blockId = getBlockAsStr(blockPos);
-                        JsonObject json = new JsonObject();
-                        json.addProperty("id", blockId);
-                        json.addProperty("x", rangeX);
-                        json.addProperty("y", rangeY);
-                        json.addProperty("z", rangeZ);
-                        if (includeState) {
-                            json.add("state", getBlockStateAsJsonObject(blockPos));
-                        }
-                        if (includeData) {
-                            json.addProperty("data", getBlockDataAsStr(blockPos));
-                        }
-                        jsonArray.add(json);
-                    }
-                }
-            }
-            return new Gson().toJson(jsonArray);
-        }
-
-        // Create list of \n-separated strings containing the x, y, z position space-separated,
-        // the block ID, the block state (if requested and available) between square brackets
-        // and the block entity data (if requested and available) between curly brackets.
-        ArrayList<String> responseList = new ArrayList<>();
+        // Create a JsonArray with JsonObject, each contain a key-value pair for
+        // the x, y, z position, the block ID, the block state (if requested and available)
+        // and the block entity data (if requested and available).
+        JsonArray jsonArray = new JsonArray();
         for (int rangeX = xMin; rangeX < xMax; rangeX++) {
             for (int rangeY = yMin; rangeY < yMax; rangeY++) {
                 for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
                     BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                    String listItem = rangeX + " " + rangeY + " " + rangeZ + " " + getBlockAsStr(blockPos);
+                    String blockId = getBlockAsStr(blockPos);
+                    JsonObject json = new JsonObject();
+                    json.addProperty("id", blockId);
+                    json.addProperty("x", rangeX);
+                    json.addProperty("y", rangeY);
+                    json.addProperty("z", rangeZ);
                     if (includeState) {
-                        listItem += getBlockStateAsStr(blockPos);
+                        json.add("state", getBlockStateAsJsonObject(blockPos));
                     }
                     if (includeData) {
-                        listItem += getBlockDataAsStr(blockPos);
+                        json.addProperty("data", getBlockDataAsStr(blockPos));
                     }
-                    responseList.add(listItem);
+                    jsonArray.add(json);
                 }
             }
         }
-        return String.join("\n", responseList);
+        return jsonArray;
     }
 
     private BlockState getBlockStateAtPosition(BlockPos pos) {
@@ -418,7 +336,6 @@ public class BlocksHandler extends HandlerBase {
                     neighbourBlockState.updateNeighbourShapes(serverLevel, neighbourPosition, flags);
                 }
             }
-
             return 1;
         } else {
             return 0;
@@ -443,17 +360,6 @@ public class BlocksHandler extends HandlerBase {
         JsonObject stateJsonObject = new JsonObject();
         bs.getValues().entrySet().stream().map(propertyToStringPairFunction).filter(Objects::nonNull).forEach(pair -> stateJsonObject.add(pair.getKey(), new JsonPrimitive(pair.getValue())));
         return stateJsonObject;
-    }
-
-    /**
-     * @param pos   Position of block in the world.
-     * @return      {@link String} containing the block state data of the block at the given position.
-     */
-    private String getBlockStateAsStr(BlockPos pos) {
-        BlockState bs = getBlockStateAtPosition(pos);
-        return '[' +
-            bs.getValues().entrySet().stream().map(propertyToStringFunction).collect(Collectors.joining(",")) +
-        ']';
     }
 
     /**
@@ -505,23 +411,6 @@ public class BlocksHandler extends HandlerBase {
         // construct flags
         return Block.UPDATE_CLIENTS | (doBlockUpdates ? Block.UPDATE_NEIGHBORS : (Block.UPDATE_SUPPRESS_DROPS | Block.UPDATE_KNOWN_SHAPE)) | (spawnDrops ? 0 : Block.UPDATE_SUPPRESS_DROPS);
     }
-
-    // function that converts a bunch of Property/Comparable pairs into strings that look like 'property=value'
-    private static final Function<Map.Entry<Property<?>, Comparable<?>>, String> propertyToStringFunction =
-        new Function<>() {
-            public String apply(@Nullable Map.Entry<Property<?>, Comparable<?>> element) {
-                if (element == null) {
-                    return "<NULL>";
-                } else {
-                    Property<?> property = element.getKey();
-                    return property.getName() + "=" + this.valueToName(property, element.getValue());
-                }
-            }
-
-            private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
-                return property.getName((T) propertyValue);
-            }
-        };
 
     // function that converts a bunch of Property/Comparable pairs into String/String pairs
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>> propertyToStringPairFunction =

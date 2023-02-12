@@ -1,6 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
@@ -107,7 +107,6 @@ public class StructureHandler extends HandlerBase {
 		Headers requestHeaders = httpExchange.getRequestHeaders();
 		String acceptHeader = getHeader(requestHeaders, "Accept", "*/*");
 		boolean returnPlainText = acceptHeader.equals("text/plain");
-		boolean returnJson = hasJsonTypeInHeader(acceptHeader);
 
 		switch (httpExchange.getRequestMethod().toLowerCase()) {
 			case "post" -> {
@@ -117,7 +116,7 @@ public class StructureHandler extends HandlerBase {
 				// stored in this compressed format.
 				String contentEncodingHeader = getHeader(requestHeaders, "Content-Encoding", "*");
 				boolean inputShouldBeCompressed = contentEncodingHeader.equals("gzip");
-				postStructureHandler(httpExchange, inputShouldBeCompressed, returnJson);
+				postStructureHandler(httpExchange, inputShouldBeCompressed);
 			}
 			case "get" -> {
 				// If "Accept-Encoding" header is set to "gzip" and the client expects a binary format,
@@ -130,8 +129,8 @@ public class StructureHandler extends HandlerBase {
 		}
 	}
 
-	private void postStructureHandler(HttpExchange httpExchange, boolean parseRequestAsGzip, boolean returnJson) throws IOException {
-		String responseString;
+	private void postStructureHandler(HttpExchange httpExchange, boolean parseRequestAsGzip) throws IOException {
+		JsonObject responseValue;
 
 		CompoundTag structureCompound;
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -205,9 +204,9 @@ public class StructureHandler extends HandlerBase {
 						}
 					}
 				}
-				responseString = "1";
+				responseValue = instructionStatus(true);
 			} else {
-				responseString = "0";
+				responseValue = instructionStatus(false);
 			}
 		} catch (Exception exception) {
 			throw new HttpException("Could not place structure: " + exception.getMessage(), 400);
@@ -215,14 +214,8 @@ public class StructureHandler extends HandlerBase {
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
 		setDefaultResponseHeaders(responseHeaders);
-		if (returnJson) {
-			responseString = new Gson().toJson(responseString);
-			setResponseHeadersContentTypeJson(responseHeaders);
-		} else {
-			setResponseHeadersContentTypePlain(responseHeaders);
-		}
 
-		resolveRequest(httpExchange, responseString);
+		resolveRequest(httpExchange, responseValue.toString());
 	}
 
 	private void getStructureHandler(HttpExchange httpExchange, boolean returnPlainText, boolean returnCompressed) throws IOException {
