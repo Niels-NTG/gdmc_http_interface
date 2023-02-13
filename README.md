@@ -1,12 +1,10 @@
 # Minecraft HTTP Interface Mod (Minecraft 1.19.2)
 
-A Minecraft Forge Mod that implements an http interface for reading and writing blocks.
+A Minecraft Forge Mod that implements an HTTP interface for reading and writing blocks.
 
 To install it, download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and follow these [installation instructions](./docs/Installation.md).
 
 ## What it's all about
-
-(Disclaimer: This mod is in active development, and things might still change)
 
 This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is designed as a tool to be used for the [Generative Design in Minecraft Competition (GDMC)](http://gendesignmc.engineering.nyu.edu/).
 
