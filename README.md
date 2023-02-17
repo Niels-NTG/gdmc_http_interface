@@ -1,6 +1,6 @@
 # Minecraft HTTP Interface Mod (Minecraft 1.19.2)
 
-A Minecraft Forge Mod that implements an HTTP interface for reading and writing blocks.
+A Minecraft (Java Edition) Forge Mod that implements an HTTP interface for reading and writing blocks.
 
 To install it, download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and follow these [installation instructions](./docs/Installation.md).
 
@@ -8,7 +8,7 @@ To install it, download the latest release [here](https://github.com/Niels-NTG/g
 
 This mod opens an HTTP interface so that other programs (on the same machine) can read and modify the world. It is designed as a tool to be used for the [Generative Design in Minecraft Competition (GDMC)](http://gendesignmc.engineering.nyu.edu/).
 
-When you open a Minecraft world, this mod opens an HTTP Server on `localhost:9000`. I recommend using [Insomnia](https://insomnia.rest/) or a similar application to test out the http interface. A Python example of how to use the interface can be found [here](https://github.com/avdstaaij/gdpc).
+When you open a Minecraft world, this mod opens an HTTP Server on `localhost:9000`. I recommend using [Insomnia](https://insomnia.rest/) or a similar application to test out the http interface. For building a structure generator I recommend using the [GDPC](https://github.com/avdstaaij/gdpc) Python library.
 
 This repo is based on a fork of [Niki Gawlik's GDMC HTTP Interface](https://github.com/nilsgawlik/gdmc_http_interface) (Minecraft 1.16.5).
 

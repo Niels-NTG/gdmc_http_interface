@@ -1,6 +1,6 @@
 # Installing this mod with the Forge Mod Launcher
 
-You need to own a copy of Minecraft Java Edition and have it installed on your machine.
+You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
 
 Get the [Forge Mod Installer](https://files.minecraftforge.net/) and download version 1.1.19.2-43.2.0, which you can find under the "1.19.2" > "Download Recommended" > "Installer". Open the downloaded file to install this version of Forge.
 
@@ -16,7 +16,7 @@ When you open a world the HTTP Server will be started automatically, and you sho
 
 # Running this mod from source
 
-If you want to contribute to the development of the http interface mod, or are just interested how it works under the hood, you can also download the source code and run the mod from the source.
+If you want to contribute to the development of the HTTP interface mod, or are just interested how it works under the hood, you can also download the source code and run the mod from the source.
 
 These instructions are adapted from the [Forge installation guide](https://docs.minecraftforge.net/en/1.19.x/gettingstarted/#getting-started-with-forge)
 
@@ -31,7 +31,7 @@ Clone or fork this repository.
 You just have to import the build.gradle in the IDE, and the project will be imported.
 - For most, if not all, changes to the build.gradle file to take effect Gradle will need to be invoked to re-evaluate the project, this can be done through Refresh buttons in the Gradle panels of both the previously mentioned IDEs.
 
-I would personally recommend using [IntelliJ IDEA](https://www.jetbrains.com/idea/) for development.
+I would personally recommend using [IntelliJ IDEA](https://www.jetbrains.com/idea/) for development. This is an IDE specialised for Java development that's very advanced while also easy to get started with. To aid in debugging I recommend an API development and test tool such as [Insomnia](https://insomnia.rest/). And for working with [NBT files](https://minecraft.fandom.com/wiki/NBT_format) I recommend installing the [Minecraft NBT Support](https://plugins.jetbrains.com/plugin/12839-minecraft-nbt-support) plugin.
 
 ## Generating IDE Launch/Run Configurations:
 
