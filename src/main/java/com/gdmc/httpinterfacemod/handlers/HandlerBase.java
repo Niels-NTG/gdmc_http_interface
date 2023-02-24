@@ -238,6 +238,10 @@ public abstract class HandlerBase implements HttpHandler {
         return json;
     }
 
+    protected CommandSourceStack createCommandSource(String name, String dimension) {
+        return createCommandSource(name, dimension, new Vec3(0, 0, 0));
+    }
+
     /**
      * Helper to create a {@link CommandSourceStack}, which serves as the source to dispatch
      * commands from (See {@link CommandHandler}) or as a point of origin to place blocks
@@ -245,9 +249,10 @@ public abstract class HandlerBase implements HttpHandler {
      *
      * @param name          Some unique identifier.
      * @param dimension     The dimension (also known as level) in the world of {@code mcServer} in which the {@link CommandSourceStack} is going to be placed.
+     * @param pos           World position of the command source. Relevant for using relative coordinates and the /locate command.
      * @return              An instance of {@link CommandSourceStack}.
      */
-    protected CommandSourceStack createCommandSource(String name, String dimension) {
+    protected CommandSourceStack createCommandSource(String name, String dimension, Vec3 pos) {
         CommandSource commandSource = new CommandSource() {
             @Override
             public void sendSystemMessage(@NotNull Component p_230797_) {
@@ -272,7 +277,7 @@ public abstract class HandlerBase implements HttpHandler {
 
         return new CommandSourceStack(
             commandSource,
-            new Vec3(0, 0, 0),
+            pos,
             new Vec2(0, 0),
             this.getServerLevel(dimension),
             4,

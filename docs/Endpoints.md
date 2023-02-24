@@ -40,9 +40,12 @@ Send one or more Minecraft console commands to the server. For the full list of 
 
 ## URL parameters
 
-| key       | valid values                                          | required | defaults to | description                                                            |
-|-----------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------|
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world the commands will be executed in. |
+| key       | valid values                                          | required | defaults to | description                                                                    |
+|-----------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------|
+| x         | integer                                               | no       | `0`         | X coordinate of command source. For commands that work with relative position. |
+| y         | integer                                               | no       | `0`         | Y coordinate of command source. For commands that work with relative position. |
+| z         | integer                                               | no       | `0`         | Z coordinate of command source. For commands that work with relative position. |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world the commands will be executed in.         |
 
 ## Request headers
 
