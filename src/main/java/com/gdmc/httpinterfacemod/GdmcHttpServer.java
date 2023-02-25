@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod;
 
+import com.gdmc.httpinterfacemod.config.GdmcHttpConfig;
 import com.gdmc.httpinterfacemod.handlers.*;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.server.MinecraftServer;
@@ -11,16 +12,24 @@ public class GdmcHttpServer {
     private static HttpServer httpServer;
     private static MinecraftServer mcServer;
 
+    public static int getHttpServerPortConfig() {
+        return GdmcHttpConfig.HTTP_INTERFACE_PORT.get();
+    }
+    public static void setHttpServerPortConfig(int portNumber) {
+        GdmcHttpConfig.HTTP_INTERFACE_PORT.set(portNumber);
+    }
+
+    public static int getCurrentHttpPort() {
+        return httpServer.getAddress().getPort();
+    }
     public static void startServer(MinecraftServer mcServer) throws IOException {
         if (GdmcHttpServer.mcServer != mcServer) {
             GdmcHttpServer.mcServer = mcServer;
         }
-        startServer(9000);
+        startServer(getHttpServerPortConfig());
     }
 
     public static void startServer(int portNumber) throws IOException {
-
-
         // Stop server if one was already running
         stopServer();
 
@@ -28,6 +37,9 @@ public class GdmcHttpServer {
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();
+
+        // Update mod config file
+        setHttpServerPortConfig(portNumber);
     }
 
     public static void stopServer() {
