@@ -35,6 +35,8 @@ public class GdmcHttpMod
         RegistryHandler.registerCommands(event);
         MinecraftServer minecraftServer = event.getServer();
 
+        // TODO load port number from settings file
+
         try {
             GdmcHttpServer.startServer(minecraftServer);
             minecraftServer.sendSystemMessage(Component.nullToEmpty("GDMC Server started successfully."));

@@ -12,17 +12,27 @@ public class GdmcHttpServer {
     private static MinecraftServer mcServer;
 
     public static void startServer(MinecraftServer mcServer) throws IOException {
-        GdmcHttpServer.mcServer = mcServer;
+        if (GdmcHttpServer.mcServer != mcServer) {
+            GdmcHttpServer.mcServer = mcServer;
+        }
+        startServer(9000);
+    }
 
-        httpServer = HttpServer.create(new InetSocketAddress(9000), 0);
+    public static void startServer(int portNumber) throws IOException {
+
+
+        // Stop server if one was already running
+        stopServer();
+
+        httpServer = HttpServer.create(new InetSocketAddress(portNumber), 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();
     }
 
     public static void stopServer() {
-        if(httpServer != null) {
-            httpServer.stop(5);
+        if (httpServer != null) {
+            httpServer.stop(0);
         }
     }
 

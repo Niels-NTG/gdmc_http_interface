@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.settlementcommand;
+package com.gdmc.httpinterfacemod.commands;
 
 import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler;
 import com.mojang.brigadier.CommandDispatcher;
@@ -11,7 +11,7 @@ import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class SetBuildAreaCommand<S> {
+public final class SetBuildAreaCommand {
 
     private static final String COMMAND_NAME = "setbuildarea";
     private static final Logger LOGGER = LogManager.getLogger();
@@ -19,13 +19,15 @@ public class SetBuildAreaCommand<S> {
     private SetBuildAreaCommand() { }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(
-                Commands.literal(COMMAND_NAME)
-                .then(Commands.argument("from", BlockPosArgument.blockPos())
-                .then(Commands.argument("to", BlockPosArgument.blockPos())
-                .executes( context -> {
-                    return perform(context, BlockPosArgument.getLoadedBlockPos(context, "from"), BlockPosArgument.getLoadedBlockPos(context, "to"));
-                }))));
+        dispatcher.register(Commands.literal(COMMAND_NAME)
+            .then(
+                Commands.argument("from", BlockPosArgument.blockPos())
+            .then(
+                Commands.argument("to", BlockPosArgument.blockPos())
+            .executes( context -> perform(context, BlockPosArgument.getLoadedBlockPos(context, "from"), BlockPosArgument.getLoadedBlockPos(context, "to"))))
+            )
+        );
+        // TODO remove requirement of the position to be loaded
     }
 
     private static int perform(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
