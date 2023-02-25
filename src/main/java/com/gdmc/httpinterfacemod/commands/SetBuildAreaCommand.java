@@ -6,15 +6,13 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class SetBuildAreaCommand {
 
     private static final String COMMAND_NAME = "setbuildarea";
-    private static final Logger LOGGER = LogManager.getLogger();
 
     private SetBuildAreaCommand() { }
 
@@ -24,10 +22,12 @@ public final class SetBuildAreaCommand {
                 Commands.argument("from", BlockPosArgument.blockPos())
             .then(
                 Commands.argument("to", BlockPosArgument.blockPos())
-            .executes( context -> perform(context, BlockPosArgument.getLoadedBlockPos(context, "from"), BlockPosArgument.getLoadedBlockPos(context, "to"))))
-            )
+            .executes( context -> perform(
+                context,
+                context.getArgument("from", Coordinates.class).getBlockPos(context.getSource()),
+                context.getArgument("to", Coordinates.class).getBlockPos(context.getSource())
+            ))))
         );
-        // TODO remove requirement of the position to be loaded
     }
 
     private static int perform(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
@@ -41,7 +41,6 @@ public final class SetBuildAreaCommand {
         BuildAreaHandler.setBuildArea(x1, y1, z1, x2, y2, z2);
         String feedback = String.format("Build area set to %d, %d, %d to %d, %d, %d,", x1, y1, z1, x2, y2, z2 );
         commandSourceContext.getSource().sendSuccess(Component.nullToEmpty(feedback), true);
-        LOGGER.info(feedback);
         return 1;
     }
 }
