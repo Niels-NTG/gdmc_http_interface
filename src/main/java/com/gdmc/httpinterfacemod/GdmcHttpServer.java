@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 public class GdmcHttpServer {
@@ -27,7 +28,9 @@ public class GdmcHttpServer {
     }
 
     public static void startServer(int portNumber) throws IOException {
-        httpServer = HttpServer.create(new InetSocketAddress(portNumber), 0);
+        // Create HTTP server on localhost with the port number defined in the config file.
+        InetAddress localHost = InetAddress.getLoopbackAddress();
+        httpServer = HttpServer.create(new InetSocketAddress(localHost, portNumber), 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();
