@@ -1,11 +1,14 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.GdmcHttpMod;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.server.MinecraftServer;
+import net.minecraftforge.fml.loading.JarVersionLookupHandler;
 
 import java.io.IOException;
+import java.util.Optional;
 
 public class InterfaceInfoHandler extends HandlerBase {
 	public InterfaceInfoHandler(MinecraftServer mcServer) {
@@ -25,7 +28,10 @@ public class InterfaceInfoHandler extends HandlerBase {
 
 		JsonObject json = new JsonObject();
 		json.addProperty("minecraftVersion", mcServer.getServerVersion());
-		json.addProperty("interfaceVersion", "1.1.1");
+		Optional<String> modVersion = JarVersionLookupHandler.getImplementationVersion(GdmcHttpMod.class);
+		if (modVersion.isPresent()) {
+			json.addProperty("interfaceVersion", modVersion.get());
+		}
 
 		resolveRequest(httpExchange, json.toString());
 	}
