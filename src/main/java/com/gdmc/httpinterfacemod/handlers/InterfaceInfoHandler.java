@@ -25,7 +25,7 @@ public class InterfaceInfoHandler extends HandlerBase {
 
 		JsonObject json = new JsonObject();
 		json.addProperty("minecraftVersion", mcServer.getServerVersion());
-		json.addProperty("interfaceVersion", "1.1.0");
+		json.addProperty("interfaceVersion", "1.1.1");
 
 		resolveRequest(httpExchange, json.toString());
 	}

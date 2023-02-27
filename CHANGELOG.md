@@ -1,3 +1,7 @@
+# GDMC-HTTP 1.1.1 (Minecraft 1.19.2) 
+
+- FIX: Undo explicitly setting HTTP interface address to the "loop back" address.
+
 # GDMC-HTTP 1.1.0 (Minecraft 1.19.2)
 
 - NEW: `POST /command` now accepts `x`, `y`, `z` parameters, usefull for when using commands with [relative coordinates](https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates) or commands such as [/locate](https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
