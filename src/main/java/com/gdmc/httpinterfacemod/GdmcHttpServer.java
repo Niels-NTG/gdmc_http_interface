@@ -15,13 +15,10 @@ public class GdmcHttpServer {
     public static int getHttpServerPortConfig() {
         return GdmcHttpConfig.HTTP_INTERFACE_PORT.get();
     }
-    public static void setHttpServerPortConfig(int portNumber) {
-        GdmcHttpConfig.HTTP_INTERFACE_PORT.set(portNumber);
-    }
-
     public static int getCurrentHttpPort() {
         return httpServer.getAddress().getPort();
     }
+
     public static void startServer(MinecraftServer mcServer) throws IOException {
         if (GdmcHttpServer.mcServer != mcServer) {
             GdmcHttpServer.mcServer = mcServer;
@@ -30,21 +27,15 @@ public class GdmcHttpServer {
     }
 
     public static void startServer(int portNumber) throws IOException {
-        // Stop server if one was already running
-        stopServer();
-
         httpServer = HttpServer.create(new InetSocketAddress(portNumber), 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();
-
-        // Update mod config file
-        setHttpServerPortConfig(portNumber);
     }
 
     public static void stopServer() {
         if (httpServer != null) {
-            httpServer.stop(0);
+            httpServer.stop(5);
         }
     }
 

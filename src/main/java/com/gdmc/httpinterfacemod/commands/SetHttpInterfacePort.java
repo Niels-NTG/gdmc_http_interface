@@ -1,14 +1,12 @@
 package com.gdmc.httpinterfacemod.commands;
 
-import com.gdmc.httpinterfacemod.GdmcHttpServer;
+import com.gdmc.httpinterfacemod.config.GdmcHttpConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-
-import java.io.IOException;
 
 public final class SetHttpInterfacePort {
 
@@ -26,15 +24,14 @@ public final class SetHttpInterfacePort {
 
 	private static int perform(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
 		try {
-			GdmcHttpServer.startServer(newPortNumber);
+			GdmcHttpConfig.HTTP_INTERFACE_PORT.set(newPortNumber);
 			commandSourceContext.getSource().sendSuccess(Component.nullToEmpty(
-				String.format("Port changed to %s", newPortNumber)
+				String.format("Port changed to %s. Reload the world for it to take effect.", newPortNumber)
 			), true);
-		} catch (IOException e) {
+		} catch (IllegalArgumentException e) {
 			commandSourceContext.getSource().sendFailure(Component.nullToEmpty(
 				String.format("Cannot change port number to %s: %s", newPortNumber, e.getMessage())
 			));
-			throw new RuntimeException(e);
 		}
 		return newPortNumber;
 	}
