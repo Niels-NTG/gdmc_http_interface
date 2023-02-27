@@ -855,3 +855,38 @@ Plain-text response with the Minecraft version number.
 ```
 1.19.2
 ```
+
+# Read HTTP interface information `OPTIONS /`
+
+Get the information about GDMC HTTP itself.
+
+## URL parameters
+
+None
+
+## Request headers
+
+None
+
+## Request body
+
+N/A
+
+## Response headers
+
+[Default](#Response-headers)
+
+## Response body
+
+JSON object containing the following:
+- `minecraftVersion`
+- `interfaceVersion`
+
+## Example
+
+```json
+{
+  "minecraftVersion": "1.19.2",
+  "interfaceVersion": "1.1.0"
+}
+```
