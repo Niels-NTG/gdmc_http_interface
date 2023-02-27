@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod;
 
+import com.gdmc.httpinterfacemod.config.GdmcHttpConfig;
 import com.gdmc.httpinterfacemod.utils.RegistryHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -7,7 +8,9 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,6 +26,7 @@ public class GdmcHttpMod
     private static final Logger LOGGER = LogManager.getLogger();
 
     public GdmcHttpMod() {
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, GdmcHttpConfig.SPEC, "gdmc-http-interface-common.toml");
         // Register ourselves for server and other game events we are interested in
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -32,6 +36,7 @@ public class GdmcHttpMod
     public void onServerStarting(ServerStartingEvent event) {
         // do something when the server starts
         LOGGER.info("Server starting");
+
         RegistryHandler.registerCommands(event);
         MinecraftServer minecraftServer = event.getServer();
 

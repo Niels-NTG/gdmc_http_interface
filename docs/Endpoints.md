@@ -40,9 +40,12 @@ Send one or more Minecraft console commands to the server. For the full list of 
 
 ## URL parameters
 
-| key       | valid values                                          | required | defaults to | description                                                            |
-|-----------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------|
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world the commands will be executed in. |
+| key       | valid values                                          | required | defaults to | description                                                                    |
+|-----------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------|
+| x         | integer                                               | no       | `0`         | X coordinate of command source. For commands that work with relative position. |
+| y         | integer                                               | no       | `0`         | Y coordinate of command source. For commands that work with relative position. |
+| z         | integer                                               | no       | `0`         | Z coordinate of command source. For commands that work with relative position. |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world the commands will be executed in.         |
 
 ## Request headers
 
@@ -851,4 +854,39 @@ Plain-text response with the Minecraft version number.
 `GET /version` returns: 
 ```
 1.19.2
+```
+
+# Read HTTP interface information `OPTIONS /`
+
+Get the information about GDMC HTTP itself.
+
+## URL parameters
+
+None
+
+## Request headers
+
+None
+
+## Request body
+
+N/A
+
+## Response headers
+
+[Default](#Response-headers)
+
+## Response body
+
+JSON object containing the following:
+- `minecraftVersion`
+- `interfaceVersion`
+
+## Example
+
+```json
+{
+  "minecraftVersion": "1.19.2",
+  "interfaceVersion": "1.1.0"
+}
 ```

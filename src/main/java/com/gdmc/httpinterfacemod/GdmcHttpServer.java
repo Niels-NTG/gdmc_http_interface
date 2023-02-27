@@ -1,27 +1,43 @@
 package com.gdmc.httpinterfacemod;
 
+import com.gdmc.httpinterfacemod.config.GdmcHttpConfig;
 import com.gdmc.httpinterfacemod.handlers.*;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
 public class GdmcHttpServer {
     private static HttpServer httpServer;
     private static MinecraftServer mcServer;
 
-    public static void startServer(MinecraftServer mcServer) throws IOException {
-        GdmcHttpServer.mcServer = mcServer;
+    public static int getHttpServerPortConfig() {
+        return GdmcHttpConfig.HTTP_INTERFACE_PORT.get();
+    }
+    public static int getCurrentHttpPort() {
+        return httpServer.getAddress().getPort();
+    }
 
-        httpServer = HttpServer.create(new InetSocketAddress(9000), 0);
+    public static void startServer(MinecraftServer mcServer) throws IOException {
+        if (GdmcHttpServer.mcServer != mcServer) {
+            GdmcHttpServer.mcServer = mcServer;
+        }
+        startServer(getHttpServerPortConfig());
+    }
+
+    public static void startServer(int portNumber) throws IOException {
+        // Create HTTP server on localhost with the port number defined in the config file.
+        InetAddress localHost = InetAddress.getLoopbackAddress();
+        httpServer = HttpServer.create(new InetSocketAddress(localHost, portNumber), 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();
     }
 
     public static void stopServer() {
-        if(httpServer != null) {
+        if (httpServer != null) {
             httpServer.stop(5);
         }
     }
@@ -35,5 +51,6 @@ public class GdmcHttpServer {
         httpServer.createContext("/biomes", new BiomesHandler(mcServer));
         httpServer.createContext("/structure", new StructureHandler(mcServer));
         httpServer.createContext("/entities", new EntitiesHandler(mcServer));
+        httpServer.createContext("/", new InterfaceInfoHandler(mcServer));
     }
 }
