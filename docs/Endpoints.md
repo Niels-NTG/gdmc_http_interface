@@ -890,3 +890,48 @@ JSON object containing the following:
   "interfaceVersion": "1.1.0"
 }
 ```
+
+# Read players `GET /players`
+
+Get player's names and positions.
+
+## URL parameters
+
+N/A
+
+## Request headers
+
+[Default](#Request-headers)
+
+## Request body
+
+N/A
+
+## Response headers
+
+[Default](#Response-headers)
+
+## Response body
+
+The response should follow this [schema](./schema.players.get.json).
+
+## Example
+
+For getting the names and positions of players, request `GET /players`:
+
+```json
+[
+	{
+		"id": "Notch",
+		"x": 2344.234243,
+		"y": 64,
+		"z": -77.334
+	},
+	{
+		"id": "Dinnerbone",
+		"x": 2345.678678,
+		"y": 64,
+		"z": -77.8643
+	}
+]
+```
