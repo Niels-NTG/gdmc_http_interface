@@ -893,7 +893,7 @@ JSON object containing the following:
 
 # Read players `GET /players`
 
-Get player's names and positions.
+Get players names, positions, and dimensions.
 
 ## URL parameters
 
@@ -917,7 +917,7 @@ The response should follow this [schema](./schema.players.get.json).
 
 ## Example
 
-For getting the names and positions of players, request `GET /players`:
+For getting the names, positions and dimensions of players, request `GET /players`:
 
 ```json
 [
@@ -925,13 +925,15 @@ For getting the names and positions of players, request `GET /players`:
 		"id": "Notch",
 		"x": 2344.234243,
 		"y": 64,
-		"z": -77.334
+		"z": -77.334,
+                "dimension": "minecraft:overworld"
 	},
 	{
 		"id": "Dinnerbone",
 		"x": 2345.678678,
 		"y": 64,
-		"z": -77.8643
+		"z": -77.8643, 
+                "dimension": "minecraft:the_nether"
 	}
 ]
 ```

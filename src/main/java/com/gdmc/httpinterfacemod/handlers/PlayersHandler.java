@@ -29,7 +29,7 @@ public class PlayersHandler extends HandlerBase {
             // Get a collection of all the players on the server
             List<ServerPlayer> players = playerList.getPlayers();
 
-            // Add each player's name and position to the response list
+            // Add each player's name, position and dimension to the response list
             for (ServerPlayer player : players) {
                 JsonObject json = new JsonObject();
                 json.addProperty("name", player.getName().getString());
@@ -37,6 +37,8 @@ public class PlayersHandler extends HandlerBase {
                 json.addProperty("x", playerPos.x);
                 json.addProperty("y", playerPos.y);
                 json.addProperty("z", playerPos.z);
+                var dimension = player.getLevel().dimension().location().toString();
+                json.addProperty("dimension", dimension);
                 responseList.add(json);
             }
 

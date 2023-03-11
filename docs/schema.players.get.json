@@ -27,6 +27,16 @@
                 },
                 "z": {
                     "$ref": "#/definitions/PosAxis"
+                },
+                "dimension": {
+                    "type": "string",
+                    "title": "Player Dimension",
+                    "description": "The current dimension of a player.",
+                    "examples": [
+                        "minecraft:overworld",
+                        "minecraft:the_end",
+                        "minecraft:the_nether"
+                    ]
                 }
             },
             "required": [

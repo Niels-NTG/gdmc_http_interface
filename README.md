@@ -24,7 +24,7 @@ GET,POST                /structure  Generate NBT structure file from selection o
 GET,PUT,PATCH,DELETE    /entities   Read, create, edit and remove entities from the world
 GET                     /buildarea  Get the build area defined by the /setbuildarea chat command
 GET                     /version    Get Minecraft version
-GET                     /players    Get players and their positions
+GET                     /players    Get players, their positions, and their dimensions
 ```
 
 A detailed documentation of the endpoints can be found [over here](./docs/Endpoints.md).
