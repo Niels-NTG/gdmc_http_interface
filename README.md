@@ -15,6 +15,7 @@ This repo is based on a fork of [Niki Gawlik's GDMC HTTP Interface](https://gith
 ## Features / HTTP Endpoints
 
 The current endpoints of the interface are:
+
 ```
 GET,PUT                 /blocks     Modify blocks in the world
 POST                    /command    Run Minecraft commands
@@ -24,7 +25,7 @@ GET,POST                /structure  Generate NBT structure file from selection o
 GET,PUT,PATCH,DELETE    /entities   Read, create, edit and remove entities from the world
 GET                     /buildarea  Get the build area defined by the /setbuildarea chat command
 GET                     /version    Get Minecraft version
-GET                     /players    Get players, their positions, and their dimensions
+GET                     /players    Get names, positions, dimensions and camera rotations of all players
 ```
 
 A detailed documentation of the endpoints can be found [over here](./docs/Endpoints.md).

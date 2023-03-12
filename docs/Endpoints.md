@@ -917,7 +917,7 @@ The response should follow this [schema](./schema.players.get.json).
 
 ## Example
 
-For getting the names, positions and dimensions of players, request `GET /players`:
+For getting players names, positions, dimensions and camera rotations, request `GET /players`:
 
 ```json
 [
@@ -926,14 +926,22 @@ For getting the names, positions and dimensions of players, request `GET /player
 		"x": 2344.234243,
 		"y": 64,
 		"z": -77.334,
-                "dimension": "minecraft:overworld"
+                "dimension": "minecraft:overworld",
+                "cameraRotation": {
+                        "x": 45.89789,
+                        "y": -34.45
+                }
 	},
 	{
 		"id": "Dinnerbone",
 		"x": 2345.678678,
 		"y": 64,
 		"z": -77.8643, 
-                "dimension": "minecraft:the_nether"
+                "dimension": "minecraft:the_nether",
+                "cameraRotation": {
+                        "x": 18.86, 
+                        "y": 27.47
+                }
 	}
 ]
 ```

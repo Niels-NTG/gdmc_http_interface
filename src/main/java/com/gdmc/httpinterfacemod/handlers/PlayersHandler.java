@@ -32,17 +32,24 @@ public class PlayersHandler extends HandlerBase {
             // Add each player's name, position and dimension to the response list
             for (ServerPlayer player : players) {
                 JsonObject json = new JsonObject();
+                // Name
                 json.addProperty("name", player.getName().getString());
+                // Position
                 var playerPos = player.position();
                 json.addProperty("x", playerPos.x);
                 json.addProperty("y", playerPos.y);
                 json.addProperty("z", playerPos.z);
+                // Dimension
                 var dimension = player.getLevel().dimension().location().toString();
                 json.addProperty("dimension", dimension);
+                // Camera rotation
+                var cameraRotationVec2 = player.getCamera().getRotationVector();
+                JsonObject cameraRotationObject = new JsonObject();
+                cameraRotationObject.addProperty("x", cameraRotationVec2.x);
+                cameraRotationObject.addProperty("y", cameraRotationVec2.y);
+                json.add("cameraRotation", cameraRotationObject);
                 responseList.add(json);
             }
-
-
         } else {
             throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
         }

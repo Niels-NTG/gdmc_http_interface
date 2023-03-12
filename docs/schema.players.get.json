@@ -1,60 +1,83 @@
 {
-    "$schema": "http://json-schema.org/draft-06/schema#",
-    "type": "array",
-    "items": {
-        "$ref": "#/definitions/PlayerInformationElement"
-    },
-    "definitions": {
-        "PlayerInformationElement": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "title": "Player Name",
-                    "description": "The name of the player.",
-                    "examples": [
-                        "Notch",
-                        "Dinnerbone",
-                        "jeb_"
-                    ]
-                },
-                "x": {
-                    "$ref": "#/definitions/PosAxis"
-                },
-                "y": {
-                    "$ref": "#/definitions/PosAxis"
-                },
-                "z": {
-                    "$ref": "#/definitions/PosAxis"
-                },
-                "dimension": {
-                    "type": "string",
-                    "title": "Player Dimension",
-                    "description": "The current dimension of a player.",
-                    "examples": [
-                        "minecraft:overworld",
-                        "minecraft:the_end",
-                        "minecraft:the_nether"
-                    ]
-                }
-            },
-            "required": [
-                "id",
-                "x",
-                "y",
-                "z"
-            ],
-            "title": "Player information element"
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "type": "array",
+  "items": {
+    "$ref": "#/definitions/PlayerInformationElement"
+  },
+  "definitions": {
+    "PlayerInformationElement": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Player Name",
+          "description": "The name of the player.",
+          "examples": ["Notch", "Dinnerbone", "jeb_"]
         },
-        "PosAxis": {
-            "type": "integer",
-            "title": "Position Axis",
-            "description": "Describe x/y/z position of the player",
-            "examples": [
-                -2,
-                781
-            ]
+        "x": {
+          "$ref": "#/definitions/PosAxis"
+        },
+        "y": {
+          "$ref": "#/definitions/PosAxis"
+        },
+        "z": {
+          "$ref": "#/definitions/PosAxis"
+        },
+        "dimension": {
+          "type": "string",
+          "title": "Player Dimension",
+          "description": "The current dimension of a player.",
+          "examples": [
+            "minecraft:overworld",
+            "minecraft:the_end",
+            "minecraft:the_nether"
+          ]
+        },
+        "cameraRotation": {
+          "$ref": "#/definitions/CameraRotation"
         }
+      },
+      "required": [
+        "name",
+        "x",
+        "y",
+        "z",
+        "dimension",
+        "cameraRotation"
+      ],
+      "title": "Player information element"
+    },
+    "PosAxis": {
+      "type": "integer",
+      "title": "Position Axis",
+      "description": "Describe x/y/z position of the player",
+      "examples": [-2, 781]
+    },
+    "CameraRotation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "x": {
+          "type": "number"
+        },
+        "y": {
+          "type": "number"
+        }
+      },
+      "required": ["x", "y"],
+      "title": "CameraRotation",
+      "description": "The x/y rotation of the players camera",
+      "examples": [
+        {
+          "x": 30.54,
+          "y": 32.54675
+        },
+        {
+          "x": -40.0,
+          "y": 57.16
+        }
+      ]
     }
+  }
 }
