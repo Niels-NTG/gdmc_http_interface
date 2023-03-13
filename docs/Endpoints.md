@@ -18,7 +18,7 @@ The following error codes can occur at any endpoint:
 
 ## Request headers
 
-The requests headers for all endpoints are the followingen, unless stated otherwise.
+The requests headers for all endpoints are the following, unless stated otherwise.
 
 | key          | valid values       | defaults to        | description                                                                                               |
 |--------------|--------------------|--------------------|-----------------------------------------------------------------------------------------------------------|
@@ -893,11 +893,15 @@ JSON object containing the following:
 
 # Read players `GET /players`
 
-Get players names, positions, and dimensions.
+Endpoint for reading all [players](https://minecraft.fandom.com/wiki/Player) from the world.
 
 ## URL parameters
 
-N/A
+
+| key         | valid values                                          | required | defaults to | description                                                                                                 |
+|-------------|-------------------------------------------------------|----------|-------------|-------------------------------------------------------------------------------------------------------------|
+| includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) in response |
+
 
 ## Request headers
 
@@ -917,31 +921,13 @@ The response should follow this [schema](./schema.players.get.json).
 
 ## Example
 
-For getting players names, positions, dimensions and camera rotations, request `GET /players`:
+Given a world with 1 player named "Dev" in it, request `GET /players?includeData=true`:
 
 ```json
 [
-	{
-		"id": "Notch",
-		"x": 2344.234243,
-		"y": 64,
-		"z": -77.334,
-                "dimension": "minecraft:overworld",
-                "cameraRotation": {
-                        "x": 45.89789,
-                        "y": -34.45
-                }
-	},
-	{
-		"id": "Dinnerbone",
-		"x": 2345.678678,
-		"y": 64,
-		"z": -77.8643, 
-                "dimension": "minecraft:the_nether",
-                "cameraRotation": {
-                        "x": 18.86, 
-                        "y": 27.47
-                }
-	}
+  {
+    "name": "Dev",
+    "data": "{AbsorptionAmount:0.0f,Air:300s,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.10000000149011612d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"}],Brain:{memories:{}},CanUpdate:1b,DataVersion:3120,DeathTime:0s,Dimension:\"minecraft:overworld\",EnderItems:[],FallDistance:0.0f,FallFlying:0b,Fire:-20s,Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[{Count:1b,Slot:0b,id:\"minecraft:obsidian\"},{Count:1b,Slot:1b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}}],Invulnerable:0b,Motion:[0.0d,0.0d,0.0d],OnGround:0b,PortalCooldown:0,Pos:[-3.483559135420974d,-58.74889429576954d,-16.579720966624766d],Rotation:[1.6493444f,24.599985f],Score:0,SelectedItemSlot:1,SleepTimer:0s,UUID:[I;940439953,-167562164,-1601161573,-1389718966],XpLevel:0,XpP:0.0f,XpSeed:-275312302,XpTotal:0,abilities:{flySpeed:0.05f,flying:1b,instabuild:1b,invulnerable:1b,mayBuild:1b,mayfly:1b,walkSpeed:0.1f},foodExhaustionLevel:0.0f,foodLevel:20,foodSaturationLevel:5.0f,foodTickTimer:0,playerGameType:1,recipeBook:{isBlastingFurnaceFilteringCraftable:0b,isBlastingFurnaceGuiOpen:0b,isFilteringCraftable:0b,isFurnaceFilteringCraftable:0b,isFurnaceGuiOpen:0b,isGuiOpen:0b,isSmokerFilteringCraftable:0b,isSmokerGuiOpen:0b,recipes:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"],toBeDisplayed:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"]},seenCredits:0b,warden_spawn_tracker:{cooldown_ticks:0,ticks_since_last_warning:8788,warning_level:0}}"
+  }
 ]
 ```

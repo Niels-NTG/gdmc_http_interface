@@ -10,74 +10,21 @@
       "additionalProperties": false,
       "properties": {
         "name": {
+          "type": "string"
+        },
+        "data": {
           "type": "string",
-          "title": "Player Name",
-          "description": "The name of the player.",
-          "examples": ["Notch", "Dinnerbone", "jeb_"]
-        },
-        "x": {
-          "$ref": "#/definitions/PosAxis"
-        },
-        "y": {
-          "$ref": "#/definitions/PosAxis"
-        },
-        "z": {
-          "$ref": "#/definitions/PosAxis"
-        },
-        "dimension": {
-          "type": "string",
-          "title": "Player Dimension",
-          "description": "The current dimension of a player.",
+          "title": "Player Data",
+          "description": "SNBT string (https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) containing player data (https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) information. This is only included if URL parameter `includeData=true` is present. Example data is truncated, real player data is often much bigger.",
           "examples": [
-            "minecraft:overworld",
-            "minecraft:the_end",
-            "minecraft:the_nether"
+            "{AbsorptionAmount:0.0f,Air:300s,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.10000000149011612d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"}],Brain:{memories:{}}..."
           ]
-        },
-        "cameraRotation": {
-          "$ref": "#/definitions/CameraRotation"
         }
       },
       "required": [
-        "name",
-        "x",
-        "y",
-        "z",
-        "dimension",
-        "cameraRotation"
+        "name"
       ],
-      "title": "Player information element"
-    },
-    "PosAxis": {
-      "type": "integer",
-      "title": "Position Axis",
-      "description": "Describe x/y/z position of the player",
-      "examples": [-2, 781]
-    },
-    "CameraRotation": {
-      "type": "object",
-      "additionalProperties": false,
-      "properties": {
-        "x": {
-          "type": "number"
-        },
-        "y": {
-          "type": "number"
-        }
-      },
-      "required": ["x", "y"],
-      "title": "CameraRotation",
-      "description": "The x/y rotation of the players camera",
-      "examples": [
-        {
-          "x": 30.54,
-          "y": 32.54675
-        },
-        {
-          "x": -40.0,
-          "y": 57.16
-        }
-      ]
+      "title": "Player Information Element"
     }
   }
 }
