@@ -115,18 +115,12 @@ public class DeforestHandler extends HandlerBase {
     private int fillBlocks(BoundingBox boundingBox) {
 
         // Setup
-        var air = new BlockInput(Blocks.AIR.defaultBlockState(), new HashSet<Property<?>>(), null);
         List<BlockPos> list = Lists.newArrayList();
         ServerLevel serverlevel = mcServer.overworld();
 
         // Get the number of chunks
         int xChunkCount = Math.floorDiv(boundingBox.maxX(), 16) - Math.floorDiv(boundingBox.minX(), 16) + 1;
         int zChunkCount = Math.floorDiv(boundingBox.maxZ(), 16) - Math.floorDiv(boundingBox.minZ(), 16) + 1;
-
-//        System.out.println("Chunks Selected");
-//        System.out.println(
-//                "X: " + Integer.toString(xChunkCount) + ", Z: " + Integer.toString(zChunkCount)
-//        );
 
         // Get the chunk x and z of the chunk at the lowest x and z
         int minChunkX = Math.floorDiv(boundingBox.minX(), 16);
@@ -173,7 +167,7 @@ public class DeforestHandler extends HandlerBase {
                             blockPos = blockPos.atY(y);
 
                             // Get the block
-                            var block = new BlockInWorld(serverlevel, blockPos, true).getState().getBlock();
+                            var block = chunk.getBlockState(blockPos).getBlock();
                             // If it is air, move down
                             if (block.equals(Blocks.AIR)) continue;
                             // If the block is in the "stoppers" array, move to next column
@@ -181,18 +175,15 @@ public class DeforestHandler extends HandlerBase {
                             // If the block is in the "replaceable" array
                             if (isBlockInArray(replaceableBlocks, block)) {
                                 // Replace it
-                                BlockInput blockinput = Mode.REPLACE.filter.filter(boundingBox, blockPos, air, serverlevel);
-                                if (blockinput != null) {
-                                    BlockEntity blockentity = serverlevel.getBlockEntity(blockPos);
-                                    Clearable.tryClear(blockentity);
-                                    if (blockinput.place(serverlevel, blockPos, 2)) {
-                                        list.add(blockPos.immutable());
-                                        // Increment the counter
-                                        ++blocksPlaced;
-                                        // Print a message every 1000 blocks placed
-                                        if (blocksPlaced % 1000 == 0) {
-                                            System.out.println(blocksPlaced);
-                                        }
+                                BlockEntity blockentity = serverlevel.getBlockEntity(blockPos);
+                                Clearable.tryClear(blockentity);
+                                if (serverlevel.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState())) {
+                                    list.add(blockPos.immutable());
+                                    // Increment the counter
+                                    ++blocksPlaced;
+                                    // Print a message every 1000 blocks placed
+                                    if (blocksPlaced % 1000 == 0) {
+                                        System.out.println(blocksPlaced);
                                     }
                                 }
                             }
@@ -200,12 +191,6 @@ public class DeforestHandler extends HandlerBase {
                     }
                 }
             }
-        }
-
-        // Update all blocks placed
-        for(BlockPos blockpos1 : list) {
-            Block block = serverlevel.getBlockState(blockpos1).getBlock();
-            serverlevel.blockUpdated(blockpos1, block);
         }
 
         // Print that it's complete
