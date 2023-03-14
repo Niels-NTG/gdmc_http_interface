@@ -203,23 +203,4 @@ public class DeforestHandler extends HandlerBase {
             return blocksPlaced;
         }
     }
-
-    static enum Mode {
-        REPLACE((p_137433_, p_137434_, p_137435_, p_137436_) -> {
-            return p_137435_;
-        }),
-        OUTLINE((p_137428_, p_137429_, p_137430_, p_137431_) -> {
-            return p_137429_.getX() != p_137428_.minX() && p_137429_.getX() != p_137428_.maxX() && p_137429_.getY() != p_137428_.minY() && p_137429_.getY() != p_137428_.maxY() && p_137429_.getZ() != p_137428_.minZ() && p_137429_.getZ() != p_137428_.maxZ() ? null : p_137430_;
-        }),
-        DESTROY((p_137418_, p_137419_, p_137420_, p_137421_) -> {
-            p_137421_.destroyBlock(p_137419_, true);
-            return p_137420_;
-        });
-
-        public final SetBlockCommand.Filter filter;
-
-        private Mode(SetBlockCommand.Filter p_137416_) {
-            this.filter = p_137416_;
-        }
-    }
 }
