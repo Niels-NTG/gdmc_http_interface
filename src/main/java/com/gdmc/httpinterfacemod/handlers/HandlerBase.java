@@ -21,7 +21,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -135,14 +134,6 @@ public abstract class HandlerBase implements HttpHandler {
     }
 
     /**
-     * @param header single header as string from request or response headers
-     * @return {@code true} if header string has a common description of a JSON Content-Type.
-     */
-    protected static boolean hasJsonTypeInHeader(String header) {
-        return header.equals("application/json") || header.equals("text/json");
-    }
-
-    /**
      * Helper to add basic headers to headers of a response.
      *
      * @param headers request or response headers
@@ -211,15 +202,17 @@ public abstract class HandlerBase implements HttpHandler {
         int last = 0, next, l = qs.length();
         while (last < l) {
             next = qs.indexOf('&', last);
-            if (next == -1)
+            if (next == -1) {
                 next = l;
+            }
 
             if (next > last) {
                 int eqPos = qs.indexOf('=', last);
-                if (eqPos < 0 || eqPos > next)
+                if (eqPos < 0 || eqPos > next) {
                     result.put(URLDecoder.decode(qs.substring(last, next), StandardCharsets.UTF_8), "");
-                else
+                } else {
                     result.put(URLDecoder.decode(qs.substring(last, eqPos), StandardCharsets.UTF_8), URLDecoder.decode(qs.substring(eqPos + 1, next), StandardCharsets.UTF_8));
+                }
             }
             last = next + 1;
         }
@@ -255,9 +248,7 @@ public abstract class HandlerBase implements HttpHandler {
     protected CommandSourceStack createCommandSource(String name, String dimension, Vec3 pos) {
         CommandSource commandSource = new CommandSource() {
             @Override
-            public void sendSystemMessage(@NotNull Component p_230797_) {
-
-            }
+            public void sendSystemMessage(Component p_230797_) {}
 
             @Override
             public boolean acceptsSuccess() {
