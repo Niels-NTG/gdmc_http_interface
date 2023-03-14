@@ -10,7 +10,13 @@
       "additionalProperties": false,
       "properties": {
         "name": {
-          "type": "string"
+          "type": "string",
+          "description": "Player name"
+        },
+        "uuid": {
+          "type": "string",
+          "format": "uuid",
+          "description": "UUID of player entity"
         },
         "data": {
           "type": "string",
@@ -22,7 +28,8 @@
         }
       },
       "required": [
-        "name"
+        "name",
+        "uuid"
       ],
       "title": "Player Information Element"
     }

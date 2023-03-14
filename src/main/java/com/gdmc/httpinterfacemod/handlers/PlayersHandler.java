@@ -43,11 +43,12 @@ public class PlayersHandler extends HandlerBase {
             // Get a collection of all the players on the server
             List<ServerPlayer> players = playerList.getPlayers();
 
-            // Add each player's name, position and dimension to the response list
+            // Add each player's name, UUID and additional data to the response list.
             for (ServerPlayer player : players) {
                 JsonObject json = new JsonObject();
-                // Name as unique identifier
+                // Name and UUID.
                 json.addProperty("name", player.getName().getString());
+                json.addProperty("uuid", player.getStringUUID());
                 // All player NBT data if requested
                 if (includeData) {
                     json.addProperty("data", player.serializeNBT().getAsString());

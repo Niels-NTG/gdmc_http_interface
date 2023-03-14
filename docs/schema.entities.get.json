@@ -11,7 +11,8 @@
             "properties": {
                 "uuid": {
                     "type": "string",
-                    "format": "uuid"
+                    "format": "uuid",
+                    "description": "UUID of player entity"
                 },
                 "data": {
                     "type": "string",
