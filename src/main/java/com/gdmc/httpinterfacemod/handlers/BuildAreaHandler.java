@@ -50,6 +50,10 @@ public class BuildAreaHandler extends HandlerBase {
         buildArea = new BuildArea(xFrom, yFrom, zFrom, xTo, yTo, zTo);
     }
 
+    public static BuildArea getBuildArea() {
+        return buildArea;
+    }
+
     public BuildAreaHandler(MinecraftServer mcServer) {
         super(mcServer);
         buildArea = null;

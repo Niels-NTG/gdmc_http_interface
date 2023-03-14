@@ -44,7 +44,7 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
-    final MinecraftServer mcServer;
+    public final MinecraftServer mcServer;
     public HandlerBase(MinecraftServer mcServer) {
         this.mcServer = mcServer;
     }
