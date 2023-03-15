@@ -807,9 +807,11 @@ Endpoint for reading all [players](https://minecraft.fandom.com/wiki/Player) fro
 ## URL parameters
 
 
-| key         | valid values    | required | defaults to | description                                                                                                     |
-|-------------|-----------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------|
-| includeData | `true`, `false` | no       | `false`     | If `true`, include [player data](https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) in response |
+| key         | valid values                                          | required | defaults to | description                                                                                                                                                                                      |
+|-------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) in response                                                                                  |
+| selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for players. This must be URL encoded.                                                                              |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored. |
 
 ## Request headers
 
