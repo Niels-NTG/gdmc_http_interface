@@ -600,16 +600,17 @@ Endpoint for reading all [entities](https://minecraft.fandom.com/wiki/Entity) fr
 
 ## URL parameters
 
-| key         | valid values                                          | required | defaults to | description                                                                                                 |
-|-------------|-------------------------------------------------------|----------|-------------|-------------------------------------------------------------------------------------------------------------|
-| x           | integer                                               | yes      | `0`         | X coordinate                                                                                                |
-| y           | integer                                               | yes      | `0`         | Y coordinate                                                                                                |
-| z           | integer                                               | yes      | `0`         | Z coordinate                                                                                                |
-| dx          | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                    |
-| dy          | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                    |
-| dz          | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                    |
-| includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) in response |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read entities from                                                          |
+| key         | valid values                                          | required | defaults to                      | description                                                                                                          |
+|-------------|-------------------------------------------------------|----------|----------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| x           | integer                                               | no       | `0`                              | X coordinate                                                                                                         |
+| y           | integer                                               | no       | `0`                              | Y coordinate                                                                                                         |
+| z           | integer                                               | no       | `0`                              | Z coordinate                                                                                                         |
+| dx          | integer                                               | no       | `1`                              | Range of blocks to get counting from x (can be negative)                                                             |
+| dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative)                                                             |
+| dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative)                                                             |
+| selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,xd=1,yd=1,dz=1]` | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for entities. This must be URL encoded. |
+| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) in response          |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from                                                                   |
 
 ## Request headers
 
@@ -643,6 +644,20 @@ Given a pit with 3 cats in it, the request `GET /entities?x=305&y=65&z=26&dx=10&
 ]
 ```
 This area happens to contain a wandering trader and their trusty lama.
+
+For a pen of various different farm animals of the size of 10 blocks wide and 10 blocks deep, using `@e[type=sheep]` as part of the request will return 2 sheep in this area. `GET /entities?includeData=true&selector=%40e%5Btype%3Dsheep,x%3D-20,y%3D0,z%3D-21,dx%3D10,dy%3D10,dz%3D10%5D`:
+```json
+[
+	{
+		"uuid": "8dd55c24-6474-409c-8e20-03162bca51a3",
+		"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.23000000417232513d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:16.0d,Modifiers:[{Amount:-0.07929991095224685d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;1067948072,-308262071,-1111740963,1312757403]},{Amount:-0.03951824343984822d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;740224470,1022511074,-1558286765,872046470]}],Name:\"minecraft:generic.follow_range\"},{Base:0.0d,Name:\"minecraft:generic.armor_toughness\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.0d,Name:\"minecraft:generic.attack_knockback\"},{Base:8.0d,Name:\"minecraft:generic.max_health\"},{Base:0.0d,Name:\"minecraft:generic.knockback_resistance\"},{Base:0.0d,Name:\"minecraft:generic.armor\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,Color:0b,DeathTime:0s,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:8.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:1b,PortalCooldown:0,Pos:[-17.443500798782093d,1.0d,-16.3957606052768d],Rotation:[4.6664124f,0.0f],Sheared:0b,UUID:[I;-1915397084,1685340316,-1910504682,734679459],id:\"minecraft:sheep\"}"
+	},
+	{
+		"uuid": "758a4369-0df1-4784-aea8-3db04970b68c",
+		"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.23000000417232513d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:16.0d,Modifiers:[{Amount:-0.054645176271711594d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;452273734,1153713910,-1393383184,760955385]},{Amount:0.03129074760589258d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;114520113,359677977,-1350020086,1661730340]}],Name:\"minecraft:generic.follow_range\"},{Base:0.0d,Name:\"minecraft:generic.armor_toughness\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.0d,Name:\"minecraft:generic.attack_knockback\"},{Base:8.0d,Name:\"minecraft:generic.max_health\"},{Base:0.0d,Name:\"minecraft:generic.knockback_resistance\"},{Base:0.0d,Name:\"minecraft:generic.armor\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,Color:0b,DeathTime:0s,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:8.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:1b,PortalCooldown:0,Pos:[-16.02778909851362d,1.0d,-15.411003372310615d],Rotation:[249.61398f,0.0f],Sheared:0b,UUID:[I;1971995497,233916292,-1364705872,1232123532],id:\"minecraft:sheep\"}"
+	}
+]
+```
 
 # Create entities `PUT /entities`
 
