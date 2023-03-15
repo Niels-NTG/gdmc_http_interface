@@ -1,25 +1,17 @@
 package com.gdmc.httpinterfacemod.handlers;
 
-import com.google.common.collect.Lists;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import net.minecraft.commands.arguments.blocks.BlockInput;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.commands.SetBlockCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.pattern.BlockInWorld;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.util.*;
@@ -114,8 +106,7 @@ public class DeforestHandler extends HandlerBase {
 
     private int fillBlocks(BoundingBox boundingBox) {
 
-        // Setup
-        List<BlockPos> list = Lists.newArrayList();
+        // Get a reference to the map/level
         ServerLevel serverlevel = mcServer.overworld();
 
         // Get the number of chunks
@@ -132,7 +123,7 @@ public class DeforestHandler extends HandlerBase {
         // For every chunk in the build area
         for (int chunkX = minChunkX; chunkX < xChunkCount + minChunkX; ++chunkX) {
             for (int chunkZ = minChunkZ; chunkZ < zChunkCount + minChunkZ; ++chunkZ) {
-//                System.out.println("Chunk X: " + Integer.toString(chunkX) + ", Chunk Z: " + Integer.toString(chunkZ));
+                // System.out.println("Chunk X: " + Integer.toString(chunkX) + ", Chunk Z: " + Integer.toString(chunkZ));
                 // Get the chunk
                 var chunk = serverlevel.getChunk(chunkX,chunkZ);
                 // Get the "MOTION_BLOCKING" heightmap
@@ -143,21 +134,21 @@ public class DeforestHandler extends HandlerBase {
                 int chunkMinX = chunkX * 16;
                 int chunkMinZ = chunkZ * 16;
 
-//                System.out.println("Chunk Min X: " + Integer.toString(chunkMinX) + ", Chunk Min Z: " + Integer.toString(chunkMinZ));
+                // System.out.println("Chunk Min X: " + Integer.toString(chunkMinX) + ", Chunk Min Z: " + Integer.toString(chunkMinZ));
                 for (int x = chunkMinX; x < chunkMinX + 16; ++x) {
                     for (int z = chunkMinZ; z < chunkMinZ + 16; ++z) {
 
                         // If the column is out of bounds skip it
-                        if (x < boundingBox.minX() || x >= boundingBox.maxX() || z < boundingBox.minZ() || z >= boundingBox.maxZ()) {
+                        if (x < boundingBox.minX() || x > boundingBox.maxX() || z < boundingBox.minZ() || z > boundingBox.maxZ()) {
                             continue;
                         }
 
                         // Get the value of the heightmap for that column
                         int highestY = heightmap.getHighestTaken(x - chunkMinX, z - chunkMinZ);
 
-//                        System.out.println(
-//                                "X: " + Integer.toString(x) + ", Z: " + Integer.toString(z) + ", Height: " + highestY
-//                        );
+                        // System.out.println(
+                        //         "X: " + Integer.toString(x) + ", Z: " + Integer.toString(z) + ", Height: " + highestY
+                        // );
 
                         // Create a blockpos variable to be incremented
                         BlockPos blockPos = new BlockPos(x, boundingBox.maxY() - 1, z);
@@ -174,11 +165,13 @@ public class DeforestHandler extends HandlerBase {
                             if (isBlockInArray(stoppers, block)) break;
                             // If the block is in the "replaceable" array
                             if (isBlockInArray(replaceableBlocks, block)) {
-                                // Replace it
-                                BlockEntity blockentity = serverlevel.getBlockEntity(blockPos);
-                                Clearable.tryClear(blockentity);
+
+                                // Remove any existing block entities
+                                // BlockEntity blockentity = chunk.getBlockEntity(blockPos);
+                                // Clearable.tryClear(blockentity);
+
+                                // Replace the block
                                 if (serverlevel.setBlockAndUpdate(blockPos, Blocks.AIR.defaultBlockState())) {
-                                    list.add(blockPos.immutable());
                                     // Increment the counter
                                     ++blocksPlaced;
                                     // Print a message every 1000 blocks placed
