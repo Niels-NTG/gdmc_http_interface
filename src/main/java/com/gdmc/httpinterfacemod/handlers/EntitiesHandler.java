@@ -8,8 +8,10 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.EntitySummonArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
@@ -19,7 +21,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
@@ -42,6 +43,10 @@ public class EntitiesHandler extends HandlerBase {
 	private int dy;
 	private int dz;
 
+	// GET: Search entities using a Target Selector (https://minecraft.fandom.com/wiki/Target_selectors).
+	// Defaults to "@e[x=x,y=y,z=z,dx=dx,dy=dy,dz=dz]" (find all entities within area).
+	private String entitySelectorString;
+
 	// GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
 	private boolean includeData;
 	private String dimension;
@@ -63,6 +68,8 @@ public class EntitiesHandler extends HandlerBase {
 			dx = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
 			dy = Integer.parseInt(queryParams.getOrDefault("dy", "1"));
 			dz = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+
+			entitySelectorString = queryParams.getOrDefault("selector", null);
 
 			includeData = Boolean.parseBoolean(queryParams.getOrDefault("includeData", "false"));
 
@@ -151,27 +158,34 @@ public class EntitiesHandler extends HandlerBase {
 		int zMin = Math.min(z, zOffset);
 		int zMax = Math.max(z, zOffset);
 
-		ServerLevel level = getServerLevel(dimension);
+		StringReader entitySelectorStringReader = new StringReader(
+			entitySelectorString != null && !entitySelectorString.isBlank() ?
+				entitySelectorString :
+				"@e[x=%s,y=%s,z=%s,dx=%s,dy=%s,dz=%s]".formatted(xMin, yMin, zMin, xMax, yMax, zMax)
+		);
+		try {
+			EntitySelector entitySelector = EntityArgument.entities().parse(entitySelectorStringReader);
+			CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
+			List<? extends Entity> entityList = entitySelector.findEntities(cmdSrc);
 
-		List<Entity> entityList = level.getEntities(null, new AABB(xMin, yMin, zMin, xMax, yMax, zMax));
-
-		// Create a JsonArray with JsonObject, each contain a key-value pair for
-		// the x, y, z position, the block ID, the block state (if requested and available)
-		// and the block entity data (if requested and available).
-		JsonArray returnList = new JsonArray();
-		for (Entity entity : entityList) {
-			String entityId = entity.getEncodeId();
-			if (entityId == null) {
-				continue;
+			JsonArray returnList = new JsonArray();
+			for (Entity entity : entityList) {
+				String entityId = entity.getEncodeId();
+				if (entityId == null) {
+					continue;
+				}
+				JsonObject json = new JsonObject();
+				json.addProperty("uuid", entity.getStringUUID());
+				if (includeData) {
+					json.addProperty("data", entity.serializeNBT().getAsString());
+				}
+				returnList.add(json);
 			}
-			JsonObject json = new JsonObject();
-			json.addProperty("uuid", entity.getStringUUID());
-			if (includeData) {
-				json.addProperty("data", getEntityDataAsStr(entity));
-			}
-			returnList.add(json);
+			return returnList;
+		} catch (CommandSyntaxException e) {
+			throw new HttpException("Malformed entity target selector: " + e.getMessage(), 400);
 		}
-		return returnList;
+
 	}
 
 	/**
@@ -258,17 +272,6 @@ public class EntitiesHandler extends HandlerBase {
 		}
 
 		return returnValues;
-	}
-
-	private String getEntityDataAsStr(Entity entity) {
-		if (!includeData) {
-			return "";
-		}
-		CompoundTag tags = entity.serializeNBT();
-		if (tags != null) {
-			return tags.getAsString();
-		}
-		return "{}";
 	}
 
 	private final static class SummonEntityInstruction {

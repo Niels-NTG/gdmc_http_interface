@@ -49,6 +49,7 @@ public class GdmcHttpServer {
         httpServer.createContext("/biomes", new BiomesHandler(mcServer));
         httpServer.createContext("/structure", new StructureHandler(mcServer));
         httpServer.createContext("/entities", new EntitiesHandler(mcServer));
+        httpServer.createContext("/players", new PlayersHandler(mcServer));
         httpServer.createContext("/", new InterfaceInfoHandler(mcServer));
     }
 }
