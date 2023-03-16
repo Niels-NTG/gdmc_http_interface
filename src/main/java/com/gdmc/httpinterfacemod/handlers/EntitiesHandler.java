@@ -177,7 +177,7 @@ public class EntitiesHandler extends HandlerBase {
 				JsonObject json = new JsonObject();
 				json.addProperty("uuid", entity.getStringUUID());
 				if (includeData) {
-					json.addProperty("data", getEntityDataAsStr(entity));
+					json.addProperty("data", entity.serializeNBT().getAsString());
 				}
 				returnList.add(json);
 			}
@@ -272,17 +272,6 @@ public class EntitiesHandler extends HandlerBase {
 		}
 
 		return returnValues;
-	}
-
-	private String getEntityDataAsStr(Entity entity) {
-		if (!includeData) {
-			return "";
-		}
-		CompoundTag tags = entity.serializeNBT();
-		if (tags != null) {
-			return tags.getAsString();
-		}
-		return "{}";
 	}
 
 	private final static class SummonEntityInstruction {

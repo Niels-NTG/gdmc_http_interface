@@ -600,17 +600,17 @@ Endpoint for reading all [entities](https://minecraft.fandom.com/wiki/Entity) fr
 
 ## URL parameters
 
-| key         | valid values                                          | required | defaults to                      | description                                                                                                          |
-|-------------|-------------------------------------------------------|----------|----------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| x           | integer                                               | no       | `0`                              | X coordinate                                                                                                         |
-| y           | integer                                               | no       | `0`                              | Y coordinate                                                                                                         |
-| z           | integer                                               | no       | `0`                              | Z coordinate                                                                                                         |
-| dx          | integer                                               | no       | `1`                              | Range of blocks to get counting from x (can be negative)                                                             |
-| dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative)                                                             |
-| dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative)                                                             |
-| selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,xd=1,yd=1,dz=1]` | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for entities. This must be URL encoded. |
-| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) in response          |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from                                                                   |
+| key         | valid values                                          | required | defaults to                      | description                                                                                                     |
+|-------------|-------------------------------------------------------|----------|----------------------------------|-----------------------------------------------------------------------------------------------------------------|
+| x           | integer                                               | no       | `0`                              | X coordinate (**deprecated**, use selector instead)                                                             |
+| y           | integer                                               | no       | `0`                              | Y coordinate (**deprecated**, use selector instead)                                                             |
+| z           | integer                                               | no       | `0`                              | Z coordinate (**deprecated**, use selector instead)                                                             |
+| dx          | integer                                               | no       | `1`                              | Range of blocks to get counting from x (can be negative) (**deprecated**, use selector instead)                 |
+| dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative) (**deprecated**, use selector instead)                 |
+| dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative) (**deprecated**, use selector instead)                 |
+| selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,xd=1,yd=1,dz=1]` | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for entities. Must be URL-encoded. |
+| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) in response     |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from.                                                             |
 
 ## Request headers
 
@@ -810,7 +810,7 @@ Endpoint for reading all [players](https://minecraft.fandom.com/wiki/Player) fro
 | key         | valid values                                          | required | defaults to | description                                                                                                                                                                                      |
 |-------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) in response                                                                                  |
-| selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for players. This must be URL encoded.                                                                              |
+| selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for players. Must be URL-encoded.                                                                                   |
 | dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored. |
 
 ## Request headers
