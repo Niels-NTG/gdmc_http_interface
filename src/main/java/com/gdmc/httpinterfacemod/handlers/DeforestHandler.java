@@ -10,11 +10,11 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DeforestHandler extends HandlerBase {
     public DeforestHandler(MinecraftServer mcServer) {
@@ -81,14 +81,48 @@ public class DeforestHandler extends HandlerBase {
             Blocks.MYCELIUM
     };
 
+    private Block[] additionalReplaceableBlocks = {
+            Blocks.DEAD_BUSH,
+            Blocks.DANDELION,
+            Blocks.POPPY,
+            Blocks.BLUE_ORCHID,
+            Blocks.ALLIUM,
+            Blocks.AZURE_BLUET,
+            Blocks.RED_TULIP,
+            Blocks.ORANGE_TULIP,
+            Blocks.WHITE_TULIP,
+            Blocks.PINK_TULIP,
+            Blocks.OXEYE_DAISY,
+            Blocks.CORNFLOWER,
+            Blocks.LILY_OF_THE_VALLEY,
+            Blocks.RED_MUSHROOM,
+            Blocks.BROWN_MUSHROOM,
+            Blocks.SUGAR_CANE,
+            Blocks.GRASS,
+            Blocks.SUNFLOWER,
+            Blocks.LILAC,
+            Blocks.ROSE_BUSH,
+            Blocks.PEONY,
+            Blocks.TALL_GRASS,
+            Blocks.LARGE_FERN,
+            Blocks.FERN,
+    };
+
+    private final HashSet<Integer> replaceableBlocksSet = new HashSet<>(
+        Arrays.asList(replaceableBlocks).stream().map(Block::hashCode).collect(Collectors.toList())
+    );
+    private final HashSet<Integer> stoppersSet = new HashSet<>(
+        Arrays.asList(stoppers).stream().map(Block::hashCode).collect(Collectors.toList())
+    );
+
     private int deforest(BuildAreaHandler.BuildArea buildArea) {
         var boundingBox = new BoundingBox(
-                buildArea.getxFrom(),
-                buildArea.getyFrom(),
-                buildArea.getzFrom(),
-                buildArea.getxTo(),
-                buildArea.getyTo(),
-                buildArea.getzTo()
+            buildArea.getxFrom(),
+            buildArea.getyFrom(),
+            buildArea.getzFrom(),
+            buildArea.getxTo(),
+            buildArea.getyTo(),
+            buildArea.getzTo()
         );
         System.out.println("Starting deforestation...");
         return fillBlocks(boundingBox);
@@ -125,9 +159,9 @@ public class DeforestHandler extends HandlerBase {
             for (int chunkZ = minChunkZ; chunkZ < zChunkCount + minChunkZ; ++chunkZ) {
                 // System.out.println("Chunk X: " + Integer.toString(chunkX) + ", Chunk Z: " + Integer.toString(chunkZ));
                 // Get the chunk
-                var chunk = serverlevel.getChunk(chunkX,chunkZ);
+                var chunk = serverlevel.getChunk(chunkX, chunkZ);
                 // Get the "MOTION_BLOCKING" heightmap
-                Map<Types, Heightmap> heightmaps = new HashMap<Types, Heightmap>();
+                HashMap<Types, Heightmap> heightmaps = new HashMap<>();
                 chunk.getHeightmaps().forEach(item -> heightmaps.put(item.getKey(), item.getValue()));
                 var heightmap = heightmaps.get(Types.MOTION_BLOCKING);
                 // For every combination of x and z in that chunk
@@ -159,12 +193,12 @@ public class DeforestHandler extends HandlerBase {
 
                             // Get the block
                             var block = chunk.getBlockState(blockPos).getBlock();
-                            // If it is air, move down
-                            if (block.equals(Blocks.AIR)) continue;
                             // If the block is in the "stoppers" array, move to next column
-                            if (isBlockInArray(stoppers, block)) break;
-                            // If the block is in the "replaceable" array
-                            if (isBlockInArray(replaceableBlocks, block)) {
+//                            if (isBlockInArray(stoppers, block)) break;
+                            if (stoppersSet.contains(block.hashCode())) break;
+//                             If the block is in the "replaceable" array
+//                            if (isBlockInArray(replaceableBlocks, block)) {
+                            if (replaceableBlocksSet.contains(block.hashCode())) {
 
                                 // Remove any existing block entities
                                 // BlockEntity blockentity = chunk.getBlockEntity(blockPos);
