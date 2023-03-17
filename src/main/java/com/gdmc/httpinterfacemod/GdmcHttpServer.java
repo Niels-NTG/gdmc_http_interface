@@ -50,7 +50,6 @@ public class GdmcHttpServer {
         httpServer.createContext("/structure", new StructureHandler(mcServer));
         httpServer.createContext("/entities", new EntitiesHandler(mcServer));
         httpServer.createContext("/players", new PlayersHandler(mcServer));
-        httpServer.createContext("/deforest", new DeforestHandler(mcServer));
         httpServer.createContext("/heightmap", new HeightmapHandler(mcServer));
         httpServer.createContext("/", new InterfaceInfoHandler(mcServer));
     }
