@@ -1,4 +1,11 @@
-# GDMC-HTTP 1.1.1 (Minecraft 1.19.2) 
+# GDMC-HTTP 1.2.0 (Minecraft 1.19.2)
+
+- NEW: Add `GET /players` endpoint to get all players on the server. Thanks to [cmoyates](https://github.com/cmoyates)!
+- NEW: Add support for [target selector](https://minecraft.fandom.com/wiki/Target_selectors) for entities in the `GET /entities` endpoint using the `selector` query parameter.
+- NEW: Add support for [target selector](https://minecraft.fandom.com/wiki/Target_selectors) for players in the `GET /players` endpoint using the `selector` query parameter.
+- NEW: Unset build area by entering the `/setbuildarea` command without arguments.
+
+# GDMC-HTTP 1.1.1 (Minecraft 1.19.2)
 
 - FIX: Undo explicitly setting HTTP interface address to the "loop back" address.
 

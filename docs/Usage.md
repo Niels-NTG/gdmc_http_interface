@@ -10,6 +10,7 @@ This mod adds a few new console commands to Minecraft
 - `/setbuildarea <fromX> <fromY> <fromZ> <toX> <toY> <toZ>`
   - Sets a build area which can be referred to using the [GET /buildarea](docs/Endpoints.md:788) endpoint
   - Example `/setbuildarea ~ ~ ~ ~100 ~40 ~100`
+  - Using the command without arguments unsets the build area.
 - `/sethttpport <number>`
   - Changes the port number the HTTP interface can be reached from. Only comes into effect when Minecraft world is reloaded.
 - `/gethttpport`

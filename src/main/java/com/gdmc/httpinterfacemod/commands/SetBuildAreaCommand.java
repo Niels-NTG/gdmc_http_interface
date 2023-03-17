@@ -18,19 +18,25 @@ public final class SetBuildAreaCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(COMMAND_NAME)
+            .executes(SetBuildAreaCommand :: unsetBuildArea)
             .then(
                 Commands.argument("from", BlockPosArgument.blockPos())
             .then(
                 Commands.argument("to", BlockPosArgument.blockPos())
-            .executes( context -> perform(
+            .executes( context -> setBuildArea(
                 context,
                 context.getArgument("from", Coordinates.class).getBlockPos(context.getSource()),
                 context.getArgument("to", Coordinates.class).getBlockPos(context.getSource())
-            ))))
-        );
+        )))));
     }
 
-    private static int perform(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
+    private static int unsetBuildArea(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
+        BuildAreaHandler.unsetBuildArea();
+        commandSourceStackCommandContext.getSource().sendSuccess(Component.nullToEmpty("Build area unset"), true);
+        return 1;
+    }
+
+    private static int setBuildArea(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
         int x1 = from.getX();
         int y1 = from.getY();
         int z1 = from.getZ();
