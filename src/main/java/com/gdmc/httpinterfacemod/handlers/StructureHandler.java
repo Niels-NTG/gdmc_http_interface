@@ -122,7 +122,7 @@ public class StructureHandler extends HandlerBase {
 				// If "Accept-Encoding" header is set to "gzip" and the client expects a binary format,
 				// (both default) compress the result using GZIP before sending out the response.
 				String acceptEncodingHeader = getHeader(requestHeaders, "Accept-Encoding", "gzip");
-				boolean returnCompressed = acceptEncodingHeader.equals("gzip");
+				boolean returnCompressed = acceptEncodingHeader.indexOf("gzip") > -1;
 				getStructureHandler(httpExchange, returnPlainText, returnCompressed);
 			}
 			default -> throw new HttpException("Method not allowed. Only POST and GET requests are supported.", 405);
