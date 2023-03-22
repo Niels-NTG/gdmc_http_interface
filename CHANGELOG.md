@@ -1,3 +1,8 @@
+# GDMC-HTTP 1.2.1 (Minecraft 1.19.2)
+
+- FIX: Issue where NBT file returned by `GET /structure` wasn't GZIP-compressed even if the `"Content-Encoding"` request header contained the word "gzip".
+- FIX: Improve error handling when an empty file is submitted to `POST /structure`.
+
 # GDMC-HTTP 1.2.0 (Minecraft 1.19.2)
 
 - NEW: Add `GET /players` endpoint to get all players on the server. Thanks to [cmoyates](https://github.com/cmoyates)!
