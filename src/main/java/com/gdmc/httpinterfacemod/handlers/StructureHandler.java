@@ -136,6 +136,9 @@ public class StructureHandler extends HandlerBase {
 		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 		try {
 			httpExchange.getRequestBody().transferTo(outputStream);
+			if (outputStream.size() == 0) {
+				throw new HttpException("Request body is empty", 400);
+			}
 		} catch (IOException e1) {
 			throw new HttpException("Could not process request body: " + e1.getMessage(), 400);
 		}
