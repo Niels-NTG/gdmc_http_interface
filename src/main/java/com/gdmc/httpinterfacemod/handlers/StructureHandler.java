@@ -45,7 +45,6 @@ public class StructureHandler extends HandlerBase {
 
 	// POST: set pivot point for the rotation. Values are relative to origin of the structure.
 	private int pivotX;
-	private int pivotY;
 	private int pivotZ;
 
 	// POST/GET: Whether to include entities (mobs, villagers, items) in placing/getting a structure.
@@ -86,7 +85,6 @@ public class StructureHandler extends HandlerBase {
 			rotate = Integer.parseInt(queryParams.getOrDefault("rotate", "0")) % 4;
 
 			pivotX = Integer.parseInt(queryParams.getOrDefault("pivotx", "0"));
-			pivotY = Integer.parseInt(queryParams.getOrDefault("pivoty", "0"));
 			pivotZ = Integer.parseInt(queryParams.getOrDefault("pivotz", "0"));
 			includeEntities = Boolean.parseBoolean(queryParams.getOrDefault("entities", "false"));
 
@@ -122,7 +120,7 @@ public class StructureHandler extends HandlerBase {
 				// If "Accept-Encoding" header is set to "gzip" and the client expects a binary format,
 				// (both default) compress the result using GZIP before sending out the response.
 				String acceptEncodingHeader = getHeader(requestHeaders, "Accept-Encoding", "gzip");
-				boolean returnCompressed = acceptEncodingHeader.indexOf("gzip") > -1;
+				boolean returnCompressed = acceptEncodingHeader.contains("gzip");
 				getStructureHandler(httpExchange, returnPlainText, returnCompressed);
 			}
 			default -> throw new HttpException("Method not allowed. Only POST and GET requests are supported.", 405);
@@ -170,7 +168,7 @@ public class StructureHandler extends HandlerBase {
 			case 2 -> structurePlaceSettings.setRotation(Rotation.CLOCKWISE_180);
 			case 3 -> structurePlaceSettings.setRotation(Rotation.COUNTERCLOCKWISE_90);
 		}
-		structurePlaceSettings.setRotationPivot(new BlockPos(pivotX, pivotY, pivotZ));
+		structurePlaceSettings.setRotationPivot(new BlockPos(pivotX, 0, pivotZ));
 		structurePlaceSettings.setIgnoreEntities(!includeEntities);
 
 		ServerLevel serverLevel = getServerLevel(dimension);
@@ -191,6 +189,9 @@ public class StructureHandler extends HandlerBase {
 				blockPlacementFlags
 			);
 			if (hasPlaced) {
+				// TODO ERROR! entity data for signs does not survive transformation!
+				// this happens when both rotate and pivot are passed
+
 				// After placement, go through all blocks listed in the structureCompound and place the corresponding block entity data
 				// stored at key "nbt" using the same placement settings as the structure itself.
 				ListTag blockList = structureCompound.getList("blocks", Tag.TAG_COMPOUND);
