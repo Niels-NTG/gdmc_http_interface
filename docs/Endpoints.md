@@ -522,6 +522,8 @@ Place an [NBT](https://minecraft.fandom.com/wiki/NBT_format) structure file into
 | customFlags    | bit string                                            | no       | `0100011`   | See customFlags in [`PUT /blocks` block placement flags](#controlling-block-update-behavior)                                             |
 | dimension      | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world to place the structure in                                                                           |
 
+Note that the _mirror_ transformation is applied first, the _rotation_ second. And the pivot point applies to both.
+
 ## Request headers
 
 | key              | valid values                     | defaults to  | description                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
