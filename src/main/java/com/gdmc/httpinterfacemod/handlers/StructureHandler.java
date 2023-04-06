@@ -11,6 +11,7 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -189,9 +190,6 @@ public class StructureHandler extends HandlerBase {
 				blockPlacementFlags
 			);
 			if (hasPlaced) {
-				// TODO ERROR! entity data for signs does not survive transformation!
-				// this happens when both rotate and pivot are passed
-
 				// After placement, go through all blocks listed in the structureCompound and place the corresponding block entity data
 				// stored at key "nbt" using the same placement settings as the structure itself.
 				ListTag blockList = structureCompound.getList("blocks", Tag.TAG_COMPOUND);
@@ -205,6 +203,11 @@ public class StructureHandler extends HandlerBase {
 						BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(transformedGlobalBlockPos);
 						if (existingBlockEntity != null) {
 							existingBlockEntity.deserializeNBT(tag.getCompound("nbt"));
+							serverLevel.markAndNotifyBlock(
+								transformedGlobalBlockPos, serverLevel.getChunkAt(transformedGlobalBlockPos),
+								serverLevel.getBlockState(transformedGlobalBlockPos), existingBlockEntity.getBlockState(),
+								blockPlacementFlags, Block.UPDATE_LIMIT
+							);
 						}
 					}
 				}
