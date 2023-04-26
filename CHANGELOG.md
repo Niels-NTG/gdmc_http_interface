@@ -1,3 +1,8 @@
+# GDMC-HTTP 1.2.3 (Minecraft 1.19.2)
+
+- FIX: With `PUT /blocks`, allow for changing the block entity (NBT) data of a block even if the target block matches the block state and block ID of the placement instruction. This makes it possible to do things such as changing the text on an existing sign or changing the items of an already placed chest.
+- FIX: Reworked the algorithm for changing the shape of a block to fit with directly adjacent blocks (eg. fences) to be more efficient.
+
 # GDMC-HTTP 1.2.2 (Minecraft 1.19.2)
 
 - FIX: Ensure blocks placed via `POST /structure` always update on the client side to reflect its block entity data (eg. text on signs, pieces of armor on armor stands, etc.). Prior to this fix the data was correctly parsed, but only became visible in-game if the relevant chunks were reloaded.
