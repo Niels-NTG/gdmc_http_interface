@@ -3,6 +3,7 @@ package com.gdmc.httpinterfacemod.handlers;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
@@ -39,8 +40,8 @@ public class BuildAreaHandler extends HandlerBase {
         resolveRequest(httpExchange, responseString);
     }
 
-    public static void setBuildArea(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo) {
-        buildArea = new BuildArea(xFrom, yFrom, zFrom, xTo, yTo, zTo);
+    public static void setBuildArea(BlockPos from, BlockPos to) {
+        buildArea = new BuildArea(from, to);
     }
 
     public static void unsetBuildArea() {
@@ -48,20 +49,13 @@ public class BuildAreaHandler extends HandlerBase {
     }
 
     public static class BuildArea {
-        private final int xFrom;
-        private final int yFrom;
-        private final int zFrom;
-        private final int xTo;
-        private final int yTo;
-        private final int zTo;
 
-        public BuildArea(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo) {
-            this.xFrom = xFrom;
-            this.yFrom = yFrom;
-            this.zFrom = zFrom;
-            this.xTo = xTo;
-            this.yTo = yTo;
-            this.zTo = zTo;
+        public final BlockPos from;
+        public final BlockPos to;
+
+        public BuildArea(BlockPos _from, BlockPos _to) {
+            this.from = _from;
+            this.to = _to;
         }
     }
 }
