@@ -1,3 +1,19 @@
+# GDMC-HTTP 1.2.3 (Minecraft 1.19.2)
+
+- FIX: With `PUT /blocks`, allow for changing the block entity (NBT) data of a block even if the target block matches the block state and block ID of the placement instruction. This makes it possible to do things such as changing the text on an existing sign or changing the items of an already placed chest.
+- FIX: Reworked the algorithm for changing the shape of a block to fit with directly adjacent blocks (eg. fences) to be more efficient.
+
+# GDMC-HTTP 1.2.2 (Minecraft 1.19.2)
+
+- FIX: Ensure blocks placed via `POST /structure` always update on the client side to reflect its block entity data (eg. text on signs, pieces of armor on armor stands, etc.). Prior to this fix the data was correctly parsed, but only became visible in-game if the relevant chunks were reloaded.
+- FIX: Remove support for `pivotY` URL query parameter in the `POST /structure` endpoint since it wasn't implemented in the first place. Minecraft does not support it. This is not a breaking change since unknown query parameters will be ignored by GDMC-HTTP.
+- FIX: Add clarification on the transformation order of structures in the `POST /structure` endpoint to documentation. 
+
+# GDMC-HTTP 1.2.1 (Minecraft 1.19.2)
+
+- FIX: Issue where NBT file returned by `GET /structure` wasn't GZIP-compressed even if the `"Content-Encoding"` request header contained the word "gzip".
+- FIX: Improve error handling when an empty file is submitted to `POST /structure`.
+
 # GDMC-HTTP 1.2.0 (Minecraft 1.19.2)
 
 - NEW: Add `GET /players` endpoint to get all players on the server. Thanks to [cmoyates](https://github.com/cmoyates)!

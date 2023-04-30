@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.utils.TagComparator;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -11,14 +12,11 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -179,23 +177,24 @@ public class BlocksHandler extends HandlerBase {
                     }
                 }
 
+                // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
+                // for this block placement.
+                String blockNBTString = "";
+                if (blockPlacementItem.has("data") && blockPlacementItem.get("data").isJsonPrimitive()) {
+                    blockNBTString = blockPlacementItem.get("data").getAsString();
+                }
+
                 // Pass block Id and block state string into a Stringreader with the the block state parser.
                 BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
                     getBlockRegisteryLookup(commandSourceStack),
-                    new StringReader(blockId + blockStateString),
+                    new StringReader(blockId + blockStateString + blockNBTString),
                     true
                 );
                 BlockState blockState = parsedBlockState.blockState();
-
-                // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
-                // for this block placement.
-                CompoundTag compoundTag = null;
-                if (blockPlacementItem.has("data") && blockPlacementItem.get("data").isJsonPrimitive()) {
-                    compoundTag = TagParser.parseTag(blockPlacementItem.get("data").getAsString());
-                }
+                CompoundTag compoundTag = parsedBlockState.nbt();
 
                 // Attempt to place block in the world.
-                boolean isSuccess = setBlock(blockPos, blockState, compoundTag, blockFlags) == 1;
+                boolean isSuccess = setBlock(blockPos, blockState, compoundTag, blockFlags);
                 returnValues.add(instructionStatus(isSuccess));
 
             } catch (CommandSyntaxException e) {
@@ -302,44 +301,52 @@ public class BlocksHandler extends HandlerBase {
 
     /**
      * @param pos                   Position in the world the block should be placed.
-     * @param blockState            Contains both the state as well as the material of the block.
+     * @param inputBlockState       Contains both the state as well as the material of the block.
      * @param blockEntityData       Optional tag of NBT data to be associated with the block (eg. contents of a chest).
      * @param flags                 Block placement flags (see {@link #getBlockFlags(boolean, boolean)} and {@link Block} for more information).
      * @return                      return 1 if block has been placed or 0 if it couldn't be placed at the given location.
      */
-    private int setBlock(BlockPos pos, BlockState blockState, CompoundTag blockEntityData, int flags) {
+    private boolean setBlock(BlockPos pos, BlockState inputBlockState, CompoundTag blockEntityData, int flags) {
+        boolean result = false;
+
         ServerLevel serverLevel = getServerLevel(dimension);
 
-        BlockEntity blockEntitytoClear = serverLevel.getBlockEntity(pos);
-        Clearable.tryClear(blockEntitytoClear);
+        // If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
+        // in the north, west, south, east, up, down directions.
+        BlockState blockState = inputBlockState;
+        if ((flags & Block.UPDATE_NEIGHBORS) != 0) {
+            blockState = Block.updateFromNeighbourShapes(inputBlockState, serverLevel, pos);
+            if (blockState.isAir()) {
+                blockState = inputBlockState;
+            }
+        }
 
         if (serverLevel.setBlock(pos, blockState, flags)) {
-            if (blockEntityData != null) {
-                BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(pos);
-                if (existingBlockEntity != null) {
-                    existingBlockEntity.deserializeNBT(blockEntityData);
-                }
-            }
-
             // If block placement flags allow for updating the shape of placed blocks, resolve placing the block as if it was placed by a player.
             // This is applicable to certain blocks that form an object larger than just a single block, such as doors and beds.
             if ((flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
                 blockState.getBlock().setPlacedBy(serverLevel, pos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
             }
-
-            // If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
-            // in the north, west, south, east, up, down directions.
-            if ((flags & Block.UPDATE_NEIGHBORS) != 0) {
-                for (Direction direction : Direction.values()) {
-                    BlockPos neighbourPosition = pos.relative(direction);
-                    BlockState neighbourBlockState = serverLevel.getBlockState(neighbourPosition);
-                    neighbourBlockState.updateNeighbourShapes(serverLevel, neighbourPosition, flags);
-                }
-            }
-            return 1;
-        } else {
-            return 0;
+            result = true;
         }
+
+        if (blockEntityData != null) {
+            BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(pos);
+            if (existingBlockEntity != null) {
+                if (TagComparator.contains(existingBlockEntity.serializeNBT(), blockEntityData)) {
+                    return result;
+                }
+                existingBlockEntity.deserializeNBT(blockEntityData);
+                serverLevel.markAndNotifyBlock(
+                    pos, serverLevel.getChunkAt(pos),
+                    serverLevel.getBlockState(pos), existingBlockEntity.getBlockState(),
+                    flags, Block.UPDATE_LIMIT
+                );
+                return true;
+            }
+        }
+
+        return result;
     }
 
     /**
