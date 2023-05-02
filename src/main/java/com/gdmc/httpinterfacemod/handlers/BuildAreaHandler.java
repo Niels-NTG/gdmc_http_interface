@@ -32,12 +32,10 @@ public class BuildAreaHandler extends HandlerBase {
             throw new HttpException("No build area is specified. Use the buildarea command inside Minecraft to set a build area.", 404);
         }
 
-        String responseString = new Gson().toJson(buildArea);
-
         Headers responseHeaders = httpExchange.getResponseHeaders();
         setDefaultResponseHeaders(responseHeaders);
 
-        resolveRequest(httpExchange, responseString);
+        resolveRequest(httpExchange, new Gson().toJson(buildArea));
     }
 
     public static void setBuildArea(BlockPos from, BlockPos to) {
@@ -48,12 +46,26 @@ public class BuildAreaHandler extends HandlerBase {
         buildArea = null;
     }
 
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     public static class BuildArea {
 
-        public final BlockPos from;
-        public final BlockPos to;
+        private final int xFrom;
+        private final int yFrom;
+        private final int zFrom;
+        private final int xTo;
+        private final int yTo;
+        private final int zTo;
+
+        public final transient BlockPos from;
+        public final transient BlockPos to;
 
         public BuildArea(BlockPos _from, BlockPos _to) {
+            this.xFrom = _from.getX();
+            this.yFrom = _from.getY();
+            this.zFrom = _from.getZ();
+            this.xTo = _to.getX();
+            this.yTo = _to.getY();
+            this.zTo = _to.getZ();
             this.from = _from;
             this.to = _to;
         }
