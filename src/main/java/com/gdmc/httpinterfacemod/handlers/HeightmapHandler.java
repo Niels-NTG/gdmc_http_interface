@@ -33,7 +33,7 @@ public class HeightmapHandler extends HandlerBase {
         // Get query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
         // Try to parse a type argument from them
-        String heightmapTypeString = queryParams.getOrDefault("type", "MOTION_BLOCKING");
+        String heightmapTypeString = queryParams.getOrDefault("type", "WORLD_SURFACE");
         Types heightmapType;
         // Check if the type is a valid heightmap type
         try {
@@ -41,8 +41,7 @@ public class HeightmapHandler extends HandlerBase {
             heightmapType = Types.valueOf(heightmapTypeString);
         } catch (IllegalArgumentException e) {
             // Otherwise, throw an error
-            String message = "Could not parse query parameter: " + e.getMessage();
-            throw new HandlerBase.HttpException(message, 400);
+            throw new HttpException("heightmap type " + heightmapTypeString + " is not supported.", 400);
         }
 
         // Get the build area
