@@ -26,6 +26,7 @@ GET,PUT,PATCH,DELETE    /entities   Read, create, edit and remove entities from 
 GET                     /buildarea  Get the build area defined by the /setbuildarea chat command
 GET                     /version    Get Minecraft version
 GET                     /players    Read players from the world
+GET                     /heightmap  Get heightmap of the set build area of a certain type
 ```
 
 A detailed documentation of the endpoints can be found [over here](./docs/Endpoints.md).
