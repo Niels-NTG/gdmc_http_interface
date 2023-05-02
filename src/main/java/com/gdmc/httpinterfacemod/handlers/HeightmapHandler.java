@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler.BuildArea;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -10,7 +11,6 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.Heightmap.Types;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
 // https://github.com/Niels-NTG/gdmc_http_interface/pull/19
@@ -45,8 +45,9 @@ public class HeightmapHandler extends HandlerBase {
         }
 
         String dimension = queryParams.getOrDefault("dimension", null);
+
         // Get the build area
-        BuildAreaHandler.BuildArea buildArea = BuildAreaHandler.getBuildArea();
+        BuildArea buildArea = BuildAreaHandler.getBuildArea();
         if (buildArea == null) {
             throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
         }
@@ -64,7 +65,7 @@ public class HeightmapHandler extends HandlerBase {
     }
 
 
-    public int[][] getHeightmap(BuildAreaHandler.BuildArea buildArea, ServerLevel serverlevel, Types heightmapType) {
+    private static int[][] getHeightmap(BuildArea buildArea, ServerLevel serverlevel, Types heightmapType) {
 
         // Get the x/z size of the build area
         int xSize = buildArea.to.getX() - buildArea.from.getX() + 1;
