@@ -44,6 +44,7 @@ public class HeightmapHandler extends HandlerBase {
             throw new HttpException("heightmap type " + heightmapTypeString + " is not supported.", 400);
         }
 
+        String dimension = queryParams.getOrDefault("dimension", null);
         // Get the build area
         BuildAreaHandler.BuildArea buildArea = BuildAreaHandler.getBuildArea();
         if (buildArea == null) {
@@ -51,7 +52,7 @@ public class HeightmapHandler extends HandlerBase {
         }
 
         // Get a reference to the map/level
-        ServerLevel serverlevel = mcServer.overworld();
+        ServerLevel serverlevel = getServerLevel(dimension);
 
         // Get the heightmap of that type
         int[][] heightmap = getHeightmap(buildArea, serverlevel, heightmapType);
