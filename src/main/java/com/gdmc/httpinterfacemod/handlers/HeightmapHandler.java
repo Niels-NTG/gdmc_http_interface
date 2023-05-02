@@ -100,7 +100,7 @@ public class HeightmapHandler extends HandlerBase {
                             continue;
                         }
                         // Set the value in the heightmap array
-                        heightmap[x - buildArea.from.getX()][z - buildArea.from.getZ()] = chunkHeightmap.getHighestTaken(x - chunkMinX, z - chunkMinZ);
+                        heightmap[x - buildArea.from.getX()][z - buildArea.from.getZ()] = chunkHeightmap.getFirstAvailable(x - chunkMinX, z - chunkMinZ);
                     }
                 }
             }
