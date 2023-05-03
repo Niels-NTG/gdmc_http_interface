@@ -146,7 +146,7 @@ public class HeightmapHandler extends HandlerBase {
                 for (int x = chunkMinX; x < chunkMinX + 16; ++x) {
                     for (int z = chunkMinZ; z < chunkMinZ + 16; ++z) {
                         // If the column is out of bounds skip it
-                        if (x < buildArea.from.getX() || x > buildArea.to.getX() || z < buildArea.from.getZ() || z > buildArea.to.getZ()) {
+                        if (buildArea.isOutsideBuildArea(x, z)) {
                             continue;
                         }
                         // Set the value in the heightmap array

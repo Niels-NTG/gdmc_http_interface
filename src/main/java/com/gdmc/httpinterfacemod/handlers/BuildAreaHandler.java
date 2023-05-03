@@ -69,5 +69,13 @@ public class BuildAreaHandler extends HandlerBase {
             this.from = _from;
             this.to = _to;
         }
+
+        public boolean isOutsideBuildArea(BlockPos pos) {
+            return isOutsideBuildArea(pos.getX(), pos.getZ());
+        }
+
+        public boolean isOutsideBuildArea(int x, int z) {
+            return x < from.getX() || x > to.getX() || z < from.getZ() || z > to.getZ();
+        }
     }
 }

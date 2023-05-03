@@ -130,17 +130,18 @@ Get information for one or more blocks in a given area.
 
 ## URL parameters
 
-| key          | valid values                                          | required | defaults to | description                                                                                                            |
-|--------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------|
-| x            | integer                                               | yes      | `0`         | X coordinate                                                                                                           |
-| y            | integer                                               | yes      | `0`         | Y coordinate                                                                                                           |
-| z            | integer                                               | yes      | `0`         | Z coordinate                                                                                                           |
-| dx           | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                               |
-| dy           | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                               |
-| dz           | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                               |
-| includeState | `true`, `false`                                       | no       | `false`     | If `true`, include [block state](https://minecraft.fandom.com/wiki/Block_states) in response                           |
-| includeData  | `true`, `false`                                       | no       | `false`     | If `true`, include [block entity data](https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) in response |
-| dimension    | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from                                                                       |
+| key             | valid values                                          | required | defaults to | description                                                                                                            |
+|-----------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------|
+| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                           |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                           |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                           |
+| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                               |
+| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                               |
+| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                               |
+| includeState    | `true`, `false`                                       | no       | `false`     | If `true`, include [block state](https://minecraft.fandom.com/wiki/Block_states) in response                           |
+| includeData     | `true`, `false`                                       | no       | `false`     | If `true`, include [block entity data](https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) in response |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skip over positions that are outside the build area                                                         |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from                                                                       |
 
 ## Request headers
 
@@ -270,15 +271,16 @@ Place one or more blocks into the world.
 
 ## URL parameters
 
-| key            | valid values                                          | required | defaults to | description                                                                                                                                            |
-|----------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| x              | integer                                               | yes      | `0`         | X coordinate                                                                                                                                           |
-| y              | integer                                               | yes      | `0`         | Y coordinate                                                                                                                                           |
-| z              | integer                                               | yes      | `0`         | Z coordinate                                                                                                                                           |
-| doBlockUpdates | `true`, `false`                                       | no       | `true`      | If `true`, tell neighbouring blocks to reach to placement, see [Controlling block update behavior](#controlling-block-update-behavior).                |
-| spawnDrops     | `true`, `false`                                       | no       | `false`     | If `true`, drop items if existing blocks are destroyed by this placement, see [Controlling block update behavior](#controlling-block-update-behavior). |
-| customFlags    | bit string                                            | no       | `0100011`   | Force certain behaviour when placing blocks, see [Controlling block update behavior](#controlling-block-update-behavior).                              |
-| dimension      | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to place blocks in                                                                                                        |
+| key             | valid values                                          | required | defaults to | description                                                                                                                                            |
+|-----------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                                                           |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                                                           |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                                                           |
+| doBlockUpdates  | `true`, `false`                                       | no       | `true`      | If `true`, tell neighbouring blocks to reach to placement, see [Controlling block update behavior](#controlling-block-update-behavior).                |
+| spawnDrops      | `true`, `false`                                       | no       | `false`     | If `true`, drop items if existing blocks are destroyed by this placement, see [Controlling block update behavior](#controlling-block-update-behavior). |
+| customFlags     | bit string                                            | no       | `0100011`   | Force certain behaviour when placing blocks, see [Controlling block update behavior](#controlling-block-update-behavior).                              |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, do not place blocks at positions outside the build area.                                                                                    |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to place blocks in                                                                                                        |
 
 ### Controlling block update behavior
 
