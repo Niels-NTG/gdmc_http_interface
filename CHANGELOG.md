@@ -1,3 +1,10 @@
+# GDMC-HTTP 1.3.0 (Minecraft 1.19.2)
+
+- NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.fandom.com/wiki/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
+- NEW: Add custom heightmap types `MOTION_BLOCKING_NO_PLANTS` and `OCEAN_FLOOR_NO_PLANTS`.
+- NEW: Add `withinBuildArea` flag to `GET /BLOCKS`. If set to true it skips over positions outside of the build area.
+- NEW: Add `withinBuildArea` flag to `PUT /BLOCKS`. If set to true it does not place blocks outside of the build area.
+
 # GDMC-HTTP 1.2.3 (Minecraft 1.19.2)
 
 - FIX: With `PUT /blocks`, allow for changing the block entity (NBT) data of a block even if the target block matches the block state and block ID of the placement instruction. This makes it possible to do things such as changing the text on an existing sign or changing the items of an already placed chest.
