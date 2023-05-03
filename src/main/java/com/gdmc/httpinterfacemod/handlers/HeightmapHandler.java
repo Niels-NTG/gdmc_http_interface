@@ -1,6 +1,8 @@
 package com.gdmc.httpinterfacemod.handlers;
 
 import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler.BuildArea;
+import com.gdmc.httpinterfacemod.utils.CustomHeightmap;
+import com.google.common.base.Enums;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -8,7 +10,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.level.levelgen.Heightmap.Types;
 
 import java.io.IOException;
 import java.util.Map;
@@ -32,17 +33,12 @@ public class HeightmapHandler extends HandlerBase {
 
         // Get query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
+
         // Try to parse a type argument from them
         String heightmapTypeString = queryParams.getOrDefault("type", "WORLD_SURFACE");
-        Types heightmapType;
         // Check if the type is a valid heightmap type
-        try {
-            // If so, store the type object
-            heightmapType = Types.valueOf(heightmapTypeString);
-        } catch (IllegalArgumentException e) {
-            // Otherwise, throw an error
-            throw new HttpException("heightmap type " + heightmapTypeString + " is not supported.", 400);
-        }
+        Heightmap.Types heightmapType = Enums.getIfPresent(Heightmap.Types.class, heightmapTypeString).orNull();
+        CustomHeightmap.Types customHeightmapType = Enums.getIfPresent(CustomHeightmap.Types.class, heightmapTypeString).orNull();
 
         String dimension = queryParams.getOrDefault("dimension", null);
 
@@ -56,7 +52,14 @@ public class HeightmapHandler extends HandlerBase {
         ServerLevel serverlevel = getServerLevel(dimension);
 
         // Get the heightmap of that type
-        int[][] heightmap = getHeightmap(buildArea, serverlevel, heightmapType);
+        int[][] heightmap;
+        if (customHeightmapType != null) {
+            heightmap = getHeightmap(buildArea, serverlevel, customHeightmapType);
+        } else if (heightmapType != null) {
+            heightmap = getHeightmap(buildArea, serverlevel, heightmapType);
+        } else {
+            throw new HttpException("heightmap type " + heightmapTypeString + " is not supported.", 400);
+        }
 
         // Respond with that array as a string
         Headers responseHeaders = httpExchange.getResponseHeaders();
@@ -65,7 +68,7 @@ public class HeightmapHandler extends HandlerBase {
     }
 
 
-    private static int[][] getHeightmap(BuildArea buildArea, ServerLevel serverlevel, Types heightmapType) {
+    private static int[][] getHeightmap(BuildArea buildArea, ServerLevel serverlevel, Heightmap.Types heightmapType) {
 
         // Get the x/z size of the build area
         int xSize = buildArea.to.getX() - buildArea.from.getX() + 1;
@@ -90,6 +93,52 @@ public class HeightmapHandler extends HandlerBase {
 
                 // Get the heightmap of type
                 Heightmap chunkHeightmap = chunk.getOrCreateHeightmapUnprimed(heightmapType);
+
+                // For every combination of x and z in that chunk
+                int chunkMinX = chunkX * 16;
+                int chunkMinZ = chunkZ * 16;
+                for (int x = chunkMinX; x < chunkMinX + 16; ++x) {
+                    for (int z = chunkMinZ; z < chunkMinZ + 16; ++z) {
+                        // If the column is out of bounds skip it
+                        if (x < buildArea.from.getX() || x > buildArea.to.getX() || z < buildArea.from.getZ() || z > buildArea.to.getZ()) {
+                            continue;
+                        }
+                        // Set the value in the heightmap array
+                        heightmap[x - buildArea.from.getX()][z - buildArea.from.getZ()] = chunkHeightmap.getFirstAvailable(x - chunkMinX, z - chunkMinZ);
+                    }
+                }
+            }
+        }
+
+        // Return the completed heightmap array
+        return heightmap;
+    }
+
+    private static int[][] getHeightmap(BuildArea buildArea, ServerLevel serverlevel, CustomHeightmap.Types heightmapType) {
+
+        // Get the x/z size of the build area
+        int xSize = buildArea.to.getX() - buildArea.from.getX() + 1;
+        int zSize = buildArea.to.getZ() - buildArea.from.getZ() + 1;
+        // Create the 2D array to store the heightmap data
+        int[][] heightmap = new int[xSize][zSize];
+
+        // Get the number of chunks
+        int xChunkCount = Math.floorDiv(buildArea.to.getX(), 16) - Math.floorDiv(buildArea.from.getX(), 16) + 1;
+        int zChunkCount = Math.floorDiv(buildArea.to.getZ(), 16) - Math.floorDiv(buildArea.from.getZ(), 16) + 1;
+
+        // Get the chunk x and z of the chunk at the lowest x and z
+        int minChunkX = Math.floorDiv(buildArea.from.getX(), 16);
+        int minChunkZ = Math.floorDiv(buildArea.from.getZ(), 16);
+
+        // For every chunk in the build area
+        for (int chunkX = minChunkX; chunkX < xChunkCount + minChunkX; ++chunkX) {
+            for (int chunkZ = minChunkZ; chunkZ < zChunkCount + minChunkZ; ++chunkZ) {
+
+                // Get the chunk
+                LevelChunk chunk = serverlevel.getChunk(chunkX, chunkZ);
+
+                // Get the heightmap of type
+                CustomHeightmap chunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, heightmapType);
 
                 // For every combination of x and z in that chunk
                 int chunkMinX = chunkX * 16;

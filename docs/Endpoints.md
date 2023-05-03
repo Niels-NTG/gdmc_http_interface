@@ -888,10 +888,28 @@ Returns the [heightmap](https://minecraft.fandom.com/wiki/Heightmap) of the set 
 
 ## URL parameters
 
-| key       | valid values                                                                   | required | defaults to     | description                                                                                                                                                                            |
-|-----------|--------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.fandom.com/wiki/Heightmap) wiki page for more information.                                                                 |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                          | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
+| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                            |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.fandom.com/wiki/Heightmap) wiki page for more information.                                                                 |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
+
+In addition to the build-in height map types of `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING` and `MOTION_BLOCKING_NO_LEAVES`, this mod also includes the following custom height maps:
+- `MOTION_BLOCKING_NO_PLANTS`
+  - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
+    - All logs
+    - Bee nests
+    - Mangrove roots
+    - Giant mushroom blocks
+    - All types of pumpkin blocks
+    - Melon blocks
+    - Cactus blocks
+    - Farmland
+    - Coral blocks
+    - Sponges
+- `OCEAN_FLOOR_NO_PLANTS`
+  - Same as `OCEAN_FLOOR`, except it also excludes the following blocks:
+    - Leaves
+    - Everything listed for `MOTION_BLOCKING_NO_PLANTS`
 
 ## Request headers
 
