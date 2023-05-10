@@ -1,6 +1,5 @@
 package com.gdmc.httpinterfacemod.utils;
 
-import com.mojang.serialization.Codec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.BitStorage;
@@ -10,7 +9,6 @@ import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Predicate;
 
@@ -77,18 +75,17 @@ public class CustomHeightmap {
 		;
 
 	public enum Types implements StringRepresentable {
-		MOTION_BLOCKING_NO_PLANTS(
+		@SuppressWarnings("unused") MOTION_BLOCKING_NO_PLANTS(
 			"MOTION_BLOCKING_NO_PLANTS",
 			(blockState) ->
 				(blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()) && NO_PLANTS.test(blockState)
 		),
-		OCEAN_FLOOR_NO_PLANTS(
+		@SuppressWarnings("unused") OCEAN_FLOOR_NO_PLANTS(
 			"OCEAN_FLOOR_NO_PLANTS",
 			(blockState) ->
 				blockState.getMaterial().blocksMotion() && NO_PLANTS.test(blockState)
 		);
 
-		public static final Codec<Types> CODEC = StringRepresentable.fromEnum(CustomHeightmap.Types::values);
 		private final String serializationKey;
 		private final Predicate<BlockState> isOpaque;
 		Types(String serializationKey, Predicate<BlockState> predicate) {
@@ -100,8 +97,9 @@ public class CustomHeightmap {
 			return this.isOpaque;
 		}
 
+		@SuppressWarnings("NullableProblems")
 		@Override
-		public @NotNull String getSerializedName() {
+		public String getSerializedName() {
 			return this.serializationKey;
 		}
 	}
