@@ -3,6 +3,7 @@ package com.gdmc.httpinterfacemod.handlers;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
@@ -10,6 +11,10 @@ import java.io.IOException;
 public class BuildAreaHandler extends HandlerBase {
 
     private static BuildArea buildArea;
+
+    public static BuildArea getBuildArea() {
+        return buildArea;
+    }
 
     public BuildAreaHandler(MinecraftServer mcServer) {
         super(mcServer);
@@ -27,23 +32,23 @@ public class BuildAreaHandler extends HandlerBase {
             throw new HttpException("No build area is specified. Use the buildarea command inside Minecraft to set a build area.", 404);
         }
 
-        String responseString = new Gson().toJson(buildArea);
-
         Headers responseHeaders = httpExchange.getResponseHeaders();
         setDefaultResponseHeaders(responseHeaders);
 
-        resolveRequest(httpExchange, responseString);
+        resolveRequest(httpExchange, new Gson().toJson(buildArea));
     }
 
-    public static void setBuildArea(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo) {
-        buildArea = new BuildArea(xFrom, yFrom, zFrom, xTo, yTo, zTo);
+    public static void setBuildArea(BlockPos from, BlockPos to) {
+        buildArea = new BuildArea(from, to);
     }
 
     public static void unsetBuildArea() {
         buildArea = null;
     }
 
+    @SuppressWarnings({"FieldCanBeLocal", "unused"})
     public static class BuildArea {
+
         private final int xFrom;
         private final int yFrom;
         private final int zFrom;
@@ -51,13 +56,26 @@ public class BuildAreaHandler extends HandlerBase {
         private final int yTo;
         private final int zTo;
 
-        public BuildArea(int xFrom, int yFrom, int zFrom, int xTo, int yTo, int zTo) {
-            this.xFrom = xFrom;
-            this.yFrom = yFrom;
-            this.zFrom = zFrom;
-            this.xTo = xTo;
-            this.yTo = yTo;
-            this.zTo = zTo;
+        public final transient BlockPos from;
+        public final transient BlockPos to;
+
+        public BuildArea(BlockPos _from, BlockPos _to) {
+            this.xFrom = _from.getX();
+            this.yFrom = _from.getY();
+            this.zFrom = _from.getZ();
+            this.xTo = _to.getX();
+            this.yTo = _to.getY();
+            this.zTo = _to.getZ();
+            this.from = _from;
+            this.to = _to;
+        }
+
+        public boolean isOutsideBuildArea(BlockPos pos) {
+            return isOutsideBuildArea(pos.getX(), pos.getZ());
+        }
+
+        public boolean isOutsideBuildArea(int x, int z) {
+            return x < from.getX() || x > to.getX() || z < from.getZ() || z > to.getZ();
         }
     }
 }

@@ -130,17 +130,18 @@ Get information for one or more blocks in a given area.
 
 ## URL parameters
 
-| key          | valid values                                          | required | defaults to | description                                                                                                            |
-|--------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------|
-| x            | integer                                               | yes      | `0`         | X coordinate                                                                                                           |
-| y            | integer                                               | yes      | `0`         | Y coordinate                                                                                                           |
-| z            | integer                                               | yes      | `0`         | Z coordinate                                                                                                           |
-| dx           | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                               |
-| dy           | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                               |
-| dz           | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                               |
-| includeState | `true`, `false`                                       | no       | `false`     | If `true`, include [block state](https://minecraft.fandom.com/wiki/Block_states) in response                           |
-| includeData  | `true`, `false`                                       | no       | `false`     | If `true`, include [block entity data](https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) in response |
-| dimension    | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from                                                                       |
+| key             | valid values                                          | required | defaults to | description                                                                                                            |
+|-----------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------|
+| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                           |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                           |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                           |
+| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                               |
+| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                               |
+| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                               |
+| includeState    | `true`, `false`                                       | no       | `false`     | If `true`, include [block state](https://minecraft.fandom.com/wiki/Block_states) in response                           |
+| includeData     | `true`, `false`                                       | no       | `false`     | If `true`, include [block entity data](https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) in response |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skip over positions that are outside the build area                                                         |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from                                                                       |
 
 ## Request headers
 
@@ -270,15 +271,16 @@ Place one or more blocks into the world.
 
 ## URL parameters
 
-| key            | valid values                                          | required | defaults to | description                                                                                                                                            |
-|----------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
-| x              | integer                                               | yes      | `0`         | X coordinate                                                                                                                                           |
-| y              | integer                                               | yes      | `0`         | Y coordinate                                                                                                                                           |
-| z              | integer                                               | yes      | `0`         | Z coordinate                                                                                                                                           |
-| doBlockUpdates | `true`, `false`                                       | no       | `true`      | If `true`, tell neighbouring blocks to reach to placement, see [Controlling block update behavior](#controlling-block-update-behavior).                |
-| spawnDrops     | `true`, `false`                                       | no       | `false`     | If `true`, drop items if existing blocks are destroyed by this placement, see [Controlling block update behavior](#controlling-block-update-behavior). |
-| customFlags    | bit string                                            | no       | `0100011`   | Force certain behaviour when placing blocks, see [Controlling block update behavior](#controlling-block-update-behavior).                              |
-| dimension      | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to place blocks in                                                                                                        |
+| key             | valid values                                          | required | defaults to | description                                                                                                                                            |
+|-----------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                                                           |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                                                           |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                                                           |
+| doBlockUpdates  | `true`, `false`                                       | no       | `true`      | If `true`, tell neighbouring blocks to reach to placement, see [Controlling block update behavior](#controlling-block-update-behavior).                |
+| spawnDrops      | `true`, `false`                                       | no       | `false`     | If `true`, drop items if existing blocks are destroyed by this placement, see [Controlling block update behavior](#controlling-block-update-behavior). |
+| customFlags     | bit string                                            | no       | `0100011`   | Force certain behaviour when placing blocks, see [Controlling block update behavior](#controlling-block-update-behavior).                              |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, do not place blocks at positions outside the build area.                                                                                    |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to place blocks in                                                                                                        |
 
 ### Controlling block update behavior
 
@@ -880,6 +882,86 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~200 ~200 ~200
 
 ```json
 { "xFrom": 2353, "yFrom": 63, "zFrom": -78, "xTo": 2553, "yTo": 263, "zTo": 122 }
+```
+
+# Get heightmap `GET /heightmap`
+
+Returns the [heightmap](https://minecraft.fandom.com/wiki/Heightmap) of the set build area of a given type.
+
+## URL parameters
+
+| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                            |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.fandom.com/wiki/Heightmap) wiki page for more information.                                                                 |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
+
+In addition to the build-in height map types of `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING` and `MOTION_BLOCKING_NO_LEAVES`, this mod also includes the following custom height maps:
+- `MOTION_BLOCKING_NO_PLANTS`
+  - Same as `MOTION_BLOCKING`, except it also excludes the following blocks
+    - Logs
+    - Leaves
+    - Bee nests
+    - Mangrove roots
+    - Giant mushroom blocks
+    - Pumpkin blocks
+    - Melon blocks
+    - Moss blocks
+    - Nether wart blocks
+    - Cactus blocks
+    - Farmland
+    - Coral blocks
+    - Sponges
+    - Bamboo plants
+    - Cobwebs
+    - Sculk
+- `OCEAN_FLOOR_NO_PLANTS`
+  - Same as `OCEAN_FLOOR`, except it also excludes the following blocks:
+    - Everything listed for `MOTION_BLOCKING_NO_PLANTS`
+
+## Request headers
+
+[Default](#Request-headers)
+
+## Request body
+
+N/A
+
+## Response headers
+
+[Default](#Response-headers)
+
+## Response body
+
+A 2D array with integer values representing the heightmap of the x-z dimensions of the build area.
+
+## Example
+
+After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, requesting the heightmap of that ignores water with `GET /heightmap?type=OCEAN_FLOOR` could return:
+
+```json
+[
+  [68,68,66,65,65,65,72,72,72,74,74,74,71,65,65,65,65,65,68,71,71],
+  [67,68,66,65,65,72,72,73,72,72,74,71,71,64,64,64,64,64,68,68,71],
+  [66,67,67,65,65,72,73,74,73,72,71,71,63,63,63,63,63,63,63,68,68],
+  [66,66,66,66,65,72,72,73,72,72,63,63,63,63,63,63,63,63,63,63,63],
+  [65,66,65,65,65,64,72,72,72,63,63,63,63,63,63,63,63,63,63,63,63],
+  [64,64,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [63,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [64,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [65,65,65,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [66,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [66,67,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [66,67,66,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
+  [66,67,67,66,66,65,65,64,64,63,63,64,64,64,64,64,65,65,65,64,64],
+  [66,67,67,66,72,72,72,65,64,64,64,64,65,65,65,65,66,66,66,66,66],
+  [66,67,67,72,72,75,72,72,65,65,65,65,65,66,66,66,67,67,67,67,67]
+]
 ```
 
 # Read Minecraft version `GET /version`

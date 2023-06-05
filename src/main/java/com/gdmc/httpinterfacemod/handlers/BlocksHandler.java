@@ -1,5 +1,6 @@
 package com.gdmc.httpinterfacemod.handlers;
 
+import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler.BuildArea;
 import com.gdmc.httpinterfacemod.utils.TagComparator;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -67,6 +68,9 @@ public class BlocksHandler extends HandlerBase {
     // https://minecraft.fandom.com/wiki/Block_update
     private int customFlags; // -1 == no custom flags
 
+    // PUT/GET is true, constrain placement/getting blocks within the current build area.
+    private boolean withinBuildArea;
+
     private String dimension;
 
     public BlocksHandler(MinecraftServer mcServer) {
@@ -99,6 +103,8 @@ public class BlocksHandler extends HandlerBase {
             spawnDrops = Boolean.parseBoolean(queryParams.getOrDefault("spawnDrops", "false"));
 
             customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
+
+            withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
 
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
@@ -145,6 +151,14 @@ public class BlocksHandler extends HandlerBase {
             throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
         }
 
+        BuildArea buildArea = null;
+        if (withinBuildArea) {
+            buildArea = BuildAreaHandler.getBuildArea();
+            if (buildArea == null) {
+                throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
+            }
+        }
+
         for (JsonElement blockPlacement : blockPlacementList) {
             JsonObject blockPlacementItem = blockPlacement.getAsJsonObject();
             try {
@@ -159,6 +173,11 @@ public class BlocksHandler extends HandlerBase {
                     "%s %s %s".formatted(posXString, posYString, posZString),
                     commandSourceStack
                 );
+
+                if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
+                    returnValues.add(instructionStatus(false, "position is outside build area " + blockPlacement));
+                    continue;
+                }
 
                 // Skip if block id is missing
                 if (!blockPlacementItem.has("id")) {
@@ -225,6 +244,14 @@ public class BlocksHandler extends HandlerBase {
         int zMin = Math.min(z, zOffset);
         int zMax = Math.max(z, zOffset);
 
+        BuildArea buildArea = null;
+        if (withinBuildArea) {
+            buildArea = BuildAreaHandler.getBuildArea();
+            if (buildArea == null) {
+                throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
+            }
+        }
+
         // Create a JsonArray with JsonObject, each contain a key-value pair for
         // the x, y, z position, the block ID, the block state (if requested and available)
         // and the block entity data (if requested and available).
@@ -233,6 +260,9 @@ public class BlocksHandler extends HandlerBase {
             for (int rangeY = yMin; rangeY < yMax; rangeY++) {
                 for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
                     BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+                    if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
+                        continue;
+                    }
                     String blockId = getBlockAsStr(blockPos);
                     JsonObject json = new JsonObject();
                     json.addProperty("id", blockId);

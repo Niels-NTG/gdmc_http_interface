@@ -43,7 +43,7 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
-    final MinecraftServer mcServer;
+    public final MinecraftServer mcServer;
     public HandlerBase(MinecraftServer mcServer) {
         this.mcServer = mcServer;
     }
@@ -127,10 +127,10 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static String getHeader(Headers headers, String key, String defaultValue) {
         List<String> list = headers.get(key);
-        if(list == null || list.size() == 0)
+        if(list == null || list.size() == 0) {
             return defaultValue;
-        else
-            return list.get(0);
+        }
+        return list.get(0);
     }
 
     /**
