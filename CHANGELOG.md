@@ -1,4 +1,4 @@
-# GDMC-HTTP 1.3.0 (Minecraft 1.19.2)
+# GDMC-HTTP 1.3.2 (Minecraft 1.19.2)
 
 - NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.fandom.com/wiki/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
 - NEW: Add custom heightmap types `MOTION_BLOCKING_NO_PLANTS` and `OCEAN_FLOOR_NO_PLANTS`.

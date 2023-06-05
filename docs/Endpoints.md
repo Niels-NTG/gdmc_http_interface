@@ -897,20 +897,25 @@ Returns the [heightmap](https://minecraft.fandom.com/wiki/Heightmap) of the set 
 
 In addition to the build-in height map types of `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING` and `MOTION_BLOCKING_NO_LEAVES`, this mod also includes the following custom height maps:
 - `MOTION_BLOCKING_NO_PLANTS`
-  - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
-    - All logs
+  - Same as `MOTION_BLOCKING`, except it also excludes the following blocks
+    - Logs
+    - Leaves
     - Bee nests
     - Mangrove roots
     - Giant mushroom blocks
-    - All types of pumpkin blocks
+    - Pumpkin blocks
     - Melon blocks
+    - Moss blocks
+    - Nether wart blocks
     - Cactus blocks
     - Farmland
     - Coral blocks
     - Sponges
+    - Bamboo plants
+    - Cobwebs
+    - Sculk
 - `OCEAN_FLOOR_NO_PLANTS`
   - Same as `OCEAN_FLOOR`, except it also excludes the following blocks:
-    - Leaves
     - Everything listed for `MOTION_BLOCKING_NO_PLANTS`
 
 ## Request headers
