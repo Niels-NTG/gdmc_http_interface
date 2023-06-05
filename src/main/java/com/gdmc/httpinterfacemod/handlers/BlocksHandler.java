@@ -260,7 +260,7 @@ public class BlocksHandler extends HandlerBase {
             for (int rangeY = yMin; rangeY < yMax; rangeY++) {
                 for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
                     BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                    if (withinBuildArea                                                     && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
+                    if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
                         continue;
                     }
                     String blockId = getBlockAsStr(blockPos);
