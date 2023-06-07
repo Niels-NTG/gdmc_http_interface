@@ -2,8 +2,8 @@
 
 - NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.fandom.com/wiki/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
 - NEW: Add custom heightmap types `MOTION_BLOCKING_NO_PLANTS` and `OCEAN_FLOOR_NO_PLANTS`.
-- NEW: Add `withinBuildArea` flag to `GET /BLOCKS`. If set to true it skips over positions outside of the build area.
-- NEW: Add `withinBuildArea` flag to `PUT /BLOCKS`. If set to true it does not place blocks outside of the build area.
+- NEW: Add `withinBuildArea` flag to `GET /blocks`. If set to true it skips over positions outside of the build area.
+- NEW: Add `withinBuildArea` flag to `PUT /blocks`. If set to true it does not place blocks outside of the build area.
 
 # GDMC-HTTP 1.2.3 (Minecraft 1.19.2)
 
@@ -34,7 +34,7 @@
 
 # GDMC-HTTP 1.1.0 (Minecraft 1.19.2)
 
-- NEW: `POST /command` now accepts `x`, `y`, `z` parameters, usefull for when using commands with [relative coordinates](https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates) or commands such as [/locate](https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
+- NEW: `POST /command` now accepts `x`, `y`, `z` parameters, usefull for when using commands with [relative coordinates](https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
 - NEW: Add `OPTIONS /` to get version of Minecraft and version of GDMC-HTTP interface.
 - NEW: Port number of the HTTP interface can be changed using the `/sethttpport <port>` Minecraft console command. This value will be saved to a config file and therefore will be persistent.
 - NEW: Get port number of the HTTP interface via the `/gethttpport` Minecraft console command.
@@ -148,6 +148,6 @@
 # GDMC-HTTP 0.5.0 (Minecraft 1.19.2)
 
 - NEW: Compatibility with Minecraft version 1.19.2.
-- BREAKING: No longer compatible with versions of Minecraft other than 1.19.2.
+- BREAKING: No longer compatible with versions of Minecraft older than 1.19.2.
 
-For older versions of GDMC-HTTP, refer to [nilsgawlik/gdmc_http_interface](https://github.com/nilsgawlik/gdmc_http_interface/releases)
+For older versions of GDMC-HTTP, refer to [nilsgawlik/gdmc_http_interface](https://github.com/nikigawlik/gdmc_http_interface/releases)
