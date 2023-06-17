@@ -203,7 +203,7 @@ public class EntitiesHandler extends HandlerBase {
 		JsonArray jsonListUUID;
 		try {
 			jsonListUUID = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-		} catch (JsonSyntaxException jsonSyntaxException) {
+		} catch (IllegalStateException | JsonSyntaxException jsonSyntaxException) {
 			throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
 		}
 		entityUUIDToBeRemoved = Arrays.asList(new Gson().fromJson(jsonListUUID, String[].class));
