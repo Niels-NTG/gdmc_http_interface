@@ -1,20 +1,17 @@
-package com.gdmc.httpinterfacemod.handlers;
+package org.ntg.gdmc.gdmchttpinterface.handlers;
 
-import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler.BuildArea;
-import com.gdmc.httpinterfacemod.utils.TagComparator;
+import net.minecraft.core.registries.Registries;
+import org.ntg.gdmc.gdmchttpinterface.utils.TagComparator;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
-import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -151,7 +148,7 @@ public class BlocksHandler extends HandlerBase {
             throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
         }
 
-        BuildArea buildArea = null;
+        BuildAreaHandler.BuildArea buildArea = null;
         if (withinBuildArea) {
             buildArea = BuildAreaHandler.getBuildArea();
             if (buildArea == null) {
@@ -205,8 +202,8 @@ public class BlocksHandler extends HandlerBase {
 
                 // Pass block Id and block state string into a Stringreader with the the block state parser.
                 BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
-                    getBlockRegisteryLookup(commandSourceStack),
-                    new StringReader(blockId + blockStateString + blockNBTString),
+                    commandSourceStack.getLevel().holderLookup(Registries.BLOCK),
+                    blockId + blockStateString + blockNBTString,
                     true
                 );
                 BlockState blockState = parsedBlockState.blockState();
@@ -244,7 +241,7 @@ public class BlocksHandler extends HandlerBase {
         int zMin = Math.min(z, zOffset);
         int zMax = Math.max(z, zOffset);
 
-        BuildArea buildArea = null;
+        BuildAreaHandler.BuildArea buildArea = null;
         if (withinBuildArea) {
             buildArea = BuildAreaHandler.getBuildArea();
             if (buildArea == null) {
@@ -428,10 +425,6 @@ public class BlocksHandler extends HandlerBase {
      */
     public static String getBlockRegistryName(Block block) {
         return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block)).toString();
-    }
-
-    public static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
-      return new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
     }
 
     public static int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {

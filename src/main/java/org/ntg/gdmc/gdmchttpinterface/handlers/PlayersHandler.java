@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.handlers;
+package org.ntg.gdmc.gdmchttpinterface.handlers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;

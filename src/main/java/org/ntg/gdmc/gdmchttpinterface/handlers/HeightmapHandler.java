@@ -1,7 +1,7 @@
-package com.gdmc.httpinterfacemod.handlers;
+package org.ntg.gdmc.gdmchttpinterface.handlers;
 
-import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler.BuildArea;
-import com.gdmc.httpinterfacemod.utils.CustomHeightmap;
+import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
+import org.ntg.gdmc.gdmchttpinterface.utils.CustomHeightmap;
 import com.google.common.base.Enums;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;

@@ -1,7 +1,7 @@
-package com.gdmc.httpinterfacemod;
+package org.ntg.gdmc.gdmchttpinterface;
 
-import com.gdmc.httpinterfacemod.config.GdmcHttpConfig;
-import com.gdmc.httpinterfacemod.utils.RegistryHandler;
+import org.ntg.gdmc.gdmchttpinterface.config.GdmcHttpConfig;
+import org.ntg.gdmc.gdmchttpinterface.utils.RegistryHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,10 +17,10 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 
 // The value here should match an entry in the META-INF/mods.toml file
-@Mod("gdmchttp")
+@Mod("gdmchttpinterface")
 public class GdmcHttpMod
 {
-    public static final String MODID = "gdmchttp";
+    public static final String MODID = "gdmchttpinterface";
 
     // Directly reference a log4j logger.
     private static final Logger LOGGER = LogManager.getLogger();

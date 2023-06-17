@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.handlers;
+package org.ntg.gdmc.gdmchttpinterface.handlers;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;

@@ -1,6 +1,6 @@
-package com.gdmc.httpinterfacemod.handlers;
+package org.ntg.gdmc.gdmchttpinterface.handlers;
 
-import com.gdmc.httpinterfacemod.GdmcHttpMod;
+import org.ntg.gdmc.gdmchttpinterface.GdmcHttpMod;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;

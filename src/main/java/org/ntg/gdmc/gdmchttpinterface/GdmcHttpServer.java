@@ -1,9 +1,9 @@
-package com.gdmc.httpinterfacemod;
+package org.ntg.gdmc.gdmchttpinterface;
 
-import com.gdmc.httpinterfacemod.config.GdmcHttpConfig;
-import com.gdmc.httpinterfacemod.handlers.*;
 import com.sun.net.httpserver.HttpServer;
 import net.minecraft.server.MinecraftServer;
+import org.ntg.gdmc.gdmchttpinterface.config.GdmcHttpConfig;
+import org.ntg.gdmc.gdmchttpinterface.handlers.*;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

@@ -1,6 +1,6 @@
-package com.gdmc.httpinterfacemod.commands;
+package org.ntg.gdmc.gdmchttpinterface.commands;
 
-import com.gdmc.httpinterfacemod.config.GdmcHttpConfig;
+import org.ntg.gdmc.gdmchttpinterface.config.GdmcHttpConfig;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -25,7 +25,7 @@ public final class SetHttpInterfacePort {
 	private static int perform(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
 		try {
 			GdmcHttpConfig.HTTP_INTERFACE_PORT.set(newPortNumber);
-			commandSourceContext.getSource().sendSuccess(Component.nullToEmpty(
+			commandSourceContext.getSource().sendSuccess(() -> Component.nullToEmpty(
 				String.format("Port changed to %s. Reload the world for it to take effect.", newPortNumber)
 			), true);
 		} catch (IllegalArgumentException e) {

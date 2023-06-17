@@ -1,4 +1,4 @@
-# Minecraft HTTP Interface Mod (Minecraft 1.19.2)
+# Minecraft HTTP Interface Mod (Minecraft 1.20.1)
 
 A Minecraft (Java Edition) Forge Mod that implements an HTTP interface for reading and writing blocks.
 

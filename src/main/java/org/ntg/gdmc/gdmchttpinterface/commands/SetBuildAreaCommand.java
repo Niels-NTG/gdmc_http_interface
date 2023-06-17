@@ -1,6 +1,6 @@
-package com.gdmc.httpinterfacemod.commands;
+package org.ntg.gdmc.gdmchttpinterface.commands;
 
-import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler;
+import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.Commands;
@@ -32,14 +32,14 @@ public final class SetBuildAreaCommand {
 
     private static int unsetBuildArea(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
         BuildAreaHandler.unsetBuildArea();
-        commandSourceStackCommandContext.getSource().sendSuccess(Component.nullToEmpty("Build area unset"), true);
+        commandSourceStackCommandContext.getSource().sendSuccess(() -> Component.nullToEmpty("Build area unset"), true);
         return 1;
     }
 
     private static int setBuildArea(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
         BuildAreaHandler.setBuildArea(from, to);
         String feedback = String.format("Build area set to %s to %s", from.toShortString(), to.toShortString());
-        commandSourceContext.getSource().sendSuccess(Component.nullToEmpty(feedback), true);
+        commandSourceContext.getSource().sendSuccess(() -> Component.nullToEmpty(feedback), true);
         return 1;
     }
 }

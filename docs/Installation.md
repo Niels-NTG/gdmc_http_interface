@@ -2,7 +2,7 @@
 
 You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
 
-Get the [Forge Mod Installer](https://files.minecraftforge.net/) and download version 1.1.19.2-43.2.0, which you can find under the "1.19.2" > "Download Recommended" > "Installer". Open the downloaded file to install this version of Forge.
+Get the [Forge Mod Installer](https://files.minecraftforge.net/) and download version 1.20.1-47.0.3, which you can find under the "1.20.1" > "Download Recommended" > "Installer". Open the downloaded file to install this version of Forge.
 
 Open your Minecraft Launcher, the Forge Installation should have appeared there.
 

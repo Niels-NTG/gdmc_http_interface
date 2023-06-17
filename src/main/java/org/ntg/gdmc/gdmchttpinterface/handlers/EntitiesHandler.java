@@ -1,6 +1,7 @@
-package com.gdmc.httpinterfacemod.handlers;
+package org.ntg.gdmc.gdmchttpinterface.handlers;
 
-import com.gdmc.httpinterfacemod.utils.TagMerger;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import org.ntg.gdmc.gdmchttpinterface.utils.TagMerger;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,7 +10,6 @@ import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.EntitySummonArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
@@ -297,7 +297,7 @@ public class EntitiesHandler extends HandlerBase {
 			entityPosition = Vec3Argument.vec3().parse(sr).getPosition(commandSourceStack);
 			sr.skip();
 
-			entityResourceLocation = EntitySummonArgument.id().parse(sr);
+			entityResourceLocation = ResourceLocationArgument.id().parse(sr);
 			sr.skip();
 
 			try {
@@ -312,7 +312,12 @@ public class EntitiesHandler extends HandlerBase {
 		}
 
 		public JsonObject summon(ServerLevel level) {
-			if (!Level.isInSpawnableBounds(new BlockPos(entityPosition))) {
+
+			if (!Level.isInSpawnableBounds(new BlockPos(
+				(int)entityPosition.x,
+				(int)entityPosition.y,
+				(int)entityPosition.z
+			))) {
 				return instructionStatus(false, "Position is not in spawnable bounds");
 			}
 

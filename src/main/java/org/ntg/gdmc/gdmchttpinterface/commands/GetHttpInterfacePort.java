@@ -1,6 +1,6 @@
-package com.gdmc.httpinterfacemod.commands;
+package org.ntg.gdmc.gdmchttpinterface.commands;
 
-import com.gdmc.httpinterfacemod.GdmcHttpServer;
+import org.ntg.gdmc.gdmchttpinterface.GdmcHttpServer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -15,15 +15,13 @@ public class GetHttpInterfacePort {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(
 			Commands.literal(COMMAND_NAME)
-			.executes(context -> perform(context))
+			.executes(GetHttpInterfacePort :: perform)
 		);
 	}
 
 	private static int perform(CommandContext<CommandSourceStack> commandSourceContext) {
 		int currentPort = GdmcHttpServer.getCurrentHttpPort();
-		commandSourceContext.getSource().sendSuccess(Component.nullToEmpty(
-			String.valueOf(currentPort)
-		), true);
+		commandSourceContext.getSource().sendSuccess(() -> Component.nullToEmpty(String.valueOf(currentPort)), true);
 		return currentPort;
 	}
 }

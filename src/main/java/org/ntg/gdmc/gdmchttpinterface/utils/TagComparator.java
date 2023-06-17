@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.utils;
+package org.ntg.gdmc.gdmchttpinterface.utils;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
