@@ -7,14 +7,15 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPOutputStream;
 
 public class ChunkHandler extends HandlerBase {
@@ -71,26 +72,27 @@ public class ChunkHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         // Gather all chunk data within the given range.
-        CompletableFuture<ListTag> cfs = CompletableFuture.supplyAsync(() -> {
-            int xOffset = chunkX + chunkDX;
-            int xMin = Math.min(chunkX, xOffset);
-            int xMax = Math.max(chunkX, xOffset);
+        int xOffset = chunkX + chunkDX;
+        int xMin = Math.min(chunkX, xOffset);
+        int xMax = Math.max(chunkX, xOffset);
 
-            int zOffset = chunkZ + chunkDZ;
-            int zMin = Math.min(chunkZ, zOffset);
-            int zMax = Math.max(chunkZ, zOffset);
-            ListTag returnList = new ListTag();
-            for (int rangeZ = zMin; rangeZ < zMax; rangeZ++)
-                for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-                    LevelChunk chunk = serverLevel.getChunk(rangeX, rangeZ);
-                    CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
-                    returnList.add(chunkNBT);
-                }
-            return returnList;
-        }, mcServer);
+        int zOffset = chunkZ + chunkDZ;
+        int zMin = Math.min(chunkZ, zOffset);
+        int zMax = Math.max(chunkZ, zOffset);
 
-        // block this thread until the above code has run on the main thread
-        ListTag chunkList = cfs.join();
+        Map<ChunkPos, CompoundTag> chunkMap = new LinkedHashMap<>();
+        for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
+            for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+                chunkMap.put(new ChunkPos(rangeX, rangeZ), null);
+            }
+        }
+        chunkMap.keySet().parallelStream().forEach(chunkPos -> {
+            LevelChunk chunk = serverLevel.getChunk(chunkPos.x, chunkPos.z);
+            CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
+            chunkMap.replace(chunkPos, chunkNBT);
+        });
+        ListTag chunkList = new ListTag();
+        chunkList.addAll(chunkMap.values());
 
         CompoundTag bodyNBT = new CompoundTag();
         bodyNBT.put("Chunks", chunkList);
