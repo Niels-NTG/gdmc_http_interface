@@ -5,6 +5,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.ChunkPos;
 
 import java.io.IOException;
 
@@ -58,6 +59,8 @@ public class BuildAreaHandler extends HandlerBase {
 
         public final transient BlockPos from;
         public final transient BlockPos to;
+        public final transient ChunkPos sectionFrom;
+        public final transient ChunkPos sectionTo;
 
         public BuildArea(BlockPos _from, BlockPos _to) {
             this.xFrom = _from.getX();
@@ -68,6 +71,8 @@ public class BuildAreaHandler extends HandlerBase {
             this.zTo = _to.getZ();
             this.from = _from;
             this.to = _to;
+            this.sectionFrom = new ChunkPos(_from);
+            this.sectionTo = new ChunkPos(_to);
         }
 
         public boolean isOutsideBuildArea(BlockPos pos) {
@@ -76,6 +81,10 @@ public class BuildAreaHandler extends HandlerBase {
 
         public boolean isOutsideBuildArea(int x, int z) {
             return x < from.getX() || x > to.getX() || z < from.getZ() || z > to.getZ();
+        }
+
+        public boolean isOutsideBuildArea(ChunkPos chunkPos) {
+            return isOutsideBuildArea(chunkPos.getWorldPosition());
         }
     }
 }

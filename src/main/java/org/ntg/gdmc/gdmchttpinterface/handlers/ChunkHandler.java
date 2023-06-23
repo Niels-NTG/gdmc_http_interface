@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -40,13 +41,32 @@ public class ChunkHandler extends HandlerBase {
 
         String dimension;
 
+        BuildArea buildArea = BuildAreaHandler.getBuildArea();
+
         try {
-            chunkX = Integer.parseInt(queryParams.getOrDefault("x", "0"));
-            chunkZ = Integer.parseInt(queryParams.getOrDefault("z", "0"));
+            if (queryParams.get("x") == null && buildArea != null) {
+                chunkX = buildArea.sectionFrom.x;
+            } else {
+                chunkX = Integer.parseInt(queryParams.getOrDefault("x", "0"));
+            }
 
-            chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
-            chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+            if (queryParams.get("z") == null && buildArea != null) {
+                chunkZ = buildArea.sectionFrom.z;
+            } else {
+                chunkZ = Integer.parseInt(queryParams.getOrDefault("z", "0"));
+            }
 
+            if (queryParams.get("dx") == null && buildArea != null) {
+                chunkDX = Math.max(buildArea.sectionTo.x - buildArea.sectionFrom.x, 0) + 1;
+            } else {
+                chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
+            }
+
+            if (queryParams.get("dz") == null && buildArea != null) {
+                chunkDZ = Math.max(buildArea.sectionTo.z - buildArea.sectionFrom.z, 0) + 1;
+            } else {
+                chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+            }
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
