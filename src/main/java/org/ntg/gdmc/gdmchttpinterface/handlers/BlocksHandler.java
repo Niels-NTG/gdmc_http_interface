@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -249,10 +250,7 @@ public class BlocksHandler extends HandlerBase {
             }
         }
 
-        // Create a JsonArray with JsonObject, each contain a key-value pair for
-        // the x, y, z position, the block ID, the block state (if requested and available)
-        // and the block entity data (if requested and available).
-        JsonArray jsonArray = new JsonArray();
+        Map<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
         for (int rangeX = xMin; rangeX < xMax; rangeX++) {
             for (int rangeY = yMin; rangeY < yMax; rangeY++) {
                 for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
@@ -260,22 +258,30 @@ public class BlocksHandler extends HandlerBase {
                     if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
                         continue;
                     }
-                    String blockId = getBlockAsStr(blockPos);
-                    JsonObject json = new JsonObject();
-                    json.addProperty("id", blockId);
-                    json.addProperty("x", rangeX);
-                    json.addProperty("y", rangeY);
-                    json.addProperty("z", rangeZ);
-                    if (includeState) {
-                        json.add("state", getBlockStateAsJsonObject(blockPos));
-                    }
-                    if (includeData) {
-                        json.addProperty("data", getBlockDataAsStr(blockPos));
-                    }
-                    jsonArray.add(json);
+                    blockPosMap.put(blockPos, null);
                 }
             }
         }
+        blockPosMap.keySet().parallelStream().forEach(blockPos -> {
+            String blockId = getBlockAsStr(blockPos);
+            JsonObject json = new JsonObject();
+            json.addProperty("id", blockId);
+            json.addProperty("x", blockPos.getX());
+            json.addProperty("y", blockPos.getY());
+            json.addProperty("z", blockPos.getZ());
+            if (includeState) {
+                json.add("state", getBlockStateAsJsonObject(blockPos));
+            }
+            if (includeData) {
+                json.addProperty("data", getBlockDataAsStr(blockPos));
+            }
+            blockPosMap.replace(blockPos, json);
+        });
+        JsonArray jsonArray = new JsonArray();
+        for (JsonObject blockJson : blockPosMap.values()) {
+            jsonArray.add(blockJson);
+        }
+
         return jsonArray;
     }
 
