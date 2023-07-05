@@ -65,12 +65,8 @@ public class HeightmapHandler extends HandlerBase {
         int[][] heightmap = new int[xSize][zSize];
 
         // Get the number of chunks
-        int xChunkCount = Math.floorDiv(buildArea.to.getX(), 16) - Math.floorDiv(buildArea.from.getX(), 16) + 1;
-        int zChunkCount = Math.floorDiv(buildArea.to.getZ(), 16) - Math.floorDiv(buildArea.from.getZ(), 16) + 1;
-
-        // Get the chunk x and z of the chunk at the lowest x and z
-        int minChunkX = Math.floorDiv(buildArea.from.getX(), 16);
-        int minChunkZ = Math.floorDiv(buildArea.from.getZ(), 16);
+        int xChunkCount = Math.max(buildArea.sectionTo.x - buildArea.sectionFrom.x, 0) + 1;
+        int zChunkCount = Math.max(buildArea.sectionTo.z - buildArea.sectionFrom.z, 0) + 1;
 
         // Check if the type is a valid heightmap type
         Heightmap.Types defaultHeightmapType = Enums.getIfPresent(Heightmap.Types.class, heightmapTypeString).orNull();
@@ -80,8 +76,8 @@ public class HeightmapHandler extends HandlerBase {
         }
 
         // For every chunk in the build area
-        for (int chunkX = minChunkX; chunkX < xChunkCount + minChunkX; ++chunkX) {
-            for (int chunkZ = minChunkZ; chunkZ < zChunkCount + minChunkZ; ++chunkZ) {
+        for (int chunkX = buildArea.sectionFrom.x; chunkX < xChunkCount + buildArea.sectionFrom.x; chunkX++) {
+            for (int chunkZ = buildArea.sectionFrom.z; chunkZ < zChunkCount + buildArea.sectionFrom.z; chunkZ++) {
 
                 // Get the chunk
                 LevelChunk chunk = serverlevel.getChunk(chunkX, chunkZ);
