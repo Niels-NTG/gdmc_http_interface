@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
@@ -21,6 +20,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ntg.gdmc.gdmchttpinterface.utils.CustomCommandSource;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,7 +33,7 @@ import java.util.Map;
 public abstract class HandlerBase implements HttpHandler {
 
     public static class HttpException extends RuntimeException {
-        public final String message;
+    public final String message;
         public final int statusCode;
         public HttpException(String message, int statusCode) {
             this.message = message;
@@ -223,8 +223,11 @@ public abstract class HandlerBase implements HttpHandler {
         return instructionStatus(isSuccess, null);
     }
     protected static JsonObject instructionStatus(boolean isSuccess, String message) {
+        return instructionStatus(isSuccess ? 1 : 0, message);
+    }
+    protected static JsonObject instructionStatus(int status, String message) {
         JsonObject json = new JsonObject();
-        json.addProperty("status", isSuccess ? 1 : 0);
+        json.addProperty("status", status);
         if (message != null) {
             json.addProperty("message", message);
         }
@@ -246,25 +249,8 @@ public abstract class HandlerBase implements HttpHandler {
      * @return              An instance of {@link CommandSourceStack}.
      */
     protected CommandSourceStack createCommandSource(String name, String dimension, Vec3 pos) {
-        CommandSource commandSource = new CommandSource() {
-            @Override
-            public void sendSystemMessage(Component p_230797_) {}
 
-            @Override
-            public boolean acceptsSuccess() {
-                return false;
-            }
-
-            @Override
-            public boolean acceptsFailure() {
-                return false;
-            }
-
-            @Override
-            public boolean shouldInformAdmins() {
-                return false;
-            }
-        };
+        CustomCommandSource commandSource = new CustomCommandSource();
 
         return new CommandSourceStack(
             commandSource,
@@ -277,6 +263,10 @@ public abstract class HandlerBase implements HttpHandler {
             mcServer,
             null
         );
+    }
+
+    protected CustomCommandSource getCustomCommandSource(CommandSourceStack commandSourceStack) {
+        return (CustomCommandSource) commandSourceStack.source;
     }
 
     /**

@@ -67,9 +67,10 @@ public class CommandHandler extends HandlerBase {
     private JsonObject executeCommand(String command, CommandSourceStack cmdSrc) {
         try {
             int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
+            String lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
             return instructionStatus(
-                    commandStatus != 0,
-                    commandStatus != 1 && commandStatus != 0 ? String.valueOf(commandStatus) : null
+                commandStatus,
+                lastCommandResult
             );
         } catch (CommandSyntaxException e) {
             return instructionStatus(false, e.getMessage());
