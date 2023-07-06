@@ -1,5 +1,6 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
+import net.minecraft.world.level.ChunkPos;
 import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
 import org.ntg.gdmc.gdmchttpinterface.utils.CustomHeightmap;
 import com.google.common.base.Enums;
@@ -12,6 +13,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class HeightmapHandler extends HandlerBase {
@@ -75,39 +77,44 @@ public class HeightmapHandler extends HandlerBase {
             throw new HttpException("heightmap type " + heightmapTypeString + " is not supported.", 400);
         }
 
-        // For every chunk in the build area
+        ArrayList<ChunkPos> chunkPosList = new ArrayList<>();
         for (int chunkX = buildArea.sectionFrom.x; chunkX < xChunkCount + buildArea.sectionFrom.x; chunkX++) {
             for (int chunkZ = buildArea.sectionFrom.z; chunkZ < zChunkCount + buildArea.sectionFrom.z; chunkZ++) {
-
-                // Get the chunk
-                LevelChunk chunk = serverlevel.getChunk(chunkX, chunkZ);
-
-                // Get the heightmap of type
-                Heightmap defaultChunkHeightmap = null;
-                CustomHeightmap customChunkHeightmap = null;
-                if (defaultHeightmapType != null) {
-                    defaultChunkHeightmap = chunk.getOrCreateHeightmapUnprimed(defaultHeightmapType);
-                } else if (customHeightmapType != null) {
-                    customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, customHeightmapType);
-                }
-
-                // For every combination of x and z in that chunk
-                int chunkMinX = chunkX * 16;
-                int chunkMinZ = chunkZ * 16;
-                for (int x = chunkMinX; x < chunkMinX + 16; ++x) {
-                    for (int z = chunkMinZ; z < chunkMinZ + 16; ++z) {
-                        // If the column is out of bounds skip it
-                        if (buildArea.isOutsideBuildArea(x, z)) {
-                            continue;
-                        }
-                        // Set the value in the heightmap array
-                        heightmap[x - buildArea.from.getX()][z - buildArea.from.getZ()] = defaultChunkHeightmap != null ?
-                            defaultChunkHeightmap.getFirstAvailable(x - chunkMinX, z - chunkMinZ) :
-                            customChunkHeightmap.getFirstAvailable(x - chunkMinX, z - chunkMinZ);
-                    }
-                }
+                chunkPosList.add(new ChunkPos(chunkX, chunkZ));
             }
         }
+
+        chunkPosList.parallelStream().forEach(chunkPos -> {
+            LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
+
+            // Get the heightmap of type
+            Heightmap defaultChunkHeightmap = null;
+            CustomHeightmap customChunkHeightmap = null;
+            if (defaultHeightmapType != null) {
+                defaultChunkHeightmap = chunk.getOrCreateHeightmapUnprimed(defaultHeightmapType);
+            } else if (customHeightmapType != null) {
+                customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, customHeightmapType);
+            }
+
+            // For every combination of x and z in that chunk
+            int chunkMinX = chunkPos.getMinBlockX();
+            int chunkMinZ = chunkPos.getMinBlockZ();
+            int chunkMaxX = chunkPos.getMaxBlockX();
+            int chunkMaxZ = chunkPos.getMaxBlockZ();
+            for (int x = chunkMinX; x <= chunkMaxX; x++) {
+                for (int z = chunkMinZ; z <= chunkMaxZ; z++) {
+                    // If the column is out of bounds skip it
+                    if (buildArea.isOutsideBuildArea(x, z)) {
+                        continue;
+                    }
+                    // Set the value in the heightmap array
+                    int height = defaultChunkHeightmap != null ?
+                        defaultChunkHeightmap.getFirstAvailable(x - chunkMinX, z - chunkMinZ) :
+                        customChunkHeightmap.getFirstAvailable(x - chunkMinX, z - chunkMinZ);
+                    heightmap[x - buildArea.from.getX()][z - buildArea.from.getZ()] = height;
+                }
+            }
+        });
 
         // Return the completed heightmap array
         return heightmap;
