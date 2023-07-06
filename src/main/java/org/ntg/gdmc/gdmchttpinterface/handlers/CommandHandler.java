@@ -15,7 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class CommandHandler extends HandlerBase {
 
@@ -54,21 +53,7 @@ public class CommandHandler extends HandlerBase {
             if (command.length() == 0) {
                 continue;
             }
-            // requests to run the actual command execution on the main thread
-            CompletableFuture<JsonObject> cfs = CompletableFuture.supplyAsync(() -> {
-                try {
-                    int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
-                    return instructionStatus(
-                        commandStatus != 0,
-                        commandStatus != 1 && commandStatus != 0 ? String.valueOf(commandStatus) : null
-                    );
-                } catch (CommandSyntaxException e) {
-                    return instructionStatus(false, e.getMessage());
-                }
-            }, mcServer);
-
-            // block this thread until the above code has run on the main thread
-            returnValues.add(cfs.join());
+            returnValues.add(executeCommand(command, cmdSrc));
         }
 
         // Response headers
@@ -77,5 +62,17 @@ public class CommandHandler extends HandlerBase {
 
         // body
         resolveRequest(httpExchange, returnValues.toString());
+    }
+
+    private JsonObject executeCommand(String command, CommandSourceStack cmdSrc) {
+        try {
+            int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
+            return instructionStatus(
+                    commandStatus != 0,
+                    commandStatus != 1 && commandStatus != 0 ? String.valueOf(commandStatus) : null
+            );
+        } catch (CommandSyntaxException e) {
+            return instructionStatus(false, e.getMessage());
+        }
     }
 }
