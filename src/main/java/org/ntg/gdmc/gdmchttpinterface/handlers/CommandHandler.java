@@ -6,6 +6,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.Vec3;
 
@@ -67,11 +68,12 @@ public class CommandHandler extends HandlerBase {
     private JsonObject executeCommand(String command, CommandSourceStack cmdSrc) {
         try {
             int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
-            String lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
-            return instructionStatus(
-                commandStatus,
-                lastCommandResult
+            Component lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
+            JsonObject json = instructionStatus(
+                commandStatus != 0,
+                lastCommandResult != null ? lastCommandResult.getString() : null
             );
+            return json;
         } catch (CommandSyntaxException e) {
             return instructionStatus(false, e.getMessage());
         }

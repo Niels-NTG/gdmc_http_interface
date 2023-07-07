@@ -27,12 +27,7 @@ public class CustomCommandSource implements CommandSource {
         return true;
     }
 
-    public String getLastOutput() {
-        String lastOutput = null;
-        if (this.lastOutput != null) {
-            lastOutput = this.lastOutput.getString();
-        }
-        this.lastOutput = null;
-        return lastOutput;
+    public Component getLastOutput() {
+        return this.lastOutput;
     }
 }
