@@ -64,6 +64,7 @@ The request body should be formatted as plain-text and can contain multiple comm
 ## Response body
 
 A JSON array with an entry on the result of each command.
+Please note that the value of the `"message"` property is only intended to give human-friendly debug information and is subject to localisation.
 
 ## Example
 
@@ -73,7 +74,7 @@ When posting following body to `POST /command`
 say start
 tp @p 0 70 0
 setblock 0 69 0 stone
-fill -8 68 -8 8 68 8 oak_planks replace
+locate structure minecraft:pillager_outpost
 say end
 ```
 
@@ -90,10 +91,10 @@ each command will be executed line by line in the context of the overworld dimen
 	{
 		"status": 1
 	},
-	{
-		"status": 1,
-		"message": "289"
-	},
+    {
+        "status": 1,
+        "message": "The nearest minecraft:pillager_outpost is at [-1376, ~, -912] (2301 blocks away)"
+    },
 	{
 		"status": 1
 	}
