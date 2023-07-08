@@ -35,6 +35,9 @@ public class BiomesHandler extends HandlerBase {
 		int dy;
 		int dz;
 
+		// GET is true, constrain getting biomes within the current build area.
+		boolean withinBuildArea;
+
 		String dimension;
 
 		try {
@@ -45,6 +48,8 @@ public class BiomesHandler extends HandlerBase {
 			dx = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
 			dy = Integer.parseInt(queryParams.getOrDefault("dy", "1"));
 			dz = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+
+			withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
 
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
@@ -72,12 +77,23 @@ public class BiomesHandler extends HandlerBase {
 			int zMin = Math.min(z, zOffset);
 			int zMax = Math.max(z, zOffset);
 
+			BuildAreaHandler.BuildArea buildArea = null;
+			if (withinBuildArea) {
+				buildArea = BuildAreaHandler.getBuildArea();
+				if (buildArea == null) {
+					throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
+				}
+			}
+
 			// Create a JsonArray with JsonObject, each contain a key-value pair for
 			// the x, y, z position and the namespaced biome name.
 			for (int rangeX = xMin; rangeX < xMax; rangeX++) {
 				for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 					for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 						BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+						if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
+							continue;
+						}
 						Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
 						if (biomeResourceKey.isEmpty()) {
 							continue;

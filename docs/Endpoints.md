@@ -380,15 +380,16 @@ Get [biome](https://minecraft.fandom.com/wiki/Biome#List_of_biomes) information 
 
 ## URL parameters
 
-| key       | valid values                                          | required | defaults to | description                                              |
-|-----------|-------------------------------------------------------|----------|-------------|----------------------------------------------------------|
-| x         | integer                                               | yes      | `0`         | X coordinate                                             |
-| y         | integer                                               | yes      | `0`         | Y coordinate                                             |
-| z         | integer                                               | yes      | `0`         | Z coordinate                                             |
-| dx        | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative) |
-| dy        | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative) |
-| dz        | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative) |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from         |
+| key             | valid values                                          | required | defaults to | description                                                    |
+|-----------------|-------------------------------------------------------|----------|-------------|----------------------------------------------------------------|
+| x               | integer                                               | yes      | `0`         | X coordinate                                                   |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                   |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                   |
+| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)       |
+| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)       |
+| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)       |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skip over positions that are outside the build area |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from               |
 
 ## Request headers
 
