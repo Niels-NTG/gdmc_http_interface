@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -59,8 +60,6 @@ public class BiomesHandler extends HandlerBase {
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
 
-		JsonArray responseList = new JsonArray();
-
 		if (method.equals("get")) {
 			ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -85,40 +84,50 @@ public class BiomesHandler extends HandlerBase {
 				}
 			}
 
-			// Create a JsonArray with JsonObject, each contain a key-value pair for
-			// the x, y, z position and the namespaced biome name.
+			// Create an ordered map with an entry for every block position we want to know the biome of.
+			Map<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
 			for (int rangeX = xMin; rangeX < xMax; rangeX++) {
 				for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 					for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 						BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-						if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
+						if (withinBuildArea && buildArea.isOutsideBuildArea(blockPos)) {
 							continue;
 						}
-						Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
-						if (biomeResourceKey.isEmpty()) {
-							continue;
-						}
-						String biomeName = "";
-						if (!serverLevel.isOutsideBuildHeight(blockPos)) {
-							biomeName = biomeResourceKey.get().location().toString();
-						}
-						JsonObject json = new JsonObject();
-						json.addProperty("id", biomeName);
-						json.addProperty("x", rangeX);
-						json.addProperty("y", rangeY);
-						json.addProperty("z", rangeZ);
-						responseList.add(json);
+						blockPosMap.put(blockPos, null);
 					}
 				}
 			}
+			// Gather biome information for each position in parallel.
+			blockPosMap.keySet().parallelStream().forEach(blockPos -> {
+				Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
+				if (biomeResourceKey.isPresent()) {
+					String biomeName = "";
+					if (!serverLevel.isOutsideBuildHeight(blockPos)) {
+						biomeName = biomeResourceKey.get().location().toString();
+					}
+					JsonObject json = new JsonObject();
+					json.addProperty("id", biomeName);
+					json.addProperty("x", blockPos.getX());
+					json.addProperty("y", blockPos.getY());
+					json.addProperty("z", blockPos.getZ());
+					blockPosMap.replace(blockPos, json);
+				}
+			});
+			// Create a JsonArray with JsonObject, each contain a key-value pair for
+			// the x, y, z position and the namespaced biome name.
+			JsonArray responseList = new JsonArray();
+			for (JsonObject biomeJson : blockPosMap.values()) {
+				responseList.add(biomeJson);
+			}
+
+			// Response headers
+			Headers responseHeaders = httpExchange.getResponseHeaders();
+			setDefaultResponseHeaders(responseHeaders);
+
+			resolveRequest(httpExchange, responseList.toString());
+
 		} else {
 			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
 		}
-
-		// Response headers
-		Headers responseHeaders = httpExchange.getResponseHeaders();
-		setDefaultResponseHeaders(responseHeaders);
-
-		resolveRequest(httpExchange, responseList.toString());
 	}
 }
