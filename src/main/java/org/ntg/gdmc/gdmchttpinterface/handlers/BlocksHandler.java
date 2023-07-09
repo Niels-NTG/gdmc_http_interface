@@ -1,6 +1,8 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
 import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.ntg.gdmc.gdmchttpinterface.utils.TagComparator;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -29,10 +31,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 public class BlocksHandler extends HandlerBase {
@@ -253,6 +252,7 @@ public class BlocksHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         Map<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
+        Map<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
         for (int rangeX = xMin; rangeX < xMax; rangeX++) {
             for (int rangeY = yMin; rangeY < yMax; rangeY++) {
                 for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
@@ -261,21 +261,25 @@ public class BlocksHandler extends HandlerBase {
                         continue;
                     }
                     blockPosMap.put(blockPos, null);
+                    chunkPosMap.put(new ChunkPos(blockPos), null);
                 }
             }
         }
+        chunkPosMap.keySet().parallelStream().forEach(chunkPos -> chunkPosMap.replace(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z)));
         blockPosMap.keySet().parallelStream().forEach(blockPos -> {
-            String blockId = getBlockAsStr(blockPos, serverLevel);
+            LevelChunk levelChunk = chunkPosMap.get(new ChunkPos(blockPos));
+
+            String blockId = getBlockAsStr(blockPos, levelChunk);
             JsonObject json = new JsonObject();
             json.addProperty("id", blockId);
             json.addProperty("x", blockPos.getX());
             json.addProperty("y", blockPos.getY());
             json.addProperty("z", blockPos.getZ());
             if (includeState) {
-                json.add("state", getBlockStateAsJsonObject(blockPos, serverLevel));
+                json.add("state", getBlockStateAsJsonObject(blockPos, levelChunk));
             }
             if (includeData) {
-                json.addProperty("data", getBlockDataAsStr(blockPos, serverLevel));
+                json.addProperty("data", getBlockDataAsStr(blockPos, levelChunk));
             }
             blockPosMap.replace(blockPos, json);
         });
@@ -287,8 +291,8 @@ public class BlocksHandler extends HandlerBase {
         return jsonArray;
     }
 
-    private static BlockState getBlockStateAtPosition(BlockPos pos, ServerLevel serverLevel) {
-        return serverLevel.getBlockState(pos);
+    private static BlockState getBlockStateAtPosition(BlockPos pos, LevelChunk levelChunk) {
+        return levelChunk.getBlockState(pos);
     }
 
     /**
@@ -384,32 +388,35 @@ public class BlocksHandler extends HandlerBase {
     }
 
     /**
-     * @param pos   Position of block in the world.
+     * @param pos           Position of block in the world.
+     * @param levelChunk    Chunk to request block state from
      * @return      Namespaced name of the block material.
      */
-    private static String getBlockAsStr(BlockPos pos, ServerLevel serverLevel) {
-        BlockState bs = getBlockStateAtPosition(pos, serverLevel);
+    private static String getBlockAsStr(BlockPos pos, LevelChunk levelChunk) {
+        BlockState bs = getBlockStateAtPosition(pos, levelChunk);
         return Objects.requireNonNull(getBlockRegistryName(bs));
     }
 
     /**
-     * @param pos   Position of block in the world.
+     * @param pos           Position of block in the world.
+     * @param levelChunk    Chunk to request block state from
      * @return      {@link JsonObject} containing the block state data of the block at the given position.
      */
-    private static JsonObject getBlockStateAsJsonObject(BlockPos pos, ServerLevel serverLevel) {
-        BlockState bs = getBlockStateAtPosition(pos, serverLevel);
+    private static JsonObject getBlockStateAsJsonObject(BlockPos pos, LevelChunk levelChunk) {
+        BlockState bs = getBlockStateAtPosition(pos, levelChunk);
         JsonObject stateJsonObject = new JsonObject();
         bs.getValues().entrySet().stream().map(propertyToStringPairFunction).filter(Objects::nonNull).forEach(pair -> stateJsonObject.add(pair.getKey(), new JsonPrimitive(pair.getValue())));
         return stateJsonObject;
     }
 
     /**
-     * @param pos   Position of block in the world.
+     * @param pos           Position of block in the world.
+     * @param levelChunk    Chunk to request block state from
      * @return      {@link String} containing the block entity data of the block at the given position.
      */
-    private static String getBlockDataAsStr(BlockPos pos, ServerLevel serverLevel) {
+    private static String getBlockDataAsStr(BlockPos pos, LevelChunk levelChunk) {
         String str = "{}";
-        BlockEntity blockEntity = serverLevel.getExistingBlockEntity(pos);
+        BlockEntity blockEntity = levelChunk.getExistingBlockEntity(pos);
         if (blockEntity != null) {
             CompoundTag tags = blockEntity.saveWithoutMetadata();
             str = tags.getAsString();
