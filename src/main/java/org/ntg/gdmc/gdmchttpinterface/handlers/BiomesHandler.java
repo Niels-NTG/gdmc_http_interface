@@ -8,9 +8,12 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -86,6 +89,7 @@ public class BiomesHandler extends HandlerBase {
 
 			// Create an ordered map with an entry for every block position we want to know the biome of.
 			Map<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
+			Map<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
 			for (int rangeX = xMin; rangeX < xMax; rangeX++) {
 				for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 					for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
@@ -94,12 +98,15 @@ public class BiomesHandler extends HandlerBase {
 							continue;
 						}
 						blockPosMap.put(blockPos, null);
+						chunkPosMap.put(new ChunkPos(blockPos), null);
 					}
 				}
 			}
+			chunkPosMap.keySet().parallelStream().forEach(chunkPos -> chunkPosMap.replace(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z)));
 			// Gather biome information for each position in parallel.
 			blockPosMap.keySet().parallelStream().forEach(blockPos -> {
-				Optional<ResourceKey<Biome>> biomeResourceKey = serverLevel.getBiome(blockPos).unwrapKey();
+				LevelChunk levelChunk = chunkPosMap.get(new ChunkPos(blockPos));
+				Optional<ResourceKey<Biome>> biomeResourceKey = levelChunk.getNoiseBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ()).unwrapKey();
 				if (biomeResourceKey.isPresent()) {
 					String biomeName = "";
 					if (!serverLevel.isOutsideBuildHeight(blockPos)) {
