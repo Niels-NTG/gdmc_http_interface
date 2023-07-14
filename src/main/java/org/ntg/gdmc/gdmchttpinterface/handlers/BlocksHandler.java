@@ -30,7 +30,6 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.*;
 import java.util.function.Function;
 
@@ -141,12 +140,7 @@ public class BlocksHandler extends HandlerBase {
 
         JsonArray returnValues = new JsonArray();
 
-        JsonArray blockPlacementList;
-        try {
-            blockPlacementList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-        } catch (JsonSyntaxException jsonSyntaxException) {
-            throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-        }
+        JsonArray blockPlacementList = parseJsonArray(requestBody);
 
         BuildAreaHandler.BuildArea buildArea = null;
         if (withinBuildArea) {

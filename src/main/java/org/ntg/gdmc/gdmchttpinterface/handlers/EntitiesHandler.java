@@ -25,7 +25,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -117,12 +116,7 @@ public class EntitiesHandler extends HandlerBase {
 		ServerLevel serverLevel = getServerLevel(dimension);
 
 		JsonArray returnValues = new JsonArray();
-		JsonArray entityDescriptionList;
-		try {
-			entityDescriptionList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-		} catch (JsonSyntaxException jsonSyntaxException) {
-			throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-		}
+		JsonArray entityDescriptionList = parseJsonArray(requestBody);
 
 		for (JsonElement entityDescription : entityDescriptionList) {
 			JsonObject json = entityDescription.getAsJsonObject();
@@ -200,12 +194,7 @@ public class EntitiesHandler extends HandlerBase {
 
 		JsonArray returnValues = new JsonArray();
 
-		JsonArray jsonListUUID;
-		try {
-			jsonListUUID = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-		} catch (IllegalStateException | JsonSyntaxException jsonSyntaxException) {
-			throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-		}
+		JsonArray jsonListUUID = parseJsonArray(requestBody);
 		entityUUIDToBeRemoved = Arrays.asList(new Gson().fromJson(jsonListUUID, String[].class));
 
 		for (String stringUUID : entityUUIDToBeRemoved) {
@@ -244,12 +233,8 @@ public class EntitiesHandler extends HandlerBase {
 
 		JsonArray returnValues = new JsonArray();
 
-		JsonArray jsonList;
-		try {
-			jsonList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-		} catch (JsonSyntaxException jsonSyntaxException) {
-			throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-		}
+		JsonArray jsonList = parseJsonArray(requestBody);
+
 		for (JsonElement entityDescription : jsonList) {
 			JsonObject json = entityDescription.getAsJsonObject();
 			PatchEntityInstruction patchEntityInstruction;

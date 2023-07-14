@@ -1,6 +1,9 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -23,6 +26,8 @@ import org.apache.logging.log4j.Logger;
 import org.ntg.gdmc.gdmchttpinterface.utils.CustomCommandSource;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -214,9 +219,17 @@ public abstract class HandlerBase implements HttpHandler {
                     result.put(URLDecoder.decode(qs.substring(last, eqPos), StandardCharsets.UTF_8), URLDecoder.decode(qs.substring(eqPos + 1, next), StandardCharsets.UTF_8));
                 }
             }
-            last = next + 1;
+        last = next + 1;
         }
         return result;
+    }
+
+    protected static JsonArray parseJsonArray(InputStream requestBody) {
+        try {
+            return JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
+        } catch (JsonSyntaxException | IllegalStateException jsonSyntaxException) {
+            throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
+        }
     }
 
     protected static JsonObject instructionStatus(boolean isSuccess) {
