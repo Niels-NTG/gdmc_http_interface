@@ -11,10 +11,12 @@ import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -23,6 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
@@ -226,19 +229,35 @@ public class StructureHandler extends HandlerBase {
 	}
 
 	private void getStructureHandler(HttpExchange httpExchange, boolean returnPlainText, boolean returnCompressed) throws IOException {
+
+		ServerLevel serverLevel = getServerLevel(dimension);
+
 		// Calculate boundaries of area of blocks to gather information on.
 		int xOffset = x + dx;
 		int xMin = Math.min(x, xOffset);
+		int xMax = Math.max(x, xOffset);
 
 		int yOffset = y + dy;
 		int yMin = Math.min(y, yOffset);
+		int yMax = Math.max(y, yOffset);
 
 		int zOffset = z + dz;
 		int zMin = Math.min(z, zOffset);
+		int zMax = Math.max(z, zOffset);
+
+		// Pre-load all chunks that encompass the area of the structure for faster getting of block states and block entities.
+		Map<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
+		for (int rangeX = xMin; rangeX < xMax; rangeX++) {
+			for (int rangeY = yMin; rangeY < yMax; rangeY++) {
+				for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
+					chunkPosMap.put(new ChunkPos(new BlockPos(rangeX, rangeY, rangeZ)), null);
+				}
+			}
+		}
+		chunkPosMap.keySet().parallelStream().forEach(chunkPos -> chunkPosMap.replace(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z)));
 
 		// Create StructureTemplate using blocks within the given area of the world.
 		StructureTemplate structureTemplate = new StructureTemplate();
-		ServerLevel serverLevel = getServerLevel(dimension);
 		BlockPos origin = new BlockPos(xMin, yMin, zMin);
 		Vec3i size = new Vec3i(Math.abs(dx), Math.abs(dy), Math.abs(dz));
 		structureTemplate.fillFromWorld(
@@ -249,26 +268,24 @@ public class StructureHandler extends HandlerBase {
 			null
 		);
 
+		// Create NBT data from of structure
 		CompoundTag newStructureCompoundTag = structureTemplate.save(new CompoundTag());
 
-		// Gather all existing block entity data for that same area of the world and append it to the
-		// exported CompoundTag from the structure template.
-		ListTag blockList = newStructureCompoundTag.getList("blocks", Tag.TAG_COMPOUND);
-		for (int i = 0; i < blockList.size(); i++) {
-			CompoundTag tag = blockList.getCompound(i);
-			if (tag.contains("nbt") || !tag.contains("pos")) {
-				continue;
+		// For each block data entry in the NBT, gather entity block data from the level and append to the NBT file in parallel.
+		newStructureCompoundTag.getList("blocks", Tag.TAG_COMPOUND).parallelStream().forEach(entry -> {
+			CompoundTag tag = (CompoundTag) entry;
+			if (!tag.contains("nbt") && tag.contains("pos")) {
+				ListTag posTag = tag.getList("pos", Tag.TAG_INT);
+				BlockPos blockPosInStructure = new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2));
+				BlockPos blockPosInWorld = origin.offset(blockPosInStructure);
+				LevelChunk chunk = chunkPosMap.get(new ChunkPos(blockPosInWorld));
+				BlockEntity existingBlockEntity = chunk.getExistingBlockEntity(blockPosInWorld);
+				if (existingBlockEntity != null) {
+					CompoundTag blockEntityCompoundTag = existingBlockEntity.saveWithoutMetadata();
+					tag.put("nbt", blockEntityCompoundTag);
+				}
 			}
-			ListTag posTag = tag.getList("pos", Tag.TAG_INT);
-			BlockPos blockPosInStructure = new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2));
-			BlockPos blockPosInWorld = origin.offset(blockPosInStructure);
-
-			BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(blockPosInWorld);
-			if (existingBlockEntity != null) {
-				CompoundTag blockEntityCompoundTag = existingBlockEntity.saveWithoutMetadata();
-				tag.put("nbt", blockEntityCompoundTag);
-			}
-		}
+		});
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
 		setDefaultResponseHeaders(responseHeaders);
