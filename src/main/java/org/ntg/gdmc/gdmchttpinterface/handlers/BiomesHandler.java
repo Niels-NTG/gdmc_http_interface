@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -39,7 +40,7 @@ public class BiomesHandler extends HandlerBase {
 		int dy;
 		int dz;
 
-		// GET is true, constrain getting biomes within the current build area.
+		// GET: if true, constrain getting biomes within the current build area.
 		boolean withinBuildArea;
 
 		String dimension;
@@ -79,13 +80,7 @@ public class BiomesHandler extends HandlerBase {
 			int zMin = Math.min(z, zOffset);
 			int zMax = Math.max(z, zOffset);
 
-			BuildAreaHandler.BuildArea buildArea = null;
-			if (withinBuildArea) {
-				buildArea = BuildAreaHandler.getBuildArea();
-				if (buildArea == null) {
-					throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
-				}
-			}
+			BuildArea buildArea = getBuildArea(withinBuildArea);
 
 			// Create an ordered map with an entry for every block position we want to know the biome of.
 			Map<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
@@ -94,7 +89,7 @@ public class BiomesHandler extends HandlerBase {
 				for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 					for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 						BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-						if (withinBuildArea && buildArea.isOutsideBuildArea(blockPos)) {
+						if (isOutsideBuildArea(blockPos, withinBuildArea, buildArea)) {
 							continue;
 						}
 						blockPosMap.put(blockPos, null);

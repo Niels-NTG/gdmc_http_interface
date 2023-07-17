@@ -3,6 +3,7 @@ package org.ntg.gdmc.gdmchttpinterface.handlers;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
 import org.ntg.gdmc.gdmchttpinterface.utils.TagComparator;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -142,13 +143,7 @@ public class BlocksHandler extends HandlerBase {
 
         JsonArray blockPlacementList = parseJsonArray(requestBody);
 
-        BuildAreaHandler.BuildArea buildArea = null;
-        if (withinBuildArea) {
-            buildArea = BuildAreaHandler.getBuildArea();
-            if (buildArea == null) {
-                throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
-            }
-        }
+        BuildArea buildArea = getBuildArea(withinBuildArea);
 
         for (JsonElement blockPlacement : blockPlacementList) {
             JsonObject blockPlacementItem = blockPlacement.getAsJsonObject();
@@ -165,7 +160,7 @@ public class BlocksHandler extends HandlerBase {
                     commandSourceStack
                 );
 
-                if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
+                if (isOutsideBuildArea(blockPos, withinBuildArea, buildArea)) {
                     returnValues.add(instructionStatus(false, "position is outside build area " + blockPlacement));
                     continue;
                 }
@@ -235,13 +230,7 @@ public class BlocksHandler extends HandlerBase {
         int zMin = Math.min(z, zOffset);
         int zMax = Math.max(z, zOffset);
 
-        BuildAreaHandler.BuildArea buildArea = null;
-        if (withinBuildArea) {
-            buildArea = BuildAreaHandler.getBuildArea();
-            if (buildArea == null) {
-                throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
-            }
-        }
+        BuildArea buildArea = getBuildArea(withinBuildArea);
 
         ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -251,7 +240,7 @@ public class BlocksHandler extends HandlerBase {
             for (int rangeY = yMin; rangeY < yMax; rangeY++) {
                 for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
                     BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                    if (withinBuildArea && buildArea != null && buildArea.isOutsideBuildArea(blockPos)) {
+                    if (isOutsideBuildArea(blockPos, withinBuildArea, buildArea)) {
                         continue;
                     }
                     blockPosMap.put(blockPos, null);

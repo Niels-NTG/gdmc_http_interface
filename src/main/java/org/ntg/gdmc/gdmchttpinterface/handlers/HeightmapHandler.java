@@ -41,10 +41,7 @@ public class HeightmapHandler extends HandlerBase {
         String dimension = queryParams.getOrDefault("dimension", null);
 
         // Get the build area
-        BuildArea buildArea = BuildAreaHandler.getBuildArea();
-        if (buildArea == null) {
-            throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
-        }
+        BuildArea buildArea = getBuildArea(true);
 
         // Get a reference to the map/level
         ServerLevel serverlevel = getServerLevel(dimension);
