@@ -6,16 +6,12 @@ import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -27,6 +23,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPOutputStream;
 
 public class StructureHandler extends HandlerBase {
@@ -178,42 +175,22 @@ public class StructureHandler extends HandlerBase {
 		ServerLevel serverLevel = getServerLevel(dimension);
 
 		try {
-
 			StructureTemplate structureTemplate = serverLevel.getStructureManager().readStructure(structureCompound);
 
 			BlockPos origin = new BlockPos(x, y, z);
 			int blockPlacementFlags = customFlags >= 0 ? customFlags : BlocksHandler.getBlockFlags(doBlockUpdates, spawnDrops);
 
-			boolean hasPlaced = structureTemplate.placeInWorld(
+			CompletableFuture<Boolean> hasPlacedFuture = mcServer.submit(() -> structureTemplate.placeInWorld(
 				serverLevel,
 				origin,
 				origin,
 				structurePlaceSettings,
 				serverLevel.getRandom(),
 				blockPlacementFlags
-			);
+			));
+			boolean hasPlaced = hasPlacedFuture.get();
+			
 			if (hasPlaced) {
-				// After placement, go through all blocks listed in the structureCompound and place the corresponding block entity data
-				// stored at key "nbt" using the same placement settings as the structure itself.
-				ListTag blockList = structureCompound.getList("blocks", Tag.TAG_COMPOUND);
-				for (int i = 0; i < blockList.size(); i++) {
-					CompoundTag tag = blockList.getCompound(i);
-					if (tag.contains("nbt")) {
-						ListTag posTag = tag.getList("pos", Tag.TAG_INT);
-						BlockPos blockPosInStructure = new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2));
-						BlockPos transformedGlobalBlockPos = origin.offset(StructureTemplate.calculateRelativePosition(structurePlaceSettings, blockPosInStructure));
-
-						BlockEntity existingBlockEntity = serverLevel.getExistingBlockEntity(transformedGlobalBlockPos);
-						if (existingBlockEntity != null) {
-							existingBlockEntity.deserializeNBT(tag.getCompound("nbt"));
-							serverLevel.markAndNotifyBlock(
-								transformedGlobalBlockPos, serverLevel.getChunkAt(transformedGlobalBlockPos),
-								serverLevel.getBlockState(transformedGlobalBlockPos), existingBlockEntity.getBlockState(),
-								blockPlacementFlags, Block.UPDATE_LIMIT
-							);
-						}
-					}
-				}
 				responseValue = instructionStatus(true);
 			} else {
 				responseValue = instructionStatus(false);
@@ -260,32 +237,17 @@ public class StructureHandler extends HandlerBase {
 		StructureTemplate structureTemplate = new StructureTemplate();
 		BlockPos origin = new BlockPos(xMin, yMin, zMin);
 		Vec3i size = new Vec3i(Math.abs(dx), Math.abs(dy), Math.abs(dz));
-		structureTemplate.fillFromWorld(
+
+		CompletableFuture<Void> placeInWorldFuture = mcServer.submit(() -> structureTemplate.fillFromWorld(
 			serverLevel,
 			origin,
 			size,
 			includeEntities,
 			null
-		);
+		));
+		placeInWorldFuture.join();
 
-		// Create NBT data from of structure
 		CompoundTag newStructureCompoundTag = structureTemplate.save(new CompoundTag());
-
-		// For each block data entry in the NBT, gather entity block data from the level and append to the NBT file in parallel.
-		newStructureCompoundTag.getList("blocks", Tag.TAG_COMPOUND).parallelStream().forEach(entry -> {
-			CompoundTag tag = (CompoundTag) entry;
-			if (!tag.contains("nbt") && tag.contains("pos")) {
-				ListTag posTag = tag.getList("pos", Tag.TAG_INT);
-				BlockPos blockPosInStructure = new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2));
-				BlockPos blockPosInWorld = origin.offset(blockPosInStructure);
-				LevelChunk chunk = chunkPosMap.get(new ChunkPos(blockPosInWorld));
-				BlockEntity existingBlockEntity = chunk.getExistingBlockEntity(blockPosInWorld);
-				if (existingBlockEntity != null) {
-					CompoundTag blockEntityCompoundTag = existingBlockEntity.saveWithoutMetadata();
-					tag.put("nbt", blockEntityCompoundTag);
-				}
-			}
-		});
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
 		setDefaultResponseHeaders(responseHeaders);
