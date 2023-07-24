@@ -20,7 +20,7 @@ public class InterfaceInfoHandler extends HandlerBase {
 		String method = httpExchange.getRequestMethod().toLowerCase();
 
 		if (!method.equals("options")) {
-			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
+			throw new HttpException("Method not allowed. Only OPTIONS requests are supported.", 405);
 		}
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();
