@@ -9,10 +9,8 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -21,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPOutputStream;
@@ -212,26 +209,12 @@ public class StructureHandler extends HandlerBase {
 		// Calculate boundaries of area of blocks to gather information on.
 		int xOffset = x + dx;
 		int xMin = Math.min(x, xOffset);
-		int xMax = Math.max(x, xOffset);
 
 		int yOffset = y + dy;
 		int yMin = Math.min(y, yOffset);
-		int yMax = Math.max(y, yOffset);
 
 		int zOffset = z + dz;
 		int zMin = Math.min(z, zOffset);
-		int zMax = Math.max(z, zOffset);
-
-		// Pre-load all chunks that encompass the area of the structure for faster getting of block states and block entities.
-		Map<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
-		for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-			for (int rangeY = yMin; rangeY < yMax; rangeY++) {
-				for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
-					chunkPosMap.put(new ChunkPos(new BlockPos(rangeX, rangeY, rangeZ)), null);
-				}
-			}
-		}
-		chunkPosMap.keySet().parallelStream().forEach(chunkPos -> chunkPosMap.replace(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z)));
 
 		// Create StructureTemplate using blocks within the given area of the world.
 		StructureTemplate structureTemplate = new StructureTemplate();
