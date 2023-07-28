@@ -458,13 +458,25 @@ Read [chunks](https://minecraft.fandom.com/wiki/Chunk) within a given range and 
 
 ## URL parameters
 
-| key       | valid values                                          | required | defaults to | description                                                            |
-|-----------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------|
-| x         | integer                                               | yes      | `0`         | X chunk coordinate                                                     |
-| z         | integer                                               | yes      | `0`         | Z chunk coordinate                                                     |
-| dx        | integer                                               | no       | `1`         | Range of chunks (not blocks!) to get counting from x (can be negative) |
-| dz        | integer                                               | no       | `1`         | Range of chunks (not blocks!) to get counting from z (can be negative) |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read chunks from                       |
+| key             | valid values                                          | required | defaults to | description                                                            |
+|-----------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------|
+| x               | integer                                               | no       | `0`         | X chunk coordinate                                                     |
+| z               | integer                                               | no       | `0`         | Z chunk coordinate                                                     |
+| dx              | integer                                               | no       | `1`         | Range of chunks (not blocks!) to get counting from x (can be negative) |
+| dz              | integer                                               | no       | `1`         | Range of chunks (not blocks!) to get counting from z (can be negative) |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true` and a build area is set, skip chunks outside the build area  |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read chunks from                       |
+
+Tip: to easily and efficiently convert from block coordinates to chunk coordinates in the client that interfaces with this endpoint, bit-shift the value of x and z by 4 places to the right. For example:
+```python
+def blockPosToChunkPos(x, y, z):
+    return (
+        x >> 4,
+        z >> 4
+    )
+```
+
+Note that if a build area is set and the parameters `x`, `z`, `dx` or `dz` are not, the values of these missing parameters will default to that of the build area.
 
 ## Request headers
 
@@ -490,12 +502,12 @@ Table below only applies if the request header `Accept: application/octet-stream
 
 ## Response body
 
-Response should be encoded as an [NBT](https://minecraft.fandom.com/wiki/NBT_format), [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) or JSON-formatted data structure depending what value has been set for `Accept` in the request header. The data always contains the following properties:
+Response should be encoded as an [NBT](https://minecraft.fandom.com/wiki/NBT_format) or [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) data structure depending what value has been set for `Accept` in the request header. The data always contains the following properties:
 
-- `ChunkX`: Same value as URL parameter x
-- `ChunkZ`: Same value as URL parameter z
-- `ChunkDX`: Same value as URL parameter dx
-- `ChunkDZ`: Same value as URL parameter dz
+- `ChunkX`: X-coordinate of the origin chunk
+- `ChunkZ`: Z-coordinate of the origin chunk
+- `ChunkDX`: Size of the selection of chunks in the x-direction 
+- `ChunkDZ`: Size of the selection of chunks in the z-direction
 - `Chunks`: List of chunks, where each chunk is in the [NBT Chunk format](https://minecraft.fandom.com/wiki/Chunk_format#NBT_structure) encoded as raw NBT or SNBT.
 
 ## Example

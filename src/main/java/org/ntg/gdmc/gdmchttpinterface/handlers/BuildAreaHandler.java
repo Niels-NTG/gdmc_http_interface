@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 
 import java.io.IOException;
 
@@ -57,34 +58,37 @@ public class BuildAreaHandler extends HandlerBase {
         private final int yTo;
         private final int zTo;
 
+        public final transient BoundingBox box;
         public final transient BlockPos from;
         public final transient BlockPos to;
         public final transient ChunkPos sectionFrom;
         public final transient ChunkPos sectionTo;
 
-        public BuildArea(BlockPos _from, BlockPos _to) {
-            this.xFrom = _from.getX();
-            this.yFrom = _from.getY();
-            this.zFrom = _from.getZ();
-            this.xTo = _to.getX();
-            this.yTo = _to.getY();
-            this.zTo = _to.getZ();
-            this.from = _from;
-            this.to = _to;
-            this.sectionFrom = new ChunkPos(_from);
-            this.sectionTo = new ChunkPos(_to);
-        }
 
-        public boolean isOutsideBuildArea(BlockPos pos) {
-            return isOutsideBuildArea(pos.getX(), pos.getZ());
+        public BuildArea(BlockPos from, BlockPos to) {
+            box = BoundingBox.fromCorners(from, to);
+            this.from = new BlockPos(box.minX(), box.minY(), box.minZ());
+            this.to = new BlockPos(box.maxX(), box.maxY(), box.maxZ());
+            sectionFrom = new ChunkPos(this.from);
+            sectionTo = new ChunkPos(this.to);
+            xFrom = this.from.getX();
+            yFrom = this.from.getY();
+            zFrom = this.from.getZ();
+            xTo = this.to.getX();
+            yTo = this.to.getY();
+            zTo = this.to.getZ();
         }
 
         public boolean isOutsideBuildArea(int x, int z) {
             return x < from.getX() || x > to.getX() || z < from.getZ() || z > to.getZ();
         }
 
-        public boolean isOutsideBuildArea(ChunkPos chunkPos) {
-            return isOutsideBuildArea(chunkPos.getWorldPosition());
+        public boolean isOutsideBuildArea(BlockPos pos) {
+            return isOutsideBuildArea(pos.getX(), pos.getZ());
+        }
+
+        public boolean isOutsideBuildArea(BoundingBox otherBox) {
+            return box.maxX() < otherBox.minX() || box.minX() > otherBox.maxX() || box.maxZ() < otherBox.minZ() || box.minZ() > otherBox.maxZ();
         }
     }
 }

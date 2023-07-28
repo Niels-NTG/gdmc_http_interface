@@ -19,9 +19,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-public class ChunkHandler extends HandlerBase {
+public class ChunksHandler extends HandlerBase {
 
-    public ChunkHandler(MinecraftServer mcServer) {
+    public ChunksHandler(MinecraftServer mcServer) {
         super(mcServer);
     }
 
@@ -38,6 +38,9 @@ public class ChunkHandler extends HandlerBase {
         // GET: Ranges in the x and z directions (can be negative). Defaults to 1.
         int chunkDX;
         int chunkDZ;
+
+        // GET: if true, constrain getting biomes within the current build area.
+        boolean withinBuildArea;
 
         String dimension;
 
@@ -67,6 +70,9 @@ public class ChunkHandler extends HandlerBase {
             } else {
                 chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
             }
+
+            withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
+
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
@@ -100,10 +106,23 @@ public class ChunkHandler extends HandlerBase {
         int zMin = Math.min(chunkZ, zOffset);
         int zMax = Math.max(chunkZ, zOffset);
 
-        Map<ChunkPos, CompoundTag> chunkMap = new LinkedHashMap<>();
-        for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
-            for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-                chunkMap.put(new ChunkPos(rangeX, rangeZ), null);
+        ChunkPos minChunkPos = new ChunkPos(xMin, zMin);
+        ChunkPos maxChunkPos = new ChunkPos(xMax, zMax);
+        // Constrain start and end position to that of the build area if withinBuildArea is true.
+        if (withinBuildArea && buildArea != null) {
+            if (buildArea.sectionFrom.getWorldPosition().compareTo(minChunkPos.getWorldPosition()) > 0) {
+                minChunkPos = buildArea.sectionFrom;
+            }
+            if (buildArea.sectionTo.getWorldPosition().compareTo(maxChunkPos.getWorldPosition()) < 0) {
+                maxChunkPos = buildArea.sectionTo;
+            }
+        }
+
+        LinkedHashMap<ChunkPos, CompoundTag> chunkMap = new LinkedHashMap<>();
+        for (int rangeZ = minChunkPos.z; rangeZ < maxChunkPos.z; rangeZ++) {
+            for (int rangeX = minChunkPos.x; rangeX < maxChunkPos.x; rangeX++) {
+                ChunkPos chunkPos = new ChunkPos(rangeX, rangeZ);
+                chunkMap.put(chunkPos, null);
             }
         }
         chunkMap.keySet().parallelStream().forEach(chunkPos -> {
@@ -116,10 +135,10 @@ public class ChunkHandler extends HandlerBase {
 
         CompoundTag bodyNBT = new CompoundTag();
         bodyNBT.put("Chunks", chunkList);
-        bodyNBT.putInt("ChunkX", chunkX);
-        bodyNBT.putInt("ChunkZ", chunkZ);
-        bodyNBT.putInt("ChunkDX", chunkDX);
-        bodyNBT.putInt("ChunkDZ", chunkDZ);
+        bodyNBT.putInt("ChunkX", minChunkPos.x);
+        bodyNBT.putInt("ChunkZ", minChunkPos.z);
+        bodyNBT.putInt("ChunkDX", maxChunkPos.x - minChunkPos.x);
+        bodyNBT.putInt("ChunkDZ", maxChunkPos.z - minChunkPos.z);
 
         // Response header and response body
         Headers responseHeaders = httpExchange.getResponseHeaders();
