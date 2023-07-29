@@ -5,7 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
-import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
+import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 import org.ntg.gdmc.gdmchttpinterface.utils.TagComparator;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -149,14 +149,12 @@ public class BlocksHandler extends HandlerBase {
 
         ServerLevel serverLevel = getServerLevel(dimension);
 
-        BuildArea buildArea = getBuildArea(withinBuildArea);
-
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
         LinkedHashMap<BlockPos, BlockPlacementInstruction> placementInstructions = new LinkedHashMap<>();
         HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
         for (JsonElement blockPlacementInput : blockPlacementList) {
-            BlockPlacementInstruction placementInstruction = new BlockPlacementInstruction(blockPlacementInput.getAsJsonObject(), commandSourceStack, buildArea);
+            BlockPlacementInstruction placementInstruction = new BlockPlacementInstruction(blockPlacementInput.getAsJsonObject(), commandSourceStack);
             placementInstructions.put(placementInstruction.blockPos, placementInstruction);
         }
         placementInstructions.values().parallelStream().forEach(placementInstruction -> {
@@ -202,8 +200,6 @@ public class BlocksHandler extends HandlerBase {
 
         ServerLevel serverLevel = getServerLevel(dimension);
 
-        BuildArea buildArea = getBuildArea(withinBuildArea);
-
         // Create ordered map to store information for each position within the given area,
         // as well as a map containing the chunks of this area that this block information
         // will be gathered from. Using a map structure allows this to be resolved in
@@ -214,7 +210,7 @@ public class BlocksHandler extends HandlerBase {
             for (int rangeY = yMin; rangeY < yMax; rangeY++) {
                 for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
                     BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                    if (isOutsideBuildArea(blockPos, withinBuildArea, buildArea)) {
+                    if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
                         continue;
                     }
                     blockPosMap.put(blockPos, null);
@@ -392,9 +388,8 @@ public class BlocksHandler extends HandlerBase {
          * @param placementInstructionInput     Json object that includes the block ID (required), xyz position (required),
          *                                      block state (optional) and block NBT data (optional) for the to be placed block.
          * @param commandSourceStack            Command source to be used as reference point if block position is relative.
-         * @param buildArea                     BuildArea to constrain to if withinBuildArea flag is set to true.
          */
-        BlockPlacementInstruction(JsonObject placementInstructionInput, CommandSourceStack commandSourceStack, BuildArea buildArea) {
+        BlockPlacementInstruction(JsonObject placementInstructionInput, CommandSourceStack commandSourceStack) {
             inputData = placementInstructionInput;
             this.commandSourceStack = commandSourceStack;
             // Parse block position x y z. Use the position of the command source (set with the URL query parameters) if not defined in
@@ -409,7 +404,7 @@ public class BlocksHandler extends HandlerBase {
                     posXString + " " + posYString + " " + posZString,
                     commandSourceStack
                 );
-                if (isOutsideBuildArea(blockPos1, withinBuildArea, buildArea)) {
+                if (BuildArea.isOutsideBuildArea(blockPos1, withinBuildArea)) {
                     this.invalidate("position is outside build area " + inputData);
                 }
             } catch (CommandSyntaxException e) {

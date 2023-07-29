@@ -24,7 +24,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
 import org.ntg.gdmc.gdmchttpinterface.utils.CustomCommandSource;
 
 import java.io.IOException;
@@ -249,22 +248,6 @@ public abstract class HandlerBase implements HttpHandler {
         return json;
     }
 
-    protected static boolean isOutsideBuildArea(BlockPos blockPos, boolean withinBuildArea, BuildArea buildArea) {
-        if (withinBuildArea && buildArea != null) {
-            return buildArea.isOutsideBuildArea(blockPos);
-        }
-        return false;
-    }
-
-    protected static BuildArea getBuildArea(boolean withinBuildArea) {
-        BuildArea buildArea = null;
-        if (withinBuildArea) {
-            buildArea = BuildAreaHandler.getBuildArea();
-            if (buildArea == null) {
-                throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
-            }
-        }
-        return buildArea;
     }
 
     protected CommandSourceStack createCommandSource(String name, String dimension) {

@@ -1,7 +1,7 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
 import net.minecraft.world.level.ChunkPos;
-import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
+import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 import org.ntg.gdmc.gdmchttpinterface.utils.CustomHeightmap;
 import com.google.common.base.Enums;
 import com.google.gson.Gson;
@@ -40,14 +40,11 @@ public class HeightmapHandler extends HandlerBase {
 
         String dimension = queryParams.getOrDefault("dimension", null);
 
-        // Get the build area
-        BuildArea buildArea = getBuildArea(true);
-
         // Get a reference to the map/level
         ServerLevel serverlevel = getServerLevel(dimension);
 
         // Get the heightmap of that type
-        int[][] heightmap = getHeightmap(buildArea, serverlevel, heightmapTypeString);
+        int[][] heightmap = getHeightmap(serverlevel, heightmapTypeString);
 
         // Respond with that array as a string
         Headers responseHeaders = httpExchange.getResponseHeaders();
@@ -55,9 +52,10 @@ public class HeightmapHandler extends HandlerBase {
         resolveRequest(httpExchange, new Gson().toJson(heightmap));
     }
 
-    private static int[][] getHeightmap(BuildArea buildArea, ServerLevel serverlevel, String heightmapTypeString) {
+    private static int[][] getHeightmap(ServerLevel serverlevel, String heightmapTypeString) {
 
         // Get the x/z size of the build area
+        BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
         int xSize = buildArea.to.getX() - buildArea.from.getX() + 1;
         int zSize = buildArea.to.getZ() - buildArea.from.getZ() + 1;
         // Create the 2D array to store the heightmap data

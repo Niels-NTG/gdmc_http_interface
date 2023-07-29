@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
-import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
+import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -44,7 +44,7 @@ public class ChunksHandler extends HandlerBase {
 
         String dimension;
 
-        BuildArea buildArea = BuildAreaHandler.getBuildArea();
+        BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
 
         try {
             if (queryParams.get("x") == null && buildArea != null) {

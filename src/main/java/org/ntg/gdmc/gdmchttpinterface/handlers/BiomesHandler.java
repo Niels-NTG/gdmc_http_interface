@@ -11,7 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.LevelChunk;
-import org.ntg.gdmc.gdmchttpinterface.handlers.BuildAreaHandler.BuildArea;
+import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -80,8 +80,6 @@ public class BiomesHandler extends HandlerBase {
 			int zMin = Math.min(z, zOffset);
 			int zMax = Math.max(z, zOffset);
 
-			BuildArea buildArea = getBuildArea(withinBuildArea);
-
 			// Create an ordered map with an entry for every block position we want to know the biome of.
 			Map<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
 			Map<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
@@ -89,7 +87,7 @@ public class BiomesHandler extends HandlerBase {
 				for (int rangeY = yMin; rangeY < yMax; rangeY++) {
 					for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
 						BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-						if (isOutsideBuildArea(blockPos, withinBuildArea, buildArea)) {
+						if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
 							continue;
 						}
 						blockPosMap.put(blockPos, null);
