@@ -8,7 +8,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -18,6 +18,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -248,6 +249,11 @@ public abstract class HandlerBase implements HttpHandler {
         return json;
     }
 
+    protected static BoundingBox createBoundingBox(int x, int y, int z, int dx, int dy, int dz) {
+        return BoundingBox.fromCorners(
+            new Vec3i(x, y, z),
+            new Vec3i(x + dx, y + dy, z + dz)
+        );
     }
 
     protected CommandSourceStack createCommandSource(String name, String dimension) {

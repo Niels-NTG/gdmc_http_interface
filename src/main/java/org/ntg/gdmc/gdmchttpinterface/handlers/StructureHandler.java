@@ -13,6 +13,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 
@@ -230,19 +231,13 @@ public class StructureHandler extends HandlerBase {
 
 		ServerLevel serverLevel = getServerLevel(dimension);
 
+
 		// Calculate boundaries of area of blocks to gather information on.
-		int xOffset = x + dx;
-		int xMin = Math.min(x, xOffset);
-
-		int yOffset = y + dy;
-		int yMin = Math.min(y, yOffset);
-
-		int zOffset = z + dz;
-		int zMin = Math.min(z, zOffset);
+		BoundingBox box = createBoundingBox(x, y, z, dx, dy, dz);
 
 		// Create StructureTemplate using blocks within the given area of the world.
 		StructureTemplate structureTemplate = new StructureTemplate();
-		BlockPos origin = new BlockPos(xMin, yMin, zMin);
+		BlockPos origin = new BlockPos(box.minX(), box.minY(), box.minZ());
 		Vec3i size = new Vec3i(Math.abs(dx), Math.abs(dy), Math.abs(dz));
 
 		// Fill the structure template with blocks in the given area of the level. Do this on the server thread such that NBT block data

@@ -11,6 +11,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 
 import java.io.IOException;
@@ -68,24 +69,14 @@ public class BiomesHandler extends HandlerBase {
 			ServerLevel serverLevel = getServerLevel(dimension);
 
 			// Calculate boundaries of area of blocks to gather biome information on.
-			int xOffset = x + dx;
-			int xMin = Math.min(x, xOffset);
-			int xMax = Math.max(x, xOffset);
-
-			int yOffset = y + dy;
-			int yMin = Math.min(y, yOffset);
-			int yMax = Math.max(y, yOffset);
-
-			int zOffset = z + dz;
-			int zMin = Math.min(z, zOffset);
-			int zMax = Math.max(z, zOffset);
+			BoundingBox box = createBoundingBox(x, y, z, dx, dy, dz);
 
 			// Create an ordered map with an entry for every block position we want to know the biome of.
-			Map<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
-			Map<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
-			for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-				for (int rangeY = yMin; rangeY < yMax; rangeY++) {
-					for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
+			LinkedHashMap<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
+			HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
+			for (int rangeX = box.minX(); rangeX < box.maxX(); rangeX++) {
+				for (int rangeY = box.minY(); rangeY < box.maxY(); rangeY++) {
+					for (int rangeZ = box.minZ(); rangeZ < box.maxZ(); rangeZ++) {
 						BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
 						if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
 							continue;

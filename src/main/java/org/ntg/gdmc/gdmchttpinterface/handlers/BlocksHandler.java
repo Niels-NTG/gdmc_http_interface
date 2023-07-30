@@ -5,6 +5,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 import org.ntg.gdmc.gdmchttpinterface.utils.TagComparator;
 import com.google.gson.*;
@@ -185,20 +186,10 @@ public class BlocksHandler extends HandlerBase {
      */
     private JsonArray getBlocksHandler() {
 
-        // Calculate boundaries of area of blocks to gather information on.
-        int xOffset = x + dx;
-        int xMin = Math.min(x, xOffset);
-        int xMax = Math.max(x, xOffset);
-
-        int yOffset = y + dy;
-        int yMin = Math.min(y, yOffset);
-        int yMax = Math.max(y, yOffset);
-
-        int zOffset = z + dz;
-        int zMin = Math.min(z, zOffset);
-        int zMax = Math.max(z, zOffset);
-
         ServerLevel serverLevel = getServerLevel(dimension);
+
+        // Calculate boundaries of area of blocks to gather information on.
+        BoundingBox box = createBoundingBox(x, y, z, dx, dy, dz);
 
         // Create ordered map to store information for each position within the given area,
         // as well as a map containing the chunks of this area that this block information
@@ -206,9 +197,9 @@ public class BlocksHandler extends HandlerBase {
         // parallel, which is significantly faster than doing the same sequentially.
         LinkedHashMap<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
         HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
-        for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-            for (int rangeY = yMin; rangeY < yMax; rangeY++) {
-                for (int rangeZ = zMin; rangeZ < zMax; rangeZ++) {
+        for (int rangeX = box.minX(); rangeX < box.maxX(); rangeX++) {
+            for (int rangeY = box.minY(); rangeY < box.maxY(); rangeY++) {
+                for (int rangeZ = box.minZ(); rangeZ < box.maxZ(); rangeZ++) {
                     BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
                     if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
                         continue;
