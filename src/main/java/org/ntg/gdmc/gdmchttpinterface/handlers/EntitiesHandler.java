@@ -139,23 +139,10 @@ public class EntitiesHandler extends HandlerBase {
 	 */
 	private JsonArray getEntitiesHandler() {
 
-		// Calculate boundaries of area of blocks to gather information on.
-		int xOffset = x + dx;
-		int xMin = Math.min(x, xOffset);
-		int xMax = Math.max(x, xOffset);
-
-		int yOffset = y + dy;
-		int yMin = Math.min(y, yOffset);
-		int yMax = Math.max(y, yOffset);
-
-		int zOffset = z + dz;
-		int zMin = Math.min(z, zOffset);
-		int zMax = Math.max(z, zOffset);
-
 		StringReader entitySelectorStringReader = new StringReader(
 			entitySelectorString != null && !entitySelectorString.isBlank() ?
 				entitySelectorString :
-				"@e[x=%s,y=%s,z=%s,dx=%s,dy=%s,dz=%s]".formatted(xMin, yMin, zMin, xMax, yMax, zMax)
+				"@e[x=%s,y=%s,z=%s,dx=%s,dy=%s,dz=%s]".formatted(x, y, z, dx, dy, dz)
 		);
 		try {
 			EntitySelector entitySelector = EntityArgument.entities().parse(entitySelectorStringReader);
