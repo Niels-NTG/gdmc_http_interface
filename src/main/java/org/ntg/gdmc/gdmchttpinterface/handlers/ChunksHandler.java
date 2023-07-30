@@ -60,13 +60,13 @@ public class ChunksHandler extends HandlerBase {
             }
 
             if (queryParams.get("dx") == null && buildArea != null) {
-                chunkDX = Math.max(buildArea.sectionTo.x - buildArea.sectionFrom.x, 0) + 1;
+                chunkDX = buildArea.getChunkSpanX();
             } else {
                 chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
             }
 
             if (queryParams.get("dz") == null && buildArea != null) {
-                chunkDZ = Math.max(buildArea.sectionTo.z - buildArea.sectionFrom.z, 0) + 1;
+                chunkDZ = buildArea.getChunkSpanZ();
             } else {
                 chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
             }

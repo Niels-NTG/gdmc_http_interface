@@ -97,5 +97,13 @@ public class BuildArea {
 			}
 			return pos;
 		}
+
+		public int getChunkSpanX() {
+			return Math.max(sectionTo.x - sectionFrom.x, 0) + 1;
+		}
+
+		public int getChunkSpanZ() {
+			return Math.max(sectionTo.z - sectionFrom.z, 0) + 1;
+		}
 	}
 }

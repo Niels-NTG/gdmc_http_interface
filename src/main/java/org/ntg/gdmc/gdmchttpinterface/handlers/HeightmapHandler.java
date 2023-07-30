@@ -56,14 +56,14 @@ public class HeightmapHandler extends HandlerBase {
 
         // Get the x/z size of the build area
         BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
-        int xSize = buildArea.to.getX() - buildArea.from.getX() + 1;
-        int zSize = buildArea.to.getZ() - buildArea.from.getZ() + 1;
+        int xSize = buildArea.box.getXSpan();
+        int zSize = buildArea.box.getZSpan();
         // Create the 2D array to store the heightmap data
         int[][] heightmap = new int[xSize][zSize];
 
         // Get the number of chunks
-        int xChunkCount = Math.max(buildArea.sectionTo.x - buildArea.sectionFrom.x, 0) + 1;
-        int zChunkCount = Math.max(buildArea.sectionTo.z - buildArea.sectionFrom.z, 0) + 1;
+        int xChunkCount = buildArea.getChunkSpanX();
+        int zChunkCount = buildArea.getChunkSpanZ();
 
         // Check if the type is a valid heightmap type
         Heightmap.Types defaultHeightmapType = Enums.getIfPresent(Heightmap.Types.class, heightmapTypeString).orNull();
