@@ -186,10 +186,16 @@ public class BlocksHandler extends HandlerBase {
      */
     private JsonArray getBlocksHandler() {
 
+        JsonArray jsonArray = new JsonArray();
+
         ServerLevel serverLevel = getServerLevel(dimension);
 
         // Calculate boundaries of area of blocks to gather information on.
-        BoundingBox box = createBoundingBox(x, y, z, dx, dy, dz);
+        BoundingBox box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
+        // Return empty list if entire requested area is outside of build area (if withinBuildArea is true).
+        if (box == null) {
+            return jsonArray;
+        }
 
         // Create ordered map to store information for each position within the given area,
         // as well as a map containing the chunks of this area that this block information
@@ -197,13 +203,10 @@ public class BlocksHandler extends HandlerBase {
         // parallel, which is significantly faster than doing the same sequentially.
         LinkedHashMap<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
         HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
-        for (int rangeX = box.minX(); rangeX < box.maxX(); rangeX++) {
-            for (int rangeY = box.minY(); rangeY < box.maxY(); rangeY++) {
-                for (int rangeZ = box.minZ(); rangeZ < box.maxZ(); rangeZ++) {
+        for (int rangeX = box.minX(); rangeX < box.maxX() + 1; rangeX++) {
+            for (int rangeY = box.minY(); rangeY < box.maxY() + 1; rangeY++) {
+                for (int rangeZ = box.minZ(); rangeZ < box.maxZ() + 1; rangeZ++) {
                     BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-                    if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
-                        continue;
-                    }
                     blockPosMap.put(blockPos, null);
                     chunkPosMap.put(new ChunkPos(blockPos), null);
                 }
@@ -227,7 +230,6 @@ public class BlocksHandler extends HandlerBase {
             }
             blockPosMap.replace(blockPos, json);
         });
-        JsonArray jsonArray = new JsonArray();
         for (JsonObject blockJson : blockPosMap.values()) {
             jsonArray.add(blockJson);
         }

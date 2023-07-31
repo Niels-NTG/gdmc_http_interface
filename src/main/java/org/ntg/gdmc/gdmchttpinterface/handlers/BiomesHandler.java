@@ -65,60 +65,61 @@ public class BiomesHandler extends HandlerBase {
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
 
-		if (method.equals("get")) {
-			ServerLevel serverLevel = getServerLevel(dimension);
-
-			// Calculate boundaries of area of blocks to gather biome information on.
-			BoundingBox box = createBoundingBox(x, y, z, dx, dy, dz);
-
-			// Create an ordered map with an entry for every block position we want to know the biome of.
-			LinkedHashMap<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
-			HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
-			for (int rangeX = box.minX(); rangeX < box.maxX(); rangeX++) {
-				for (int rangeY = box.minY(); rangeY < box.maxY(); rangeY++) {
-					for (int rangeZ = box.minZ(); rangeZ < box.maxZ(); rangeZ++) {
-						BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
-						if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
-							continue;
-						}
-						blockPosMap.put(blockPos, null);
-						chunkPosMap.put(new ChunkPos(blockPos), null);
-					}
-				}
-			}
-			chunkPosMap.keySet().parallelStream().forEach(chunkPos -> chunkPosMap.replace(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z)));
-			// Gather biome information for each position in parallel.
-			blockPosMap.keySet().parallelStream().forEach(blockPos -> {
-				LevelChunk levelChunk = chunkPosMap.get(new ChunkPos(blockPos));
-				Optional<ResourceKey<Biome>> biomeResourceKey = levelChunk.getNoiseBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ()).unwrapKey();
-				if (biomeResourceKey.isPresent()) {
-					String biomeName = "";
-					if (!serverLevel.isOutsideBuildHeight(blockPos)) {
-						biomeName = biomeResourceKey.get().location().toString();
-					}
-					JsonObject json = new JsonObject();
-					json.addProperty("id", biomeName);
-					json.addProperty("x", blockPos.getX());
-					json.addProperty("y", blockPos.getY());
-					json.addProperty("z", blockPos.getZ());
-					blockPosMap.replace(blockPos, json);
-				}
-			});
-			// Create a JsonArray with JsonObject, each contain a key-value pair for
-			// the x, y, z position and the namespaced biome name.
-			JsonArray responseList = new JsonArray();
-			for (JsonObject biomeJson : blockPosMap.values()) {
-				responseList.add(biomeJson);
-			}
-
-			// Response headers
-			Headers responseHeaders = httpExchange.getResponseHeaders();
-			setDefaultResponseHeaders(responseHeaders);
-
-			resolveRequest(httpExchange, responseList.toString());
-
-		} else {
+		if (!method.equals("get")) {
 			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
 		}
+
+		// Response headers
+		Headers responseHeaders = httpExchange.getResponseHeaders();
+		setDefaultResponseHeaders(responseHeaders);
+
+		JsonArray responseList = new JsonArray();
+
+		ServerLevel serverLevel = getServerLevel(dimension);
+
+		// Calculate boundaries of area of blocks to gather biome information on.
+		BoundingBox box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
+		if (box == null) {
+			resolveRequest(httpExchange, responseList.toString());
+			return;
+		}
+
+		// Create an ordered map with an entry for every block position we want to know the biome of.
+		LinkedHashMap<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
+		HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
+		for (int rangeX = box.minX(); rangeX < box.maxX() + 1; rangeX++) {
+			for (int rangeY = box.minY(); rangeY < box.maxY() + 1; rangeY++) {
+				for (int rangeZ = box.minZ(); rangeZ < box.maxZ() + 1; rangeZ++) {
+					BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
+					blockPosMap.put(blockPos, null);
+					chunkPosMap.put(new ChunkPos(blockPos), null);
+				}
+			}
+		}
+		chunkPosMap.keySet().parallelStream().forEach(chunkPos -> chunkPosMap.replace(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z)));
+		// Gather biome information for each position in parallel.
+		blockPosMap.keySet().parallelStream().forEach(blockPos -> {
+			LevelChunk levelChunk = chunkPosMap.get(new ChunkPos(blockPos));
+			Optional<ResourceKey<Biome>> biomeResourceKey = levelChunk.getNoiseBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ()).unwrapKey();
+			if (biomeResourceKey.isPresent()) {
+				String biomeName = "";
+				if (!serverLevel.isOutsideBuildHeight(blockPos)) {
+					biomeName = biomeResourceKey.get().location().toString();
+				}
+				JsonObject json = new JsonObject();
+				json.addProperty("id", biomeName);
+				json.addProperty("x", blockPos.getX());
+				json.addProperty("y", blockPos.getY());
+				json.addProperty("z", blockPos.getZ());
+				blockPosMap.replace(blockPos, json);
+			}
+		});
+		// Create a JsonArray with JsonObject, each contain a key-value pair for
+		// the x, y, z position and the namespaced biome name.
+		for (JsonObject biomeJson : blockPosMap.values()) {
+			responseList.add(biomeJson);
+		}
+
+		resolveRequest(httpExchange, responseList.toString());
 	}
 }

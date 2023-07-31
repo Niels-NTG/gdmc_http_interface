@@ -10,10 +10,7 @@ public class BuildArea {
 	private static BuildAreaInstance buildAreaInstance;
 
 	public static BuildAreaInstance getBuildArea() {
-		return getBuildArea(true);
-	}
-	public static BuildAreaInstance getBuildArea(boolean withinBuildArea) {
-		if (withinBuildArea && buildAreaInstance == null) {
+		if (buildAreaInstance == null) {
 			throw new HandlerBase.HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
 		}
 		return buildAreaInstance;
@@ -29,7 +26,7 @@ public class BuildArea {
 
 	public static boolean isOutsideBuildArea(BlockPos blockPos, boolean withinBuildArea) {
 		if (withinBuildArea) {
-			return getBuildArea().isOutsideBuildArea(blockPos);
+			return getBuildArea().isOutsideBuildArea(blockPos.getX(), blockPos.getZ());
 		}
 		return false;
 	}
@@ -39,6 +36,13 @@ public class BuildArea {
 			return getBuildArea().isOutsideBuildArea(box);
 		}
 		return false;
+	}
+
+	public static BoundingBox clampToBuildArea(BoundingBox box, boolean withinBuildArea) {
+		if (withinBuildArea) {
+			return getBuildArea().clampBox(box);
+		}
+		return box;
 	}
 
 	@SuppressWarnings({"FieldCanBeLocal", "unused"})
@@ -58,7 +62,7 @@ public class BuildArea {
 		public final transient ChunkPos sectionTo;
 
 
-		public BuildAreaInstance(BlockPos from, BlockPos to) {
+		private BuildAreaInstance(BlockPos from, BlockPos to) {
 			box = BoundingBox.fromCorners(from, to);
 			this.from = new BlockPos(box.minX(), box.minY(), box.minZ());
 			this.to = new BlockPos(box.maxX(), box.maxY(), box.maxZ());
@@ -76,26 +80,27 @@ public class BuildArea {
 			return x < from.getX() || x > to.getX() || z < from.getZ() || z > to.getZ();
 		}
 
-		public boolean isOutsideBuildArea(BlockPos pos) {
-			return isOutsideBuildArea(pos.getX(), pos.getZ());
-		}
-
-		public boolean isOutsideBuildArea(BoundingBox otherBox) {
+		private boolean isOutsideBuildArea(BoundingBox otherBox) {
 			return box.maxX() < otherBox.minX() || box.minX() > otherBox.maxX() || box.maxZ() < otherBox.minZ() || box.minZ() > otherBox.maxZ();
 		}
 
-		public BlockPos clampMinPosition(BlockPos pos) {
-			if (from.compareTo(pos) > 0) {
-				return from;
+		private BoundingBox clampBox(BoundingBox otherBox) {
+			if (!box.intersects(otherBox)) {
+				return null;
 			}
-			return pos;
-		}
 
-		public BlockPos clampMaxPosition(BlockPos pos) {
-			if (to.compareTo(pos) < 0) {
-				return to;
-			}
-			return pos;
+			return BoundingBox.fromCorners(
+				new BlockPos(
+					Math.min(Math.max(box.minX(), otherBox.minX()), box.maxX()),
+					Math.min(Math.max(box.minY(), otherBox.minY()), box.maxY()),
+					Math.min(Math.max(box.minZ(), otherBox.minZ()), box.maxZ())
+				),
+				new BlockPos(
+					Math.max(Math.min(box.maxX(), otherBox.maxX()), box.minX()),
+					Math.max(Math.min(box.maxY(), otherBox.maxY()), box.minY()),
+					Math.max(Math.min(box.maxZ(), otherBox.maxZ()), box.minZ())
+				)
+			);
 		}
 
 		public int getChunkSpanX() {
