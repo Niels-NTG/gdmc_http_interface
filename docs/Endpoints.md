@@ -570,16 +570,17 @@ Create an [NBT](https://minecraft.fandom.com/wiki/NBT_format) structure file fro
 
 ## URL parameters
 
-| key       | valid values                                          | required | defaults to | description                                                                                                           |
-|-----------|-------------------------------------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------|
-| x         | integer                                               | yes      | `0`         | X coordinate                                                                                                          |
-| y         | integer                                               | yes      | `0`         | Y coordinate                                                                                                          |
-| z         | integer                                               | yes      | `0`         | Z coordinate                                                                                                          |
-| dx        | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                              |
-| dy        | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                              |
-| dz        | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                              |
-| entities  | `true`, `false`                                       | no       | `false`     | `true` = also save all [entities](https://minecraft.fandom.com/wiki/Entity) (mobs, villagers, etc.) in the given area |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | overworld   | Which dimension of the world to read blocks from                                                                      |
+| key             | valid values                                          | required | defaults to | description                                                                                                           |
+|-----------------|-------------------------------------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------|
+| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                          |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                          |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                          |
+| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                              |
+| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                              |
+| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                              |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skips positions that are outside the build area                                                            |
+| entities        | `true`, `false`                                       | no       | `false`     | `true` = also save all [entities](https://minecraft.fandom.com/wiki/Entity) (mobs, villagers, etc.) in the given area |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | overworld   | Which dimension of the world to read blocks from                                                                      |
 
 ## Request headers
 
@@ -606,6 +607,8 @@ Table below only applies if the request header `Accept: application/octet-stream
 ## Response body
 
 An [NBT file](https://minecraft.fandom.com/wiki/NBT_format) the selected area of the world.
+
+Note that the response returns a 403 error code if the `withinBuilArea` flag is `true` and the selected area is completely outside of the build area.
 
 ## Example
 

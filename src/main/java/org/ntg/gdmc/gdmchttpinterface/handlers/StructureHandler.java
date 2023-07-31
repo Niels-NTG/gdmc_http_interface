@@ -16,6 +16,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
+import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -62,6 +63,9 @@ public class StructureHandler extends HandlerBase {
 	private int customFlags; // -1 == no custom flags
 	private String dimension;
 
+	// GET: is true, constrain placement/getting blocks within the current build area.
+	private boolean withinBuildArea;
+
 	public StructureHandler(MinecraftServer mcServer) {
 		super(mcServer);
 	}
@@ -95,9 +99,11 @@ public class StructureHandler extends HandlerBase {
 
 			customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
 
+			withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
+
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
-			throw new HandlerBase.HttpException("Could not parse query parameter: " + e.getMessage(), 400);
+			throw new HttpException("Could not parse query parameter: " + e.getMessage(), 400);
 		}
 
 		Headers requestHeaders = httpExchange.getRequestHeaders();
@@ -231,14 +237,17 @@ public class StructureHandler extends HandlerBase {
 
 		ServerLevel serverLevel = getServerLevel(dimension);
 
-
 		// Calculate boundaries of area of blocks to gather information on.
-		BoundingBox box = createBoundingBox(x, y, z, dx, dy, dz);
+		BoundingBox initialBox = createBoundingBox(x, y, z, dx, dy, dz);
+		BoundingBox box = BuildArea.clampToBuildArea(initialBox, withinBuildArea);
+		if (box == null) {
+			throw new HttpException("Requested area of " + initialBox + " is outside of the build area " + BuildArea.getBuildArea().box, 403);
+		}
 
 		// Create StructureTemplate using blocks within the given area of the world.
 		StructureTemplate structureTemplate = new StructureTemplate();
 		BlockPos origin = new BlockPos(box.minX(), box.minY(), box.minZ());
-		Vec3i size = new Vec3i(Math.abs(dx), Math.abs(dy), Math.abs(dz));
+		Vec3i size = new BlockPos(box.getXSpan(), box.getYSpan(), box.getZSpan());
 
 		// Fill the structure template with blocks in the given area of the level. Do this on the server thread such that NBT block data
 		// gets gathered correctly. When resolved, save the result to a new CompoundTag.
