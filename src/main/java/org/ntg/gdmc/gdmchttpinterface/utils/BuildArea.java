@@ -16,8 +16,9 @@ public class BuildArea {
 		return buildAreaInstance;
 	}
 
-	public static void setBuildArea(BlockPos from, BlockPos to) {
+	public static BuildAreaInstance setBuildArea(BlockPos from, BlockPos to) {
 		buildAreaInstance = new BuildAreaInstance(from, to);
+		return buildAreaInstance;
 	}
 
 	public static void unsetBuildArea() {

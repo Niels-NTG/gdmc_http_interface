@@ -37,8 +37,8 @@ public final class SetBuildAreaCommand {
     }
 
     private static int setBuildArea(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
-        BuildArea.setBuildArea(from, to);
-        String feedback = String.format("Build area set from %s to %s", from.toShortString(), to.toShortString());
+        BuildArea.BuildAreaInstance newBuildArea = BuildArea.setBuildArea(from, to);
+        String feedback = String.format("Build area set from %s to %s", newBuildArea.from.toShortString(), newBuildArea.to.toShortString());
         commandSourceContext.getSource().sendSuccess(() -> Component.nullToEmpty(feedback), true);
         return 1;
     }
