@@ -10,6 +10,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 
 import java.io.ByteArrayOutputStream;
@@ -60,15 +61,15 @@ public class ChunksHandler extends HandlerBase {
             }
 
             if (queryParams.get("dx") == null && buildArea != null) {
-                chunkDX = buildArea.getChunkSpanX();
+                chunkDX = buildArea.sectionTo.x - buildArea.sectionFrom.x;
             } else {
-                chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
+                chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1")) - 1;
             }
 
             if (queryParams.get("dz") == null && buildArea != null) {
-                chunkDZ = buildArea.getChunkSpanZ();
+                chunkDZ = buildArea.sectionTo.z - buildArea.sectionFrom.z;
             } else {
-                chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+                chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1")) - 1;
             }
 
             withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
@@ -98,31 +99,19 @@ public class ChunksHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         // Gather all chunk data within the given range.
-        int xOffset = chunkX + chunkDX;
-        int xMin = Math.min(chunkX, xOffset);
-        int xMax = Math.max(chunkX, xOffset);
-
-        int zOffset = chunkZ + chunkDZ;
-        int zMin = Math.min(chunkZ, zOffset);
-        int zMax = Math.max(chunkZ, zOffset);
-
-        ChunkPos minChunkPos = new ChunkPos(xMin, zMin);
-        ChunkPos maxChunkPos = new ChunkPos(xMax, zMax);
         // Constrain start and end position to that of the build area if withinBuildArea is true.
-        if (withinBuildArea && buildArea != null) {
-            if (buildArea.sectionFrom.getWorldPosition().compareTo(minChunkPos.getWorldPosition()) > 0) {
-                minChunkPos = buildArea.sectionFrom;
-            }
-            if (buildArea.sectionTo.getWorldPosition().compareTo(maxChunkPos.getWorldPosition()) < 0) {
-                maxChunkPos = buildArea.sectionTo;
-            }
+        BoundingBox box = BuildArea.clampChunksToBuildArea(createBoundingBox(
+            chunkX, 0, chunkZ,
+            chunkDX, 0, chunkDZ
+        ), withinBuildArea);
+        if (box == null) {
+            throw new HttpException("Requested area is outside of build area", 403);
         }
 
         LinkedHashMap<ChunkPos, CompoundTag> chunkMap = new LinkedHashMap<>();
-        for (int rangeZ = minChunkPos.z; rangeZ < maxChunkPos.z; rangeZ++) {
-            for (int rangeX = minChunkPos.x; rangeX < maxChunkPos.x; rangeX++) {
-                ChunkPos chunkPos = new ChunkPos(rangeX, rangeZ);
-                chunkMap.put(chunkPos, null);
+        for (int rangeZ = box.minZ(); rangeZ <= box.maxZ(); rangeZ++) {
+            for (int rangeX = box.minX(); rangeX <= box.maxX(); rangeX++) {
+                chunkMap.put(new ChunkPos(rangeX, rangeZ), null);
             }
         }
         chunkMap.keySet().parallelStream().forEach(chunkPos -> {
@@ -135,10 +124,10 @@ public class ChunksHandler extends HandlerBase {
 
         CompoundTag bodyNBT = new CompoundTag();
         bodyNBT.put("Chunks", chunkList);
-        bodyNBT.putInt("ChunkX", minChunkPos.x);
-        bodyNBT.putInt("ChunkZ", minChunkPos.z);
-        bodyNBT.putInt("ChunkDX", maxChunkPos.x - minChunkPos.x);
-        bodyNBT.putInt("ChunkDZ", maxChunkPos.z - minChunkPos.z);
+        bodyNBT.putInt("ChunkX", box.minX());
+        bodyNBT.putInt("ChunkZ", box.minZ());
+        bodyNBT.putInt("ChunkDX", (box.maxX() - box.minX()) + 1);
+        bodyNBT.putInt("ChunkDZ", (box.maxZ() - box.minZ()) + 1);
 
         // Response header and response body
         Headers responseHeaders = httpExchange.getResponseHeaders();

@@ -46,9 +46,17 @@ public class BuildArea {
 		return box;
 	}
 
+	public static BoundingBox clampChunksToBuildArea(BoundingBox box, boolean withinBuildArea) {
+		if (withinBuildArea) {
+			return getBuildArea().clampSectionBox(box);
+		}
+		return box;
+	}
+
 	@SuppressWarnings({"FieldCanBeLocal", "unused"})
 	public static class BuildAreaInstance {
 
+		// These 6 properties are used for JSON serialisation.
 		private final int xFrom;
 		private final int yFrom;
 		private final int zFrom;
@@ -61,6 +69,7 @@ public class BuildArea {
 		public final transient BlockPos to;
 		public final transient ChunkPos sectionFrom;
 		public final transient ChunkPos sectionTo;
+		private final transient BoundingBox sectionBox;
 
 
 		private BuildAreaInstance(BlockPos from, BlockPos to) {
@@ -69,6 +78,10 @@ public class BuildArea {
 			this.to = new BlockPos(box.maxX(), box.maxY(), box.maxZ());
 			sectionFrom = new ChunkPos(this.from);
 			sectionTo = new ChunkPos(this.to);
+			sectionBox = BoundingBox.fromCorners(
+				new BlockPos(sectionFrom.x, 0, sectionFrom.z),
+				new BlockPos(sectionTo.x, 0, sectionTo.z)
+			);
 			xFrom = this.from.getX();
 			yFrom = this.from.getY();
 			zFrom = this.from.getZ();
@@ -104,12 +117,22 @@ public class BuildArea {
 			);
 		}
 
-		public int getChunkSpanX() {
-			return Math.max(sectionTo.x - sectionFrom.x, 0) + 1;
-		}
-
-		public int getChunkSpanZ() {
-			return Math.max(sectionTo.z - sectionFrom.z, 0) + 1;
+		private BoundingBox clampSectionBox(BoundingBox otherBox) {
+			if (!sectionBox.intersects(otherBox)) {
+				return null;
+			}
+			return BoundingBox.fromCorners(
+				new BlockPos(
+					Math.min(Math.max(sectionBox.minX(), otherBox.minX()), sectionBox.maxX()),
+					0,
+					Math.min(Math.max(sectionBox.minZ(), otherBox.minZ()), sectionBox.maxZ())
+				),
+				new BlockPos(
+					Math.max(Math.min(sectionBox.maxX(), otherBox.maxX()), sectionBox.minX()),
+					0,
+					Math.max(Math.min(sectionBox.maxZ(), otherBox.maxZ()), sectionBox.minZ())
+				)
+			);
 		}
 	}
 }

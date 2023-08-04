@@ -61,10 +61,6 @@ public class HeightmapHandler extends HandlerBase {
         // Create the 2D array to store the heightmap data
         int[][] heightmap = new int[xSize][zSize];
 
-        // Get the number of chunks
-        int xChunkCount = buildArea.getChunkSpanX();
-        int zChunkCount = buildArea.getChunkSpanZ();
-
         // Check if the type is a valid heightmap type
         Heightmap.Types defaultHeightmapType = Enums.getIfPresent(Heightmap.Types.class, heightmapTypeString).orNull();
         CustomHeightmap.Types customHeightmapType = Enums.getIfPresent(CustomHeightmap.Types.class, heightmapTypeString).orNull();
@@ -73,8 +69,8 @@ public class HeightmapHandler extends HandlerBase {
         }
 
         ArrayList<ChunkPos> chunkPosList = new ArrayList<>();
-        for (int chunkX = buildArea.sectionFrom.x; chunkX < xChunkCount + buildArea.sectionFrom.x; chunkX++) {
-            for (int chunkZ = buildArea.sectionFrom.z; chunkZ < zChunkCount + buildArea.sectionFrom.z; chunkZ++) {
+        for (int chunkX = buildArea.sectionFrom.x; chunkX <= buildArea.sectionTo.x; chunkX++) {
+            for (int chunkZ = buildArea.sectionFrom.z; chunkZ <= buildArea.sectionTo.z; chunkZ++) {
                 chunkPosList.add(new ChunkPos(chunkX, chunkZ));
             }
         }
