@@ -7,7 +7,6 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
-import org.ntg.gdmc.gdmchttpinterface.utils.TagComparator;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -30,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.ntg.gdmc.gdmchttpinterface.utils.TagUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -532,7 +532,7 @@ public class BlocksHandler extends HandlerBase {
             // the level of this change to make the change visible in the world.
             BlockEntity existingBlockEntity = chunk.getExistingBlockEntity(blockPos);
             if (existingBlockEntity != null) {
-                if (TagComparator.contains(existingBlockEntity.serializeNBT(), blockNBT)) {
+                if (TagUtils.contains(existingBlockEntity.serializeNBT(), blockNBT)) {
                     return;
                 }
                 existingBlockEntity.deserializeNBT(blockNBT);

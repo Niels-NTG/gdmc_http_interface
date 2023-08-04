@@ -4,7 +4,29 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 
-public class TagMerger {
+public class TagUtils {
+
+	public static boolean contains(CompoundTag existingCompound, CompoundTag newCompound) {
+		if (existingCompound == newCompound) {
+			return true;
+		}
+
+		if (existingCompound.isEmpty() != newCompound.isEmpty()) {
+			return false;
+		}
+
+		for (String newCompoundKey : newCompound.getAllKeys()) {
+			Tag existingTag = existingCompound.get(newCompoundKey);
+			if (existingTag == null) {
+				return false;
+			}
+			if (!existingTag.equals(newCompound.get(newCompoundKey))) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
 	 * Merge patch with target compound where the key and the tag type is the same, or if the key
@@ -14,7 +36,7 @@ public class TagMerger {
 	 * @param patchCompound existing compoundtag to merge from
 	 * @return targetComponent
 	 */
-	public static CompoundTag merge(CompoundTag targetCompound, CompoundTag patchCompound) {
+	public static CompoundTag mergeTags(CompoundTag targetCompound, CompoundTag patchCompound) {
 		for (String patchKey : patchCompound.getAllKeys()) {
 			Tag patchTag = patchCompound.get(patchKey);
 			if (patchTag == null) {
@@ -32,7 +54,7 @@ public class TagMerger {
 			}
 
 			if (patchTag.getId() == Tag.TAG_COMPOUND && targetTag.getId() == Tag.TAG_COMPOUND) {
-				TagMerger.merge(
+				TagUtils.mergeTags(
 					targetCompound.getCompound(patchKey),
 					patchCompound.getCompound(patchKey)
 				);

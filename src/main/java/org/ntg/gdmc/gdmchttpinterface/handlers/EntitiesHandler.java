@@ -1,7 +1,7 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-import org.ntg.gdmc.gdmchttpinterface.utils.TagMerger;
+import org.ntg.gdmc.gdmchttpinterface.utils.TagUtils;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -335,7 +335,7 @@ public class EntitiesHandler extends HandlerBase {
 				return false;
 			}
 
-			CompoundTag patchedData = TagMerger.merge(entity.serializeNBT(), patchData);
+			CompoundTag patchedData = TagUtils.mergeTags(entity.serializeNBT(), patchData);
 			if (entity.serializeNBT().equals(patchedData)) {
 				return false;
 			}
