@@ -48,6 +48,9 @@ public class EntitiesHandler extends HandlerBase {
 
 	// GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
 	private boolean includeData;
+
+	// GET/PUT/DELETE/PATCH: Search for entities within a specific dimension.
+	// For GET requests this only works if selector string contains position arguments.
 	private String dimension;
 
 	public EntitiesHandler(MinecraftServer mcServer) {
