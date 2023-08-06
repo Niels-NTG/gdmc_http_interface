@@ -25,7 +25,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -115,7 +114,7 @@ public class EntitiesHandler extends HandlerBase {
 	 * @return summon results
 	 */
 	private JsonArray putEntitiesHandler(InputStream requestBody) {
-		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
+		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension, new Vec3(x, y, z));
 		ServerLevel serverLevel = getServerLevel(dimension);
 
 		JsonArray returnValues = new JsonArray();
@@ -149,7 +148,7 @@ public class EntitiesHandler extends HandlerBase {
 		);
 		try {
 			EntitySelector entitySelector = EntityArgument.entities().parse(entitySelectorStringReader);
-			CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
+			CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension, new Vec3(x, y, z));
 			List<? extends Entity> entityList = entitySelector.findEntities(cmdSrc);
 
 			JsonArray returnList = new JsonArray();
@@ -180,15 +179,14 @@ public class EntitiesHandler extends HandlerBase {
 
 		ServerLevel level = getServerLevel(dimension);
 
-		List<String> entityUUIDToBeRemoved;
-
 		JsonArray returnValues = new JsonArray();
 
 		JsonArray jsonListUUID = parseJsonArray(requestBody);
-		entityUUIDToBeRemoved = Arrays.asList(new Gson().fromJson(jsonListUUID, String[].class));
+		String[] entityUUIDToBeRemoved = new Gson().fromJson(jsonListUUID, String[].class);
 
 		for (String stringUUID : entityUUIDToBeRemoved) {
-			if (stringUUID.length() == 0) {
+			if (stringUUID.isBlank()) {
+				returnValues.add(instructionStatus(false, "Invalid UUID"));
 				continue;
 			}
 			Entity entityToBeRemoved;
