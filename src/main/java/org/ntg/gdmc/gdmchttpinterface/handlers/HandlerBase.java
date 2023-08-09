@@ -134,7 +134,7 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static String getHeader(Headers headers, String key, String defaultValue) {
         List<String> list = headers.get(key);
-        if(list == null || list.size() == 0) {
+        if(list == null || list.isEmpty()) {
             return defaultValue;
         }
         return list.get(0);

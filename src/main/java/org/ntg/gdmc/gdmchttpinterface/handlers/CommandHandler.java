@@ -51,7 +51,7 @@ public class CommandHandler extends HandlerBase {
 
         JsonArray returnValues = new JsonArray();
         for (String command: commands) {
-            if (command.length() == 0) {
+            if (command.isBlank()) {
                 continue;
             }
             returnValues.add(executeCommand(command, cmdSrc));

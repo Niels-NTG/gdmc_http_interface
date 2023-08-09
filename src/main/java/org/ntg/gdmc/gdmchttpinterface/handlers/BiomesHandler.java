@@ -87,9 +87,9 @@ public class BiomesHandler extends HandlerBase {
 		// Create an ordered map with an entry for every block position we want to know the biome of.
 		LinkedHashMap<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
 		HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
-		for (int rangeX = box.minX(); rangeX < box.maxX() + 1; rangeX++) {
-			for (int rangeY = box.minY(); rangeY < box.maxY() + 1; rangeY++) {
-				for (int rangeZ = box.minZ(); rangeZ < box.maxZ() + 1; rangeZ++) {
+		for (int rangeX = box.minX(); rangeX <= box.maxX(); rangeX++) {
+			for (int rangeY = box.minY(); rangeY <= box.maxY(); rangeY++) {
+				for (int rangeZ = box.minZ(); rangeZ <= box.maxZ(); rangeZ++) {
 					BlockPos blockPos = new BlockPos(rangeX, rangeY, rangeZ);
 					blockPosMap.put(blockPos, null);
 					chunkPosMap.put(new ChunkPos(blockPos), null);
