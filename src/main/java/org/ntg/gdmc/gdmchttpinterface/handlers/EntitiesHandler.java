@@ -121,12 +121,11 @@ public class EntitiesHandler extends HandlerBase {
 		JsonArray entityDescriptionList = parseJsonArray(requestBody);
 
 		for (JsonElement entityDescription : entityDescriptionList) {
-			JsonObject json = entityDescription.getAsJsonObject();
-
 			SummonEntityInstruction summonEntityInstruction;
 			try {
+				JsonObject json = entityDescription.getAsJsonObject();
 				summonEntityInstruction = new SummonEntityInstruction(json, cmdSrc);
-			} catch (CommandSyntaxException e) {
+			} catch (UnsupportedOperationException | IllegalStateException | CommandSyntaxException e) {
 				returnValues.add(instructionStatus(false, e.getMessage()));
 				continue;
 			}
