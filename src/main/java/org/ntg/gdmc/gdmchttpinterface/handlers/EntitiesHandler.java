@@ -182,9 +182,15 @@ public class EntitiesHandler extends HandlerBase {
 		JsonArray returnValues = new JsonArray();
 
 		JsonArray jsonListUUID = parseJsonArray(requestBody);
-		String[] entityUUIDToBeRemoved = new Gson().fromJson(jsonListUUID, String[].class);
 
-		for (String stringUUID : entityUUIDToBeRemoved) {
+		for (JsonElement jsonElement : jsonListUUID) {
+			String stringUUID;
+			try {
+				stringUUID = jsonElement.getAsString();
+			} catch (UnsupportedOperationException | IllegalStateException e) {
+				returnValues.add(instructionStatus(false, "Invalid UUID"));
+				continue;
+			}
 			if (stringUUID.isBlank()) {
 				returnValues.add(instructionStatus(false, "Invalid UUID"));
 				continue;
