@@ -230,11 +230,11 @@ public class EntitiesHandler extends HandlerBase {
 		JsonArray jsonList = parseJsonArray(requestBody);
 
 		for (JsonElement entityDescription : jsonList) {
-			JsonObject json = entityDescription.getAsJsonObject();
 			PatchEntityInstruction patchEntityInstruction;
 			try {
+				JsonObject json = entityDescription.getAsJsonObject();
 				patchEntityInstruction = new PatchEntityInstruction(json);
-			} catch (IllegalArgumentException | CommandSyntaxException | UnsupportedOperationException e) {
+			} catch (IllegalStateException | UnsupportedOperationException | NullPointerException | IllegalArgumentException | CommandSyntaxException e) {
 				returnValues.add(instructionStatus(false, e.getMessage()));
 				continue;
 			}
@@ -328,7 +328,7 @@ public class EntitiesHandler extends HandlerBase {
 		private final UUID uuid;
 		private final CompoundTag patchData;
 
-		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException, UnsupportedOperationException {
+		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException, UnsupportedOperationException, NullPointerException {
 			uuid = UUID.fromString(inputData.get("uuid").getAsString());
 			patchData = TagParser.parseTag(inputData.get("data").getAsString());
 		}
