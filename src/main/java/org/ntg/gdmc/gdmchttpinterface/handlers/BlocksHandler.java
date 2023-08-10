@@ -72,7 +72,7 @@ public class BlocksHandler extends HandlerBase {
     // https://minecraft.fandom.com/wiki/Block_update
     private int customFlags; // -1 == no custom flags
 
-    // PUT/GET is true, constrain placement/getting blocks within the current build area.
+    // PUT/GET: If true, constrain placement/getting blocks within the current build area.
     private boolean withinBuildArea;
 
     private String dimension;
@@ -191,9 +191,11 @@ public class BlocksHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         // Calculate boundaries of area of blocks to gather information on.
-        BoundingBox box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
-        // Return empty list if entire requested area is outside of build area (if withinBuildArea is true).
-        if (box == null) {
+        BoundingBox box;
+        try {
+            box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
+        } catch (HttpException e) {
+            // Return empty list if entire requested area is outside of build area (if withinBuildArea is true).
             return jsonArray;
         }
 

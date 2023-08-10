@@ -245,9 +245,6 @@ public class StructureHandler extends HandlerBase {
 		// Calculate boundaries of area of blocks to gather information on.
 		BoundingBox initialBox = createBoundingBox(x, y, z, dx, dy, dz);
 		BoundingBox box = BuildArea.clampToBuildArea(initialBox, withinBuildArea);
-		if (box == null) {
-			throw new HttpException("Requested area of " + initialBox + " is outside of the build area " + BuildArea.getBuildArea().box, 403);
-		}
 
 		// Create StructureTemplate using blocks within the given area of the world.
 		StructureTemplate structureTemplate = new StructureTemplate();

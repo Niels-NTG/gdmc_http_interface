@@ -3,7 +3,7 @@ package org.ntg.gdmc.gdmchttpinterface.utils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.ntg.gdmc.gdmchttpinterface.handlers.HandlerBase;
+import org.ntg.gdmc.gdmchttpinterface.handlers.HandlerBase.HttpException;
 
 public class BuildArea {
 
@@ -11,7 +11,7 @@ public class BuildArea {
 
 	public static BuildAreaInstance getBuildArea() {
 		if (buildAreaInstance == null) {
-			throw new HandlerBase.HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
+			throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
 		}
 		return buildAreaInstance;
 	}
@@ -100,7 +100,7 @@ public class BuildArea {
 
 		private BoundingBox clampBox(BoundingBox otherBox) {
 			if (!box.intersects(otherBox)) {
-				return null;
+				throw new HttpException("Requested area is outside of build area", 403);
 			}
 
 			return BoundingBox.fromCorners(
@@ -119,7 +119,7 @@ public class BuildArea {
 
 		private BoundingBox clampSectionBox(BoundingBox otherBox) {
 			if (!sectionBox.intersects(otherBox)) {
-				return null;
+				throw new HttpException("Requested area is outside of build area", 403);
 			}
 			return BoundingBox.fromCorners(
 				new BlockPos(

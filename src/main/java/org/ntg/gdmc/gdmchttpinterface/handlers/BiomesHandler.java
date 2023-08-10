@@ -78,8 +78,10 @@ public class BiomesHandler extends HandlerBase {
 		ServerLevel serverLevel = getServerLevel(dimension);
 
 		// Calculate boundaries of area of blocks to gather biome information on.
-		BoundingBox box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
-		if (box == null) {
+		BoundingBox box;
+		try {
+			box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
+		} catch (HttpException e) {
 			resolveRequest(httpExchange, responseList.toString());
 			return;
 		}

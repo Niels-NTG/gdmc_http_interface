@@ -104,9 +104,6 @@ public class ChunksHandler extends HandlerBase {
             chunkX, 0, chunkZ,
             chunkDX, 0, chunkDZ
         ), withinBuildArea);
-        if (box == null) {
-            throw new HttpException("Requested area is outside of build area", 403);
-        }
 
         LinkedHashMap<ChunkPos, CompoundTag> chunkMap = new LinkedHashMap<>();
         for (int rangeZ = box.minZ(); rangeZ <= box.maxZ(); rangeZ++) {
