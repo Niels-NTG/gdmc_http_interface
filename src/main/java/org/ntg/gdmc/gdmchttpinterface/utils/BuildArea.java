@@ -34,7 +34,7 @@ public class BuildArea {
 
 	public static boolean isOutsideBuildArea(BoundingBox box, boolean withinBuildArea) {
 		if (withinBuildArea) {
-			return getBuildArea().isOutsideBuildArea(box);
+			return !getBuildArea().isInsideBuildArea(box);
 		}
 		return false;
 	}
@@ -94,8 +94,8 @@ public class BuildArea {
 			return x < from.getX() || x > to.getX() || z < from.getZ() || z > to.getZ();
 		}
 
-		private boolean isOutsideBuildArea(BoundingBox otherBox) {
-			return box.maxX() < otherBox.minX() || box.minX() > otherBox.maxX() || box.maxZ() < otherBox.minZ() || box.minZ() > otherBox.maxZ();
+		private boolean isInsideBuildArea(BoundingBox otherBox) {
+			return box.maxX() >= otherBox.maxX() && box.minX() <= otherBox.minX() && box.maxZ() >= otherBox.maxZ() && box.minZ() <= otherBox.minZ();
 		}
 
 		private BoundingBox clampBox(BoundingBox otherBox) {

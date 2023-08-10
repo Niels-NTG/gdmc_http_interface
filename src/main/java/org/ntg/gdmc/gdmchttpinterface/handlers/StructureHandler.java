@@ -25,6 +25,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.zip.GZIPOutputStream;
 
 public class StructureHandler extends HandlerBase {
@@ -63,7 +64,7 @@ public class StructureHandler extends HandlerBase {
 	private int customFlags; // -1 == no custom flags
 	private String dimension;
 
-	// GET: is true, constrain placement/getting blocks within the current build area.
+	// POST/GET: is true, constrain placement/getting blocks within the current build area.
 	private boolean withinBuildArea;
 
 	public StructureHandler(MinecraftServer mcServer) {
@@ -203,6 +204,10 @@ public class StructureHandler extends HandlerBase {
 			StructureTemplate structureTemplate = serverLevel.getStructureManager().readStructure(structureCompound);
 
 			BlockPos origin = new BlockPos(x, y, z);
+			BoundingBox box = structureTemplate.getBoundingBox(structurePlaceSettings, origin);
+			if (BuildArea.isOutsideBuildArea(box, withinBuildArea)) {
+				throw new HttpException("Could not place structure: bounds of structure are (partially) outside the build area.", 403);
+			}
 			int blockPlacementFlags = customFlags >= 0 ? customFlags : BlocksHandler.getBlockFlags(doBlockUpdates, spawnDrops);
 
 			// Place the structure into the world on the server thread to ensure NBT data within the blocks of the structure
@@ -223,7 +228,7 @@ public class StructureHandler extends HandlerBase {
 			} else {
 				responseValue = instructionStatus(false);
 			}
-		} catch (Exception exception) {
+		} catch (InterruptedException | ExecutionException exception) {
 			throw new HttpException("Could not place structure: " + exception.getMessage(), 400);
 		}
 
