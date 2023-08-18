@@ -10,7 +10,6 @@ import net.minecraft.network.chat.Component;
 public class GetHttpInterfacePort {
 
 	private static final String COMMAND_NAME = "gethttpport";
-	private GetHttpInterfacePort() {}
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(

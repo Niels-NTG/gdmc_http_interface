@@ -14,8 +14,6 @@ public final class SetBuildAreaCommand {
 
     private static final String COMMAND_NAME = "setbuildarea";
 
-    private SetBuildAreaCommand() { }
-
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(COMMAND_NAME)
             .executes(SetBuildAreaCommand :: unsetBuildArea)

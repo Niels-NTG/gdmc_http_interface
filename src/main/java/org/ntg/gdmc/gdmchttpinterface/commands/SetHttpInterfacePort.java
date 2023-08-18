@@ -12,8 +12,6 @@ public final class SetHttpInterfacePort {
 
 	private static final String COMMAND_NAME = "sethttpport";
 
-	private SetHttpInterfacePort() {}
-
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(
 			Commands.literal(COMMAND_NAME)
