@@ -1,10 +1,9 @@
 package org.ntg.gdmc.gdmchttpinterface;
 
-import org.ntg.gdmc.gdmchttpinterface.config.GdmcHttpConfig;
-import org.ntg.gdmc.gdmchttpinterface.utils.RegistryHandler;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -13,6 +12,8 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ntg.gdmc.gdmchttpinterface.config.GdmcHttpConfig;
+import org.ntg.gdmc.gdmchttpinterface.utils.RegistryHandler;
 
 import java.io.IOException;
 
@@ -42,10 +43,10 @@ public class GdmcHttpMod
 
         try {
             GdmcHttpServer.startServer(minecraftServer);
-            minecraftServer.sendSystemMessage(Component.nullToEmpty("GDMC Server started successfully."));
+            minecraftServer.sendSystemMessage(successMessage());
         } catch (IOException e) {
             LOGGER.warn("Unable to start server!");
-            minecraftServer.sendSystemMessage(Component.nullToEmpty("GDMC Server failed to start!"));
+            minecraftServer.sendSystemMessage(failureMessage());
         }
     }
 
@@ -54,5 +55,20 @@ public class GdmcHttpMod
         LOGGER.info("Server stopping");
 
         GdmcHttpServer.stopServer();
+    }
+
+    @SubscribeEvent
+    public void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity() != null) {
+            event.getEntity().displayClientMessage(GdmcHttpServer.hasHtppServerStarted ? successMessage() : failureMessage(), true);
+        }
+    }
+
+    private static Component successMessage() {
+        return Component.nullToEmpty(String.format("GDMC-HTTP server started successfully at http://localhost:%s/", GdmcHttpServer.getCurrentHttpPort()));
+    }
+
+    private static Component failureMessage() {
+        return Component.nullToEmpty("GDMC-HTTP server failed to start!");
     }
 }

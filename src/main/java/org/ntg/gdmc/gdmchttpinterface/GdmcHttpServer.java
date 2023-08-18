@@ -12,6 +12,8 @@ public class GdmcHttpServer {
     private static HttpServer httpServer;
     private static MinecraftServer mcServer;
 
+    public static boolean hasHtppServerStarted = false;
+
     public static int getHttpServerPortConfig() {
         return GdmcHttpConfig.HTTP_INTERFACE_PORT.get();
     }
@@ -26,18 +28,20 @@ public class GdmcHttpServer {
         startServer(getHttpServerPortConfig());
     }
 
-    public static void startServer(int portNumber) throws IOException {
+    private static void startServer(int portNumber) throws IOException {
         // Create HTTP server on localhost with the port number defined in the config file.
         httpServer = HttpServer.create(new InetSocketAddress(portNumber), 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();
+        hasHtppServerStarted = true;
     }
 
     public static void stopServer() {
         if (httpServer != null) {
             httpServer.stop(5);
         }
+        hasHtppServerStarted = false;
     }
 
     private static void createContexts() {
