@@ -23,5 +23,9 @@ eclipse
 run
 mcmodsrepo
 
+# profiler
+*.jfr
+*.prof
+
 # Files from Forge MDK
 forge*changelog.txt
