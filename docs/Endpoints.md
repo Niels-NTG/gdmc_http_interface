@@ -10,11 +10,45 @@ The JSON schemas in this page are made with the help of [quicktype.io](https://a
 
 ## Error codes
 
-The following error codes can occur at any endpoint:
+The following error status codes are shared across multiple endpoints:
 
 - `400`: "Could not parse query parameters"
+  - Possible causes:
+    - A required parameter is missing from the request URL
+    - A parameter value cannot be parsed to the expected type
+
+- `400`: "Malformed JSON"
+  - Only relevant for requests that use the `PUT`, `POST`, `PATCH` or `DELETE` method
+
+  - Possible causes:
+    - Request body is empty
+    - Request body is missing a closing brace somewhere
+    - A comma is missing between properties
+    - Or another syntax typo in the JSON
+
+- `403`: "Requested area is outside of build area"
+  - Error is thrown at endpoints that support the`withinBuildArea` query parameter if all the following conditions are true:
+    - `withinBuildArea` is set to `true`
+    - A build area is set
+    - Area in the request is completely outside of the build area
+- `404`: "No build area is specified. Use the /setbuildarea command inside Minecraft to set a build area."
+  - Error is thrown if no build area is set when an request requires it
+
 - `405`: "Method not allowed"
+  - Current endpoint does not support the method. See the methods listed in this documentation or the 405 error message to see what methods are supported.
+
 - `500`: "Internal server error"
+  - This type of error is unintended behaviour and could be a bug in either GDMC-HTTP or Minecraft itself. Feel free to submit an [issue](https://github.com/Niels-NTG/gdmc_http_interface/issues) with steps explaining how to reproduce this error.
+
+
+When an error is thrown GDMC-HTTP will return a JSON-formatted response containing the status code itself and an error message. For example:
+
+```json
+{
+	"status": 400,
+	"message": "Malformed JSON: Not a JSON Array: null"
+}
+```
 
 ## Request headers
 
@@ -549,7 +583,7 @@ Note that the _mirror_ transformation is applied first, the _rotation_ second. A
 
 ## Request body
 
-A valid [NBT file](https://minecraft.fandom.com/wiki/NBT_format).
+A valid [NBT file](https://minecraft.fandom.com/wiki/NBT_format) or plain [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format)-formatted text.
 
 ## Response headers
 
@@ -558,6 +592,11 @@ A valid [NBT file](https://minecraft.fandom.com/wiki/NBT_format).
 ## Response body
 
 Contains a single `{ "status": 1 }` if the placement was successful or a `{ "status": 0 }` if not.
+
+A `400` error status is returned instead if:
+
+- Request body is empty
+- Request body could not be processed because it's not in a NBT or SNBT format
 
 ## Example
 
@@ -621,17 +660,17 @@ Endpoint for reading all [entities](https://minecraft.fandom.com/wiki/Entity) fr
 
 ## URL parameters
 
-| key         | valid values                                          | required | defaults to                      | description                                                                                                                                                                               |
-|-------------|-------------------------------------------------------|----------|----------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| x           | integer                                               | no       | `0`                              | X coordinate (**deprecated**, use selector instead)                                                                                                                                       |
-| y           | integer                                               | no       | `0`                              | Y coordinate (**deprecated**, use selector instead)                                                                                                                                       |
-| z           | integer                                               | no       | `0`                              | Z coordinate (**deprecated**, use selector instead)                                                                                                                                       |
-| dx          | integer                                               | no       | `1`                              | Range of blocks to get counting from x (can be negative) (**deprecated**, use selector instead)                                                                                           |
-| dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative) (**deprecated**, use selector instead)                                                                                           |
-| dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative) (**deprecated**, use selector instead)                                                                                           |
-| selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,xd=1,yd=1,dz=1]` | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for entities. Must be URL-encoded.                                                                           |
-| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) in response                                                                               |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored. |
+| key         | valid values                                          | required | defaults to                      | description                                                                                                                                                                                                   |
+|-------------|-------------------------------------------------------|----------|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| x           | integer                                               | no       | `0`                              | X coordinate (**deprecated**, use selector instead)                                                                                                                                                           |
+| y           | integer                                               | no       | `0`                              | Y coordinate (**deprecated**, use selector instead)                                                                                                                                                           |
+| z           | integer                                               | no       | `0`                              | Z coordinate (**deprecated**, use selector instead)                                                                                                                                                           |
+| dx          | integer                                               | no       | `1`                              | Range of blocks to get counting from x (can be negative) (**deprecated**, use selector instead)                                                                                                               |
+| dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative) (**deprecated**, use selector instead)                                                                                                               |
+| dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative) (**deprecated**, use selector instead)                                                                                                               |
+| selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,xd=1,yd=1,dz=1]` | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for entities. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
+| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) in response                                                                                                   |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.                     |
 
 ## Request headers
 
@@ -828,11 +867,11 @@ Endpoint for reading all [players](https://minecraft.fandom.com/wiki/Player) fro
 ## URL parameters
 
 
-| key         | valid values                                          | required | defaults to | description                                                                                                                                                                                      |
-|-------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) in response                                                                                  |
-| selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for players. Must be URL-encoded.                                                                                   |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored. |
+| key         | valid values                                          | required | defaults to | description                                                                                                                                                                                                  |
+|-------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) in response                                                                                              |
+| selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for players. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.             |
 
 ## Request headers
 
@@ -908,10 +947,10 @@ Returns the [heightmap](https://minecraft.fandom.com/wiki/Heightmap) of the set 
 
 ## URL parameters
 
-| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                            |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.fandom.com/wiki/Heightmap) wiki page for more information.                                                                 |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
+| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                                 |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.fandom.com/wiki/Heightmap) wiki page for more information. A `400` status code is returned if heightmap type is not recognised. |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.      |
 
 In addition to the build-in height map types of `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING` and `MOTION_BLOCKING_NO_LEAVES`, this mod also includes the following custom height maps:
 - `MOTION_BLOCKING_NO_PLANTS`
@@ -951,6 +990,8 @@ N/A
 ## Response body
 
 A 2D array with integer values representing the heightmap of the x-z dimensions of the build area.
+
+A `404` error is returned if no build area has been set.
 
 ## Example
 

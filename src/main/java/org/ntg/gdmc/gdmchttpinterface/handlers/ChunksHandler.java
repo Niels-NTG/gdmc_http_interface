@@ -29,6 +29,11 @@ public class ChunksHandler extends HandlerBase {
     @Override
     public void internalHandle(HttpExchange httpExchange) throws IOException {
 
+        String method = httpExchange.getRequestMethod().toLowerCase();
+        if(!method.equals("get")) {
+            throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
+        }
+
         // query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
 
@@ -78,11 +83,6 @@ public class ChunksHandler extends HandlerBase {
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
             throw new HttpException(message, 400);
-        }
-
-        String method = httpExchange.getRequestMethod().toLowerCase();
-        if(!method.equals("get")) {
-            throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
         }
 
         // Check if clients wants a response in plain-text. If not, return response

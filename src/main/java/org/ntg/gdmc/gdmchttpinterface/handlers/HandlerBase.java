@@ -40,8 +40,8 @@ import java.util.Map;
 public abstract class HandlerBase implements HttpHandler {
 
     public static class HttpException extends RuntimeException {
-    public final String message;
-        public final int statusCode;
+        private final String message;
+        private final int statusCode;
         public HttpException(String message, int statusCode) {
             this.message = message;
             this.statusCode = statusCode;

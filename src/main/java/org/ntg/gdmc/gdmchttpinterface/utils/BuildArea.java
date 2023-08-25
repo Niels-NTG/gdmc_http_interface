@@ -11,7 +11,7 @@ public class BuildArea {
 
 	public static BuildAreaInstance getBuildArea() {
 		if (buildAreaInstance == null) {
-			throw new HttpException("No build area is specified. Use the setbuildarea command inside Minecraft to set a build area.", 404);
+			throw new HttpException("No build area is specified. Use the /setbuildarea command inside Minecraft to set a build area.", 404);
 		}
 		return buildAreaInstance;
 	}

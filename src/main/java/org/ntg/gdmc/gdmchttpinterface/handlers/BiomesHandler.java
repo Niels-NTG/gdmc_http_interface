@@ -59,8 +59,7 @@ public class BiomesHandler extends HandlerBase {
 
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
-			String message = "Could not parse query parameter: " + e.getMessage();
-			throw new HandlerBase.HttpException(message, 400);
+			throw new HttpException("Could not parse query parameter: " + e.getMessage(), 400);
 		}
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
