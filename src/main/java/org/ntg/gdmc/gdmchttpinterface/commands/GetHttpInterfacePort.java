@@ -5,7 +5,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.Component;
+import org.ntg.gdmc.gdmchttpinterface.utils.Feedback;
 
 public class GetHttpInterfacePort {
 
@@ -20,7 +20,7 @@ public class GetHttpInterfacePort {
 
 	private static int perform(CommandContext<CommandSourceStack> commandSourceContext) {
 		int currentPort = GdmcHttpServer.getCurrentHttpPort();
-		commandSourceContext.getSource().sendSuccess(() -> Component.nullToEmpty(String.valueOf(currentPort)), true);
+		commandSourceContext.getSource().sendSuccess(() -> Feedback.chatMessage("Current GDMC-HTTP port: ").append(Feedback.copyOnClickText(String.valueOf(currentPort))), true);
 		return currentPort;
 	}
 }

@@ -1,9 +1,9 @@
 package org.ntg.gdmc.gdmchttpinterface;
 
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.event.server.ServerStoppingEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -13,6 +13,7 @@ import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ntg.gdmc.gdmchttpinterface.config.GdmcHttpConfig;
+import org.ntg.gdmc.gdmchttpinterface.utils.Feedback;
 import org.ntg.gdmc.gdmchttpinterface.utils.RegistryHandler;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.io.IOException;
 @Mod("gdmchttpinterface")
 public class GdmcHttpMod
 {
+    @SuppressWarnings("unused")
     public static final String MODID = "gdmchttpinterface";
 
     // Directly reference a log4j logger.
@@ -58,17 +60,17 @@ public class GdmcHttpMod
     }
 
     @SubscribeEvent
-    public void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
+    public void onPlayerLogIn(PlayerLoggedInEvent event) {
         if (event.getEntity() != null) {
-            event.getEntity().displayClientMessage(GdmcHttpServer.hasHtppServerStarted ? successMessage() : failureMessage(), true);
+            event.getEntity().sendSystemMessage(GdmcHttpServer.hasHtppServerStarted ? successMessage() : failureMessage());
         }
     }
 
-    private static Component successMessage() {
-        return Component.nullToEmpty(String.format("GDMC-HTTP server started successfully at http://localhost:%s/", GdmcHttpServer.getCurrentHttpPort()));
+    private static MutableComponent successMessage() {
+        return Feedback.chatMessage("Server started at ").append(Feedback.copyOnClickText(String.format("http://localhost:%s/", GdmcHttpServer.getCurrentHttpPort())));
     }
 
-    private static Component failureMessage() {
-        return Component.nullToEmpty("GDMC-HTTP server failed to start!");
+    private static MutableComponent failureMessage() {
+        return Feedback.chatMessage("GDMC-HTTP server failed to start!");
     }
 }

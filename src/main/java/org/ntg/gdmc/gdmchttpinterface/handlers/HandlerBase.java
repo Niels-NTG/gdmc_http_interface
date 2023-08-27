@@ -281,7 +281,7 @@ public abstract class HandlerBase implements HttpHandler {
             this.getServerLevel(dimension),
             4,
             name,
-            Component.nullToEmpty(name),
+            Component.literal(name),
             mcServer,
             null
         );
