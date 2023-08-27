@@ -13,14 +13,24 @@ public final class SetHttpInterfacePort {
 	private static final String COMMAND_NAME = "sethttpport";
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(
-			Commands.literal(COMMAND_NAME)
+		dispatcher.register(Commands.literal(COMMAND_NAME)
+			.executes(SetHttpInterfacePort::unsetInterfacePort)
 			.then(Commands.argument("port", IntegerArgumentType.integer(0, 65535))
-			.executes(context -> perform(context, IntegerArgumentType.getInteger(context, "port")))
+			.executes(context -> setInterfacePort(context, IntegerArgumentType.getInteger(context, "port")))
 		));
 	}
 
-	private static int perform(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
+	private static int unsetInterfacePort(CommandContext<CommandSourceStack> commandSourceStack) {
+		int defaultPort = GdmcHttpConfig.HTTP_INTERFACE_PORT.getDefault();
+		GdmcHttpConfig.HTTP_INTERFACE_PORT.set(defaultPort);
+		commandSourceStack.getSource().sendSuccess(() ->
+			Feedback.chatMessage("Port changed back to default value of ").append(Feedback.copyOnClickText(String.valueOf(defaultPort))).append(". Reload the world for it to take effect."),
+			true
+		);
+		return defaultPort;
+	}
+
+	private static int setInterfacePort(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
 		try {
 			GdmcHttpConfig.HTTP_INTERFACE_PORT.set(newPortNumber);
 			commandSourceContext.getSource().sendSuccess(() ->
