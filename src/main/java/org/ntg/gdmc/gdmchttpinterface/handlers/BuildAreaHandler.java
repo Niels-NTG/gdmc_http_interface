@@ -1,6 +1,5 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.server.MinecraftServer;
@@ -21,11 +20,9 @@ public class BuildAreaHandler extends HandlerBase {
             throw new HttpException("Method not allowed. Use GET method to request the build area.", 405);
         }
 
-        BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
-
         Headers responseHeaders = httpExchange.getResponseHeaders();
         setDefaultResponseHeaders(responseHeaders);
 
-        resolveRequest(httpExchange, new Gson().toJson(buildArea));
+        resolveRequest(httpExchange, BuildArea.toJSONString());
     }
 }

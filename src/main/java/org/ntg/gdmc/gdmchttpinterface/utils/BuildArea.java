@@ -1,5 +1,6 @@
 package org.ntg.gdmc.gdmchttpinterface.utils;
 
+import com.google.gson.Gson;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
@@ -51,6 +52,10 @@ public class BuildArea {
 			return getBuildArea().clampSectionBox(box);
 		}
 		return box;
+	}
+
+	public static String toJSONString() {
+		return new Gson().toJson(getBuildArea());
 	}
 
 	@SuppressWarnings({"FieldCanBeLocal", "unused"})

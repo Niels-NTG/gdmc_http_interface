@@ -14,7 +14,11 @@ public class Feedback {
 	}
 
 	public static MutableComponent copyOnClickText(String str) {
-		return Component.literal(str).withStyle((style) -> style.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, str)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(str));
+		return copyOnClickText(str, str);
+	}
+
+	public static MutableComponent copyOnClickText(String str, String clipboardContent) {
+		return Component.literal(str).withStyle((style) -> style.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(str));
 	}
 
 }
