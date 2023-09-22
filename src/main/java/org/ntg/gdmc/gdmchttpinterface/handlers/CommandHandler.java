@@ -6,9 +6,10 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.Vec3;
+import org.ntg.gdmc.gdmchttpinterface.utils.ChatComponentDataExtractor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -68,11 +69,14 @@ public class CommandHandler extends HandlerBase {
     private JsonObject executeCommand(String command, CommandSourceStack cmdSrc) {
         try {
             int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
-            Component lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
+            MutableComponent lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
             JsonObject json = instructionStatus(
                 commandStatus != 0,
                 lastCommandResult != null ? lastCommandResult.getString() : null
             );
+            if (lastCommandResult != null) {
+                json.add("data", ChatComponentDataExtractor.toJsonTree(lastCommandResult));
+            }
             return json;
         } catch (CommandSyntaxException e) {
             return instructionStatus(false, e.getMessage());

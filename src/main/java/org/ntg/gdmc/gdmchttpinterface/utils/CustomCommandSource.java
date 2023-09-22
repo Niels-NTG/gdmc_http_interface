@@ -2,14 +2,15 @@ package org.ntg.gdmc.gdmchttpinterface.utils;
 
 import net.minecraft.commands.CommandSource;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class CustomCommandSource implements CommandSource {
 
-    private Component lastOutput;
+    private MutableComponent lastOutput;
 
     @Override
     public void sendSystemMessage(Component output) {
-        this.lastOutput = output;
+        this.lastOutput = output.copy();
     }
 
     @Override
@@ -27,7 +28,7 @@ public class CustomCommandSource implements CommandSource {
         return true;
     }
 
-    public Component getLastOutput() {
+    public MutableComponent getLastOutput() {
         return this.lastOutput;
     }
 }
