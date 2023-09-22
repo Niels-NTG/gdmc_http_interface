@@ -1,8 +1,6 @@
-# GDMC-HTTP 1.4.0 (Minecraft 1.20.1)
+# GDMC-HTTP 1.4.0 (Minecraft 1.20.2)
 
-- NEW: Compatibility with Minecraft version 1.20.1.
-- BREAKING: No longer compatible with versions of Minecraft older than 1.20.1
-
+- NEW: Compatibility with Minecraft version 1.20.2. No longer compatible with older versions of Minecraft. Any GDMC client (eg. your settlement generator) that works with GDMC-HTTP 1.0.0 or later should work with GDMC-HTTP 1.4.0 without making any changes to your code.
 # GDMC-HTTP 1.3.2 (Minecraft 1.19.2)
 
 - NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.fandom.com/wiki/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
