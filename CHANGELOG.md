@@ -1,6 +1,37 @@
 # GDMC-HTTP 1.4.0 (Minecraft 1.20.2)
 
+TL;DR:
+- ⛏ Minecraft 1.20.2 compatibility!
+- ⏱ Huge performance improvements!
+- 📜 Commands now return usefull feedback to the client!
+- 📐 Restrict actions to the build area with the `withinBuildArea` flag!
+- 🏗 SNBT support for placing structures!
+- 😸 Lots of quality-of-life improvements!
+
 - NEW: Compatibility with Minecraft version 1.20.2. No longer compatible with older versions of Minecraft. Any GDMC client (eg. your settlement generator) that works with GDMC-HTTP 1.0.0 or later should work with GDMC-HTTP 1.4.0 without making any changes to your code.
+- NEW: The value `"message"` property returned by the `POST /commands` endpoint is now equal to what you would see in the in-game chat.
+- NEW: `POST /structure` endpoint now also accepts [SNBT-encoded](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) files.
+- NEW: `GET /chunks` default to using the build area if no URL query parameters are given.
+- NEW: Add `withinBuildArea` flag to `GET /chunks`. If set to true and a build area is set, chunks outside of the build area are skipped.
+- NEW: Add `withinBuildArea` flag to `GET /biomes`. If set to true and a build area is set, it skips positions outside of the build area.
+- NEW: Add `withinBuildArea` flag to `GET /structure`. If set to true and a build area is set, it skips positions outside of the build area.
+- NEW: Add `withinBuildArea` flag to `POST /structure`. If set to true and a build area is set, structures that are (partially) outside of the build area cannot be placed.
+- NEW: Copy JSON representation of the current build area to clipboard when clicking on the chat message after setting it with the `/setbuildarea` command.
+- NEW: Display GDMC-HTTP server status in chat message when player joins the world.
+- NEW: Revert interface port to default (`9000`) if `/sethttpport` command has no arguments.
+- FIX: Requests to `PUT /blocks` are up to 70%[^1] faster!
+- FIX: Requests to `GET /blocks` are up to 60%[^1] faster!
+- FIX: Requests to `GET /chunks` are up to 60%[^1] faster!
+- FIX: Requests to `GET /heightmap` are now up to 85%[^1] faster!
+- FIX: Requests to `GET /biomes` are now up to 60%[^1] faster!
+- FIX: Requests to `GET /structure` are now up to 60%[^1] faster!
+- FIX: Requests to `GET /chunks` larger than than 52x52 chunks should no longer time out[^1].
+- FIX: Parse arguments `dx`, `dy` and `dz` in `GET /entities` as ranges (correct) instead of absolute coordinates (wrong).
+- FIX: Improved error handling across all endpoints.
+- FIX: Do not ignore blank entries in requests to `DELETE /entities`.
+
+[^1]: Tested using an AMD Ryzen 3600 6-core CPU. Actual performance gains may vary depending on the amount of available CPU threads
+
 # GDMC-HTTP 1.3.2 (Minecraft 1.19.2)
 
 - NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.fandom.com/wiki/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
@@ -17,7 +48,7 @@
 
 - FIX: Ensure blocks placed via `POST /structure` always update on the client side to reflect its block entity data (eg. text on signs, pieces of armor on armor stands, etc.). Prior to this fix the data was correctly parsed, but only became visible in-game if the relevant chunks were reloaded.
 - FIX: Remove support for `pivotY` URL query parameter in the `POST /structure` endpoint since it wasn't implemented in the first place. Minecraft does not support it. This is not a breaking change since unknown query parameters will be ignored by GDMC-HTTP.
-- FIX: Add clarification on the transformation order of structures in the `POST /structure` endpoint to documentation. 
+- FIX: Add clarification on the transformation order of structures in the `POST /structure` endpoint to documentation.
 
 # GDMC-HTTP 1.2.1 (Minecraft 1.19.2)
 
@@ -46,6 +77,7 @@
 
 # GDMC-HTTP 1.0.0 (Minecraft 1.19.2)
 
+- NEW: First stable release!
 - BREAKING: JSON-formatted NBT-like data is no longer supported in request bodies. Use [SNBT notation](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) instead.
 - BREAKING: Properties containing NBT values in JSON responses are no longer formatted as JSON, but as [SNBT strings](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format).
 - BREAKING: Plain-text formatted responses have been removed in favour of JSON.
