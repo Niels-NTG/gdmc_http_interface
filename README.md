@@ -18,7 +18,9 @@ When you open a Minecraft world, this mod opens an HTTP server on `localhost:900
 
 This repo is based on a fork of [Niki Gawlik's GDMC HTTP Interface](https://github.com/nilsgawlik/gdmc_http_interface) (Minecraft 1.16.5).
 
-## Features / HTTP Endpoints
+## Features
+
+### HTTP Endpoints
 
 The current endpoints of the interface are:
 
@@ -30,9 +32,10 @@ GET                     /biomes     Get biome of position in the world
 GET,POST                /structure  Generate NBT structure file from selection or place file into the world
 GET,PUT,PATCH,DELETE    /entities   Read, create, edit and remove entities from the world
 GET                     /buildarea  Get the build area defined by the /setbuildarea chat command
-GET                     /version    Get Minecraft version
 GET                     /players    Read players from the world
 GET                     /heightmap  Get heightmap of the set build area of a certain type
+GET                     /version    Get Minecraft version
+OPTIONS                 /           Get Minecraft version, mod version
 ```
 
 A detailed documentation of the endpoints can be found [over here](./docs/Endpoints.md).
