@@ -56,10 +56,10 @@ public class BlocksHandler extends HandlerBase {
     private int dy;
     private int dz;
 
-    // GET: Whether to include block state https://minecraft.fandom.com/wiki/Block_states
+    // GET: Whether to include block state https://minecraft.wiki/w/Block_states
     private boolean includeState;
 
-    // GET: Whether to include block entity data https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format
+    // GET: Whether to include block entity data https://minecraft.wiki/w/Chunk_format#Block_entity_format
     private boolean includeData;
 
     // PUT: Defaults to true. If true, update neighbouring blocks after placement.
@@ -69,7 +69,7 @@ public class BlocksHandler extends HandlerBase {
     private boolean spawnDrops;
 
     // PUT: Overrides both doBlockUpdates and spawnDrops if set. For more information see #getBlockFlags and
-    // https://minecraft.fandom.com/wiki/Block_update
+    // https://minecraft.wiki/w/Block_update
     private int customFlags; // -1 == no custom flags
 
     // PUT/GET: If true, constrain placement/getting blocks within the current build area.
@@ -246,7 +246,7 @@ public class BlocksHandler extends HandlerBase {
     /**
      * Parse block position x y z.
      * Valid values may be any positive or negative integer and can use tilde or caret notation.
-     * see: <a href="https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>
+     * see: <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>
      *
      * @param str                       {@code String} which may or may not contain a valid block position coordinate.
      * @param commandSourceStack        Origin for relative coordinates.
@@ -389,7 +389,7 @@ public class BlocksHandler extends HandlerBase {
             this.commandSourceStack = commandSourceStack;
             // Parse block position x y z. Use the position of the command source (set with the URL query parameters) if not defined in
             // the block placement item JsonObject. Valid values may be any positive or negative integer and can use tilde or caret notation
-            // (see: https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
+            // (see: https://minecraft.wiki/w/Coordinates#Relative_world_coordinates).
             String posXString = inputData.has("x") ? inputData.get("x").getAsString() : String.valueOf(commandSourceStack.getPosition().x);
             String posYString = inputData.has("y") ? inputData.get("y").getAsString() : String.valueOf(commandSourceStack.getPosition().y);
             String posZString = inputData.has("z") ? inputData.get("z").getAsString() : String.valueOf(commandSourceStack.getPosition().z);

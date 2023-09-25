@@ -70,7 +70,7 @@ The responses for all endpoints return with the following headers, unless stated
 
 # Send Commands `POST /commands`
 
-Send one or more Minecraft console commands to the server. For the full list of all commands consult the [Minecraft commands documentation](https://minecraft.fandom.com/wiki/Commands#List_and_summary_of_commands).
+Send one or more Minecraft console commands to the server. For the full list of all commands consult the [Minecraft commands documentation](https://minecraft.wiki/w/Commands#List_and_summary_of_commands).
 
 ## URL parameters
 
@@ -165,18 +165,18 @@ Get information for one or more blocks in a given area.
 
 ## URL parameters
 
-| key             | valid values                                          | required | defaults to | description                                                                                                            |
-|-----------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------|
-| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                           |
-| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                           |
-| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                           |
-| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                               |
-| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                               |
-| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                               |
-| includeState    | `true`, `false`                                       | no       | `false`     | If `true`, include [block state](https://minecraft.fandom.com/wiki/Block_states) in response                           |
-| includeData     | `true`, `false`                                       | no       | `false`     | If `true`, include [block entity data](https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) in response |
-| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skip over positions that are outside the build area                                                         |
-| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from                                                                       |
+| key             | valid values                                          | required | defaults to | description                                                  |
+| --------------- | ----------------------------------------------------- | -------- | ----------- | ------------------------------------------------------------ |
+| x               | integer                                               | yes      | `0`         | X coordinate                                                 |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                 |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                 |
+| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)     |
+| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)     |
+| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)     |
+| includeState    | `true`, `false`                                       | no       | `false`     | If `true`, include [block state](https://minecraft.wiki/w/Block_states) in response |
+| includeData     | `true`, `false`                                       | no       | `false`     | If `true`, include [block entity data](https://minecraft.wiki/w/Chunk_format#Block_entity_format) in response |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skip over positions that are outside the build area |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world to read blocks from             |
 
 ## Request headers
 
@@ -264,7 +264,7 @@ To get all block within a 2x2x2 area, request `GET /blocks?x=5525&y=62&z=4381&dx
 ]
 ```
 
-To include the [block state](https://minecraft.fandom.com/wiki/Block_states), request `GET /blocks?x=5525&y=64&z=4382&includeState=true`:
+To include the [block state](https://minecraft.wiki/w/Block_states), request `GET /blocks?x=5525&y=64&z=4382&includeState=true`:
 
 ```json
 [
@@ -298,7 +298,7 @@ To get information such as the contents of a chest, use `includeData=true` as pa
   }
 ]
 ```
-Note that that block data such as the contents of a chest are formatted as an [SNBT string](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format).
+Note that that block data such as the contents of a chest are formatted as an [SNBT string](https://minecraft.wiki/w/NBT_format#SNBT_format).
 
 # Place blocks `PUT /blocks`
 
@@ -410,7 +410,7 @@ Where each entry corresponds to a placement instruction, where `"status": 1` ind
 
 # Read biomes `GET /biomes`
 
-Get [biome](https://minecraft.fandom.com/wiki/Biome#List_of_biomes) information in a given area.
+Get [biome](https://minecraft.wiki/w/Biome#List_of_biomes) information in a given area.
 
 ## URL parameters
 
@@ -488,7 +488,7 @@ For getting the biomes of a row of blocks, request `GET /biomes?x=2350&y=64&z=-7
 
 # Read chunk data `GET /chunks`
 
-Read [chunks](https://minecraft.fandom.com/wiki/Chunk) within a given range and return it as [chunk data](https://minecraft.fandom.com/wiki/Chunk_format).
+Read [chunks](https://minecraft.wiki/w/Chunk) within a given range and return it as [chunk data](https://minecraft.wiki/w/Chunk_format).
 
 ## URL parameters
 
@@ -514,10 +514,10 @@ Note that if a build area is set and the parameters `x`, `z`, `dx` or `dz` are n
 
 ## Request headers
 
-| key             | valid values                             | defaults to                | description                                                                                                                                                                                                                                               |
-|-----------------|------------------------------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Accept          | `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns as raw bytes of a [NBT](https://minecraft.fandom.com/wiki/NBT_format) file. Use `text/plain` for the same data, but in the human-readable [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) format. |
-| Accept-Encoding | `gzip`, `*`                              | `*`                        | If set to `gzip`, any raw bytes NBT file is compressed using GZIP.                                                                                                                                                                                        |
+| key             | valid values                             | defaults to                | description                                                  |
+| --------------- | ---------------------------------------- | -------------------------- | ------------------------------------------------------------ |
+| Accept          | `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns as raw bytes of a [NBT](https://minecraft.wiki/w/NBT_format) file. Use `text/plain` for the same data, but in the human-readable [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format) format. |
+| Accept-Encoding | `gzip`, `*`                              | `*`                        | If set to `gzip`, any raw bytes NBT file is compressed using GZIP. |
 
 ## Request body
 
@@ -536,13 +536,13 @@ Table below only applies if the request header `Accept: application/octet-stream
 
 ## Response body
 
-Response should be encoded as an [NBT](https://minecraft.fandom.com/wiki/NBT_format) or [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) data structure depending what value has been set for `Accept` in the request header. The data always contains the following properties:
+Response should be encoded as an [NBT](https://minecraft.wiki/w/NBT_format) or [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format) data structure depending what value has been set for `Accept` in the request header. The data always contains the following properties:
 
 - `ChunkX`: X-coordinate of the origin chunk
 - `ChunkZ`: Z-coordinate of the origin chunk
 - `ChunkDX`: Size of the selection of chunks in the x-direction 
 - `ChunkDZ`: Size of the selection of chunks in the z-direction
-- `Chunks`: List of chunks, where each chunk is in the [NBT Chunk format](https://minecraft.fandom.com/wiki/Chunk_format#NBT_structure) encoded as raw NBT or SNBT.
+- `Chunks`: List of chunks, where each chunk is in the [NBT Chunk format](https://minecraft.wiki/w/Chunk_format#NBT_structure) encoded as raw NBT or SNBT.
 
 ## Example
 
@@ -554,36 +554,36 @@ Get a single chunk at position x=0, z=8 in the Nether with the request `GET /chu
 
 # Place NBT structure file `POST /structure`
 
-Place an [NBT](https://minecraft.fandom.com/wiki/NBT_format) structure file into the world. These files can be created by the [Structure Block](https://minecraft.fandom.com/wiki/Structure_Block) as well as other means.
+Place an [NBT](https://minecraft.wiki/w/NBT_format) structure file into the world. These files can be created by the [Structure Block](https://minecraft.wiki/w/Structure_Block) as well as other means.
 
 ## URL parameters
-| key             | valid values                                          | required | defaults to | description                                                                                                                              |
-|-----------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                                             |
-| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                                             |
-| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                                             |
-| mirror          | `x`, `y`                                              | no       | `0`         | `x` = mirror structure front to back; `y` = mirror structure left to right                                                               |
+| key             | valid values                                          | required | defaults to | description                                                  |
+| --------------- | ----------------------------------------------------- | -------- | ----------- | ------------------------------------------------------------ |
+| x               | integer                                               | yes      | `0`         | X coordinate                                                 |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                 |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                 |
+| mirror          | `x`, `y`                                              | no       | `0`         | `x` = mirror structure front to back; `y` = mirror structure left to right |
 | rotate          | `0`, `1`, `2`, `3`                                    | no       | `0`         | `0` = apply no rotation; `1` = rotate structure 90° clockwise; `2` = rotate structure 180°; `3` = rotate structure 90° counter-clockwise |
-| pivotX          | integer                                               | no       | `0`         | relative X coordinate to use as pivot for rotation                                                                                       |
-| pivotZ          | integer                                               | no       | `0`         | relative Z coordinate to use as pivot for rotation                                                                                       |
-| entities        | `true`, `false`                                       | no       | `false`     | `true` = also place all [entities](https://minecraft.fandom.com/wiki/Entity) (mobs, villagers, etc.) saved with the file                 |
-| doBlockUpdates  | `true`, `false`                                       | no       | `true`      | See doBlockUpdates in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                  |
-| spawnDrops      | `true`, `false`                                       | no       | `false`     | See spawnBlocks in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                     |
-| customFlags     | bit string                                            | no       | `0100011`   | See customFlags in [`PUT /blocks` block placement flags](#controlling-block-update-behavior)                                             |
-| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true` and build area is set, a structure cannot be placed (partially) outside of the build area                                      |
-| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world to place the structure in                                                                           |
+| pivotX          | integer                                               | no       | `0`         | relative X coordinate to use as pivot for rotation           |
+| pivotZ          | integer                                               | no       | `0`         | relative Z coordinate to use as pivot for rotation           |
+| entities        | `true`, `false`                                       | no       | `false`     | `true` = also place all [entities](https://minecraft.wiki/w/Entity) (mobs, villagers, etc.) saved with the file |
+| doBlockUpdates  | `true`, `false`                                       | no       | `true`      | See doBlockUpdates in [`PUT /blocks` URL parameters](#url-parameters-2) |
+| spawnDrops      | `true`, `false`                                       | no       | `false`     | See spawnBlocks in [`PUT /blocks` URL parameters](#url-parameters-2) |
+| customFlags     | bit string                                            | no       | `0100011`   | See customFlags in [`PUT /blocks` block placement flags](#controlling-block-update-behavior) |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true` and build area is set, a structure cannot be placed (partially) outside of the build area |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world to place the structure in |
 
 Note that the _mirror_ transformation is applied first, the _rotation_ second. And the pivot point applies to both.
 
 ## Request headers
 
-| key              | valid values              | defaults to | description                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-|------------------|---------------------------|-------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Content-Encoding | `gzip`, `text/plain`, `*` | `*`         | If set to `gzip`, input NBT file is assumed to be compressed using GZIP. This is enabled by default since files generated by the [Structure Block](https://minecraft.fandom.com/wiki/Structure_Block) are compressed this way. If set to `text/plain` the input file is assumed to contain [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format)-formatted text. If the header is missing, GDMC-HTTP attempts to parse the file as both a compressed and uncompressed file binary NBT file (in that order) and continue with the one that is valid, ideal for when it's unclear if the file is compressed or not. |
+| key              | valid values              | defaults to | description                                                  |
+| ---------------- | ------------------------- | ----------- | ------------------------------------------------------------ |
+| Content-Encoding | `gzip`, `text/plain`, `*` | `*`         | If set to `gzip`, input NBT file is assumed to be compressed using GZIP. This is enabled by default since files generated by the [Structure Block](https://minecraft.wiki/w/Structure_Block) are compressed this way. If set to `text/plain` the input file is assumed to contain [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format)-formatted text. If the header is missing, GDMC-HTTP attempts to parse the file as both a compressed and uncompressed file binary NBT file (in that order) and continue with the one that is valid, ideal for when it's unclear if the file is compressed or not. |
 
 ## Request body
 
-A valid [NBT file](https://minecraft.fandom.com/wiki/NBT_format) or plain [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format)-formatted text.
+A valid [NBT file](https://minecraft.wiki/w/NBT_format) or plain [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format)-formatted text.
 
 ## Response headers
 
@@ -600,34 +600,34 @@ A `400` error status is returned instead if:
 
 ## Example
 
-Using the [Structure Block](https://minecraft.fandom.com/wiki/Structure_Block), [save](https://minecraft.fandom.com/wiki/Structure_Block#Save) an area of any Minecraft world. Give it a name such as "example:test-structure" and set the Include entities setting to "ON", then hit the "SAVE" button. You will now be able to find the file under `(minecraftFiles)/saves/(worldName)/generated/example/test-structure.nbt`.
+Using the [Structure Block](https://minecraft.wiki/w/Structure_Block), [save](https://minecraft.wiki/w/Structure_Block#Save) an area of any Minecraft world. Give it a name such as "example:test-structure" and set the Include entities setting to "ON", then hit the "SAVE" button. You will now be able to find the file under `(minecraftFiles)/saves/(worldName)/generated/example/test-structure.nbt`.
 
 Now in Minecraft load the Minecraft world you want to place this structure in, pick a location and place it there using this endpoint. To place the it at location x=102, y=67, z=-21 with entities, include the file as the request body to request `POST /structure?x=102&y=67&z=-21&entities=true`.
 
 # Create NBT structure file `GET /structure`
 
-Create an [NBT](https://minecraft.fandom.com/wiki/NBT_format) structure file from an area of the world.
+Create an [NBT](https://minecraft.wiki/w/NBT_format) structure file from an area of the world.
 
 ## URL parameters
 
-| key             | valid values                                          | required | defaults to | description                                                                                                           |
-|-----------------|-------------------------------------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------|
-| x               | integer                                               | yes      | `0`         | X coordinate                                                                                                          |
-| y               | integer                                               | yes      | `0`         | Y coordinate                                                                                                          |
-| z               | integer                                               | yes      | `0`         | Z coordinate                                                                                                          |
-| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)                                                              |
-| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)                                                              |
-| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)                                                              |
-| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skips positions that are outside the build area                                                            |
-| entities        | `true`, `false`                                       | no       | `false`     | `true` = also save all [entities](https://minecraft.fandom.com/wiki/Entity) (mobs, villagers, etc.) in the given area |
-| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | overworld   | Which dimension of the world to read blocks from                                                                      |
+| key             | valid values                                          | required | defaults to | description                                                  |
+| --------------- | ----------------------------------------------------- | -------- | ----------- | ------------------------------------------------------------ |
+| x               | integer                                               | yes      | `0`         | X coordinate                                                 |
+| y               | integer                                               | yes      | `0`         | Y coordinate                                                 |
+| z               | integer                                               | yes      | `0`         | Z coordinate                                                 |
+| dx              | integer                                               | no       | `1`         | Range of blocks to get counting from x (can be negative)     |
+| dy              | integer                                               | no       | `1`         | Range of blocks to get counting from y (can be negative)     |
+| dz              | integer                                               | no       | `1`         | Range of blocks to get counting from z (can be negative)     |
+| withinBuildArea | `true`, `false`                                       | no       | `false`     | If `true`, skips positions that are outside the build area   |
+| entities        | `true`, `false`                                       | no       | `false`     | `true` = also save all [entities](https://minecraft.wiki/w/Entity) (mobs, villagers, etc.) in the given area |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | overworld   | Which dimension of the world to read blocks from             |
 
 ## Request headers
 
-| key             | valid values                             | defaults to                | description                                                                                                                                                                                                                             |
-|-----------------|------------------------------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Accept          | `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns the contents that makes a real NBT file. Use `text/plain` for a more human readable lossless version of the data in the [SNBT](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) format. |
-| Accept-Encoding | `gzip`, `*`                              | `gzip`                     | If set to `gzip`, compress resulting file using gzip compression.                                                                                                                                                                       |
+| key             | valid values                             | defaults to                | description                                                  |
+| --------------- | ---------------------------------------- | -------------------------- | ------------------------------------------------------------ |
+| Accept          | `text/plain`, `application/octet-stream` | `application/octet-stream` | Response data type. By default returns the contents that makes a real NBT file. Use `text/plain` for a more human readable lossless version of the data in the [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format) format. |
+| Accept-Encoding | `gzip`, `*`                              | `gzip`                     | If set to `gzip`, compress resulting file using gzip compression. |
 
 ## Request body
 
@@ -646,31 +646,31 @@ Table below only applies if the request header `Accept: application/octet-stream
 
 ## Response body
 
-An [NBT file](https://minecraft.fandom.com/wiki/NBT_format) the selected area of the world.
+An [NBT file](https://minecraft.wiki/w/NBT_format) the selected area of the world.
 
 Note that the response returns a 403 error code if the `withinBuilArea` flag is `true` and the selected area is completely outside of the build area.
 
 ## Example
 
-The request `GET /structure?x=87&y=178&z=247&dx=10&dy=10&dz=10&dimension=nether` gets us a 10x10x10 area from The Nether. Entities such as mobs in that cube-shaped area are not included, since the request does not have the `entities=true` parameter. Leaving the request headers to its defaults this yields a gzip-compressed binary-encoded NBT data that we can save to a file, manipulate using an external tool, and place back into the world using the [Structure Block](https://minecraft.fandom.com/wiki/Structure_Block) or the `POST /structure` endpoint.
+The request `GET /structure?x=87&y=178&z=247&dx=10&dy=10&dz=10&dimension=nether` gets us a 10x10x10 area from The Nether. Entities such as mobs in that cube-shaped area are not included, since the request does not have the `entities=true` parameter. Leaving the request headers to its defaults this yields a gzip-compressed binary-encoded NBT data that we can save to a file, manipulate using an external tool, and place back into the world using the [Structure Block](https://minecraft.wiki/w/Structure_Block) or the `POST /structure` endpoint.
 
 # Read entities `GET /entities`
 
-Endpoint for reading all [entities](https://minecraft.fandom.com/wiki/Entity) from within a certain area of the world.
+Endpoint for reading all [entities](https://minecraft.wiki/w/Entity) from within a certain area of the world.
 
 ## URL parameters
 
-| key         | valid values                                          | required | defaults to                      | description                                                                                                                                                                                                   |
-|-------------|-------------------------------------------------------|----------|----------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| x           | integer                                               | no       | `0`                              | X coordinate (**deprecated**, use selector instead)                                                                                                                                                           |
-| y           | integer                                               | no       | `0`                              | Y coordinate (**deprecated**, use selector instead)                                                                                                                                                           |
-| z           | integer                                               | no       | `0`                              | Z coordinate (**deprecated**, use selector instead)                                                                                                                                                           |
-| dx          | integer                                               | no       | `1`                              | Range of blocks to get counting from x (can be negative) (**deprecated**, use selector instead)                                                                                                               |
-| dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative) (**deprecated**, use selector instead)                                                                                                               |
-| dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative) (**deprecated**, use selector instead)                                                                                                               |
-| selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,xd=1,yd=1,dz=1]` | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for entities. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
-| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) in response                                                                                                   |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.                     |
+| key         | valid values                                          | required | defaults to                      | description                                                  |
+| ----------- | ----------------------------------------------------- | -------- | -------------------------------- | ------------------------------------------------------------ |
+| x           | integer                                               | no       | `0`                              | X coordinate (**deprecated**, use selector instead)          |
+| y           | integer                                               | no       | `0`                              | Y coordinate (**deprecated**, use selector instead)          |
+| z           | integer                                               | no       | `0`                              | Z coordinate (**deprecated**, use selector instead)          |
+| dx          | integer                                               | no       | `1`                              | Range of blocks to get counting from x (can be negative) (**deprecated**, use selector instead) |
+| dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative) (**deprecated**, use selector instead) |
+| dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative) (**deprecated**, use selector instead) |
+| selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,xd=1,yd=1,dz=1]` | [Target selector](https://minecraft.wiki/w/Target_selectors) string for entities. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
+| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.wiki/w/Entity_format#Entity_Format) in response |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored. |
 
 ## Request headers
 
@@ -721,7 +721,7 @@ For a pen of various different farm animals of the size of 10 blocks wide and 10
 
 # Create entities `PUT /entities`
 
-Endpoint for summoning any number of [entities](https://minecraft.fandom.com/wiki/Entity) into the world such as [mobs](https://minecraft.fandom.com/wiki/Mob), [items](https://minecraft.fandom.com/wiki/Item_(entity)), [item frames](https://minecraft.fandom.com/wiki/Item_Frame), [painting](https://minecraft.fandom.com/wiki/Painting) and [projectiles](https://minecraft.fandom.com/wiki/Snowball). This endpoint has feature-parity with the [/summon command](https://minecraft.fandom.com/wiki/Commands/summon), meaning it takes the same options and has the same constraints.
+Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity) into the world such as [mobs](https://minecraft.wiki/w/Mob), [items](https://minecraft.wiki/w/Item_(entity)), [item frames](https://minecraft.wiki/w/Item_Frame), [painting](https://minecraft.wiki/w/Painting) and [projectiles](https://minecraft.wiki/w/Snowball). This endpoint has feature-parity with the [/summon command](https://minecraft.wiki/w/Commands/summon), meaning it takes the same options and has the same constraints.
 
 ## URL parameters
 
@@ -781,7 +781,7 @@ For placing a red cat that's invulnerable and permanently on fire, reproduction 
 
 # Edit entities `PATCH /entities`
 
-Endpoint for changing the properties of [entities](https://minecraft.fandom.com/wiki/Entity) that are already present in the world.
+Endpoint for changing the properties of [entities](https://minecraft.wiki/w/Entity) that are already present in the world.
 
 ## URL parameters
 
@@ -795,13 +795,13 @@ Endpoint for changing the properties of [entities](https://minecraft.fandom.com/
 
 ## Request body
 
-The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) and entities of a specific type for an overview of properties and their data types.
+The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.wiki/w/Entity_format#Entity_Format) and entities of a specific type for an overview of properties and their data types.
 
 The response is expected to be valid JSON. It should be a single JSON array of JSON objects according to this [schema](./schema.entities.patch.json).
 
 After receiving the request, GDMC-HTTP will first to attempt to parse the whole request body into valid JSON. If this fails it will return a response with HTTP status `400`.
 
-Refer to [the conversion from JSON table](https://minecraft.fandom.com/wiki/NBT_format#Conversion_from_JSON) to ensure data types of property values match that of the target entity.
+Refer to [the conversion from JSON table](https://minecraft.wiki/w/NBT_format#Conversion_from_JSON) to ensure data types of property values match that of the target entity.
 
 ## Response headers
 
@@ -825,7 +825,7 @@ When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (ob
 
 # Remove entities `DELETE /entities`
 
-Endpoint for remove one or more [entities](https://minecraft.fandom.com/wiki/Entity) from the world.
+Endpoint for remove one or more [entities](https://minecraft.wiki/w/Entity) from the world.
 
 ## URL parameters
 
@@ -862,16 +862,16 @@ To remove a cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained usi
 
 # Read players `GET /players`
 
-Endpoint for reading all [players](https://minecraft.fandom.com/wiki/Player) from the world.
+Endpoint for reading all [players](https://minecraft.wiki/w/Player) from the world.
 
 ## URL parameters
 
 
-| key         | valid values                                          | required | defaults to | description                                                                                                                                                                                                  |
-|-------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.fandom.com/wiki/Player.dat_format#NBT_structure) in response                                                                                              |
-| selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.fandom.com/wiki/Target_selectors) string for players. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.             |
+| key         | valid values                                          | required | defaults to | description                                                  |
+| ----------- | ----------------------------------------------------- | -------- | ----------- | ------------------------------------------------------------ |
+| includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.wiki/w/Player.dat_format#NBT_structure) in response |
+| selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.wiki/w/Target_selectors) string for players. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored. |
 
 ## Request headers
 
@@ -943,14 +943,14 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~200 ~200 ~200
 
 # Get heightmap `GET /heightmap`
 
-Returns the [heightmap](https://minecraft.fandom.com/wiki/Heightmap) of the set build area of a given type.
+Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build area of a given type.
 
 ## URL parameters
 
-| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                                 |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.fandom.com/wiki/Heightmap) wiki page for more information. A `400` status code is returned if heightmap type is not recognised. |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.      |
+| key       | valid values                                                 | required | defaults to     | description                                                  |
+| --------- | ------------------------------------------------------------ | -------- | --------------- | ------------------------------------------------------------ |
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.wiki/w/Heightmap) wiki page for more information. A `400` status code is returned if heightmap type is not recognised. |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`        | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
 
 In addition to the build-in height map types of `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING` and `MOTION_BLOCKING_NO_LEAVES`, this mod also includes the following custom height maps:
 - `MOTION_BLOCKING_NO_PLANTS`

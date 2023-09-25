@@ -31,7 +31,7 @@
                 "state": {
                     "type": "object",
                     "title": "Block State",
-                    "description": "Object containing block state (https://minecraft.fandom.com/wiki/Block_states) information. This is only included if URL parameter `includeState=true` is present.",
+                    "description": "Object containing block state (https://minecraft.wiki/w/Block_states) information. This is only included if URL parameter `includeState=true` is present.",
                     "examples": [
                         {
                             "facing": "east",
@@ -43,7 +43,7 @@
                 "data": {
                     "type": "string",
                     "title": "Block Entity Data",
-                    "description": "SNBT-formatted string (https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) containing block entity data (https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) information. This is only included if URL parameter `includeData=true` is present.",
+                    "description": "SNBT-formatted string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing block entity data (https://minecraft.wiki/w/Chunk_format#Block_entity_format) information. This is only included if URL parameter `includeData=true` is present.",
                     "examples": [
                         "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
                     ],

@@ -31,7 +31,7 @@ Clone or fork this repository.
 You just have to import the build.gradle in the IDE, and the project will be imported.
 - For most, if not all, changes to the build.gradle file to take effect Gradle will need to be invoked to re-evaluate the project, this can be done through Refresh buttons in the Gradle panels of both the previously mentioned IDEs.
 
-I would personally recommend using [IntelliJ IDEA](https://www.jetbrains.com/idea/) for development. This is an IDE specialised for Java development that's very advanced while also easy to get started with. To aid in debugging I recommend an API development and test tool such as [Insomnia](https://insomnia.rest/). And for working with [NBT files](https://minecraft.fandom.com/wiki/NBT_format) I recommend installing the [Minecraft NBT Support](https://plugins.jetbrains.com/plugin/12839-minecraft-nbt-support) plugin.
+I would personally recommend using [IntelliJ IDEA](https://www.jetbrains.com/idea/) for development. This is an IDE specialised for Java development that's very advanced while also easy to get started with. To aid in debugging I recommend an API development and test tool such as [Insomnia](https://insomnia.rest/). And for working with [NBT files](https://minecraft.wiki/w/NBT_format) I recommend installing the [Minecraft NBT Support](https://plugins.jetbrains.com/plugin/12839-minecraft-nbt-support) plugin.
 
 ## Generating IDE Launch/Run Configurations:
 

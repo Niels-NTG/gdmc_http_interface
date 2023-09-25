@@ -31,7 +31,7 @@
                 "state": {
                     "type": "object",
                     "title": "Block State",
-                    "description": "Object containing block state (https://minecraft.fandom.com/wiki/Block_states) information",
+                    "description": "Object containing block state (https://minecraft.wiki/w/Block_states) information",
                     "examples": [
                         {
                             "facing": "east",
@@ -43,7 +43,7 @@
                 "data": {
                     "type": "string",
                     "title": "Block Entity Data",
-                    "description": "SNBT-formatted string (https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) containing block entity data (https://minecraft.fandom.com/wiki/Chunk_format#Block_entity_format) information",
+                    "description": "SNBT-formatted string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing block entity data (https://minecraft.wiki/w/Chunk_format#Block_entity_format) information",
                     "examples": [
                         "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
                     ],
@@ -67,7 +67,7 @@
                 },
                 {
                     "type": "string",
-                    "description": "Any negative or positive whole number to represent absolute world coordinates, a relative coordinate (https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates) or a local coordinate (https://minecraft.fandom.com/wiki/Coordinates#Local_coordinates)",
+                    "description": "Any negative or positive whole number to represent absolute world coordinates, a relative coordinate (https://minecraft.wiki/w/Coordinates#Relative_world_coordinates) or a local coordinate (https://minecraft.wiki/w/Coordinates#Local_coordinates)",
                     "examples": [
                         "-2",
                         "~84",

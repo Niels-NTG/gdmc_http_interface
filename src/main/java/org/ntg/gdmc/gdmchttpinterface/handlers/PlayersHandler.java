@@ -35,11 +35,11 @@ public class PlayersHandler extends HandlerBase {
         // Query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
 
-        // GET: Search players using a Target Selector (https://minecraft.fandom.com/wiki/Target_selectors).
+        // GET: Search players using a Target Selector (https://minecraft.wiki/w/Target_selectors).
         // Defaults to "@a" (find all players).
         String playerSelectorString;
 
-        // GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
+        // GET: Whether to include entity data https://minecraft.wiki/w/Entity_format#Entity_Format
         boolean includeData;
 
         // GET: Search for players within a specific dimension. Only works if selector string contains

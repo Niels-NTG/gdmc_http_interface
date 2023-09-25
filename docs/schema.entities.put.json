@@ -31,7 +31,7 @@
 				"data": {
 					"type": "string",
                     "title": "Entity Data",
-                    "description": "SNBT-formatted string (https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) containing entity data (https://minecraft.fandom.com/wiki/Entity_format#Entity_Format) information",
+                    "description": "SNBT-formatted string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing entity data (https://minecraft.wiki/w/Entity_format#Entity_Format) information",
                     "examples": [
 					  	"{variant:\"minecraft:red\",hasVisualFire:true,Invulnerable:true}"
                     ]
@@ -58,7 +58,7 @@
                 },
                 {
                     "type": "string",
-                    "description": "Any negative or positive number to represent absolute world coordinates, a relative coordinate (https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates) or a local coordinate (https://minecraft.fandom.com/wiki/Coordinates#Local_coordinates)",
+                    "description": "Any negative or positive number to represent absolute world coordinates, a relative coordinate (https://minecraft.wiki/w/Coordinates#Relative_world_coordinates) or a local coordinate (https://minecraft.wiki/w/Coordinates#Local_coordinates)",
                     "examples": [
                         "-2",
                         "~84",
