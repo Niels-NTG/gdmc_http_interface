@@ -1,5 +1,7 @@
 # GDMC HTTP Interface Mod
 
+![logo](./src/main/resources/logo.png)
+
 Forge Mod for Minecraft (Java Edition) that implements an HTTP interface for reading and writing blocks (and more).
 
 To install it, download the latest release [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and follow these [installation instructions](./docs/Installation.md).
