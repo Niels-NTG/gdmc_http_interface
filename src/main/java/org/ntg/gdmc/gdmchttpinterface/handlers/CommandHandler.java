@@ -1,6 +1,7 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
@@ -75,7 +76,10 @@ public class CommandHandler extends HandlerBase {
                 lastCommandResult != null ? lastCommandResult.getString() : null
             );
             if (lastCommandResult != null) {
-                json.add("data", ChatComponentDataExtractor.toJsonTree(lastCommandResult));
+                JsonElement data = ChatComponentDataExtractor.toJsonTree(lastCommandResult);
+                if (!data.getAsJsonObject().isEmpty()) {
+                    json.add("data", data);
+                }
             }
             return json;
         } catch (CommandSyntaxException e) {

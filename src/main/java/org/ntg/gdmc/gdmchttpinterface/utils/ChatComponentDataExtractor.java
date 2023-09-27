@@ -33,6 +33,12 @@ public class ChatComponentDataExtractor {
 		public JsonElement serialize(MutableComponent component, Type typeOfSrc, JsonSerializationContext context) {
 			JsonObject jsonObject = new JsonObject();
 
+			extractValues(jsonObject, component);
+
+			return jsonObject;
+		}
+
+		private static void extractValues(JsonObject targetJson, MutableComponent component) {
 			ComponentContents componentContents = component.getContents();
 			if (componentContents != ComponentContents.EMPTY && componentContents instanceof TranslatableContents) {
 				TranslatableContents translatableContents = (TranslatableContents) componentContents;
@@ -40,22 +46,22 @@ public class ChatComponentDataExtractor {
 					JsonArray jsonArgsArray = new JsonArray();
 					for (Object object : translatableContents.getArgs()) {
 						if (object instanceof MutableComponent) {
-							jsonArgsArray.add(this.serialize((MutableComponent) object, object.getClass(), context));
-						} else  {
-							if (object instanceof Number) {
-								jsonArgsArray.add((Number)object);
-							} else if (object instanceof Boolean) {
-								jsonArgsArray.add((Boolean)object);
-							} else {
-								jsonArgsArray.add(String.valueOf(object));
-							}
+							extractValues(targetJson, (MutableComponent) object);
+							continue;
+						}
+						if (object instanceof Number) {
+							jsonArgsArray.add((Number)object);
+						} else if (object instanceof Boolean) {
+							jsonArgsArray.add((Boolean)object);
+						} else {
+							jsonArgsArray.add(String.valueOf(object));
 						}
 					}
-					jsonObject.add(translatableContents.getKey(), jsonArgsArray);
+					if (!jsonArgsArray.isEmpty()) {
+						targetJson.add(translatableContents.getKey(), jsonArgsArray);
+					}
 				}
 			}
-
-			return jsonObject;
 		}
 	};
 
