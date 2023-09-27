@@ -42,7 +42,13 @@ public class ChatComponentDataExtractor {
 						if (object instanceof MutableComponent) {
 							jsonArgsArray.add(this.serialize((MutableComponent) object, object.getClass(), context));
 						} else  {
-							jsonArgsArray.add(new JsonPrimitive(String.valueOf(object)));
+							if (object instanceof Number) {
+								jsonArgsArray.add((Number)object);
+							} else if (object instanceof Boolean) {
+								jsonArgsArray.add((Boolean)object);
+							} else {
+								jsonArgsArray.add(String.valueOf(object));
+							}
 						}
 					}
 					jsonObject.add(translatableContents.getKey(), jsonArgsArray);
