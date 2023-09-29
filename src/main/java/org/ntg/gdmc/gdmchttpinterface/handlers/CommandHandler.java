@@ -75,7 +75,6 @@ public class CommandHandler extends HandlerBase {
 			    commandStatus != 0,
 			    lastCommandResult != null ? lastCommandResult.getString() : null
 		    );
-		    json.addProperty("command", command);
 		    if (lastCommandResult != null) {
 			    JsonElement data = ChatComponentDataExtractor.toJsonTree(lastCommandResult);
 			    if (!data.getAsJsonObject().isEmpty()) {
@@ -84,9 +83,7 @@ public class CommandHandler extends HandlerBase {
 		    }
 		    return json;
 	    } catch (CommandSyntaxException e) {
-		    JsonObject json = instructionStatus(false, e.getMessage());
-		    json.addProperty("command", command);
-		    return json;
+		    return instructionStatus(false, e.getMessage());
 	    }
     }
 }

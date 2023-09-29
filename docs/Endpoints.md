@@ -104,7 +104,6 @@ A JSON array with an entry of the result of each command in the order of input. 
 
 - `status`: 1 meaning successful, zero meaning nothing happened
 - `message`: Feedback chat message as it would appear in-game. Please note is only intended to give human-friendly debug information and is subject to the localisation setting of Minecraft.
-- `command`: the input command itself
 - `data`: structured data that appears in the `message`. Please note that the keys may vary depending on the type of result, even for the same command.
 
 ## Example
@@ -125,12 +124,10 @@ each command will be executed line by line in the context of the overworld dimen
 [
 	{
 		"status": 1,
-		"command": "say hi"
 	},
 	{
 		"status": 1,
 		"message": "The nearest minecraft:village_plains is at [112, ~, 208] (121 blocks away)",
-		"command": "locate structure minecraft:village_plains",
 		"data": {
 			"chat.coordinates": [
 				112,
@@ -146,7 +143,6 @@ each command will be executed line by line in the context of the overworld dimen
 	{
 		"status": 1,
 		"message": "Successfully filled 126 block(s)",
-		"command": "fill 20 -61 42 22 -48 40 minecraft:dirt",
 		"data": {
 			"commands.fill.success": [
 				126
@@ -156,7 +152,6 @@ each command will be executed line by line in the context of the overworld dimen
 	{
 		"status": 1,
 		"message": "Killed 4 entities",
-		"command": "kill @e[type=item]",
 		"data": {
 			"commands.kill.success.multiple": [
 				4
@@ -166,7 +161,6 @@ each command will be executed line by line in the context of the overworld dimen
 	{
 		"status": 1,
 		"message": "Gave 1 [Acacia Button] to Dev",
-		"command": "give @p minecraft:acacia_button",
 		"data": {
 			"commands.give.success.single": [
 				1
