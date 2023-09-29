@@ -68,22 +68,25 @@ public class CommandHandler extends HandlerBase {
     }
 
     private JsonObject executeCommand(String command, CommandSourceStack cmdSrc) {
-        try {
-            int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
-            MutableComponent lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
-            JsonObject json = instructionStatus(
-                commandStatus != 0,
-                lastCommandResult != null ? lastCommandResult.getString() : null
-            );
-            if (lastCommandResult != null) {
-                JsonElement data = ChatComponentDataExtractor.toJsonTree(lastCommandResult);
-                if (!data.getAsJsonObject().isEmpty()) {
-                    json.add("data", data);
-                }
-            }
-            return json;
-        } catch (CommandSyntaxException e) {
-            return instructionStatus(false, e.getMessage());
-        }
+	    try {
+		    int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
+		    MutableComponent lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
+		    JsonObject json = instructionStatus(
+			    commandStatus != 0,
+			    lastCommandResult != null ? lastCommandResult.getString() : null
+		    );
+		    json.addProperty("command", command);
+		    if (lastCommandResult != null) {
+			    JsonElement data = ChatComponentDataExtractor.toJsonTree(lastCommandResult);
+			    if (!data.getAsJsonObject().isEmpty()) {
+				    json.add("data", data);
+			    }
+		    }
+		    return json;
+	    } catch (CommandSyntaxException e) {
+		    JsonObject json = instructionStatus(false, e.getMessage());
+		    json.addProperty("command", command);
+		    return json;
+	    }
     }
 }
