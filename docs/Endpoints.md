@@ -98,63 +98,80 @@ The request body should be formatted as plain-text and can contain multiple comm
 ## Response body
 
 A JSON array with an entry on the result of each command.
-Please note that the value of the `"message"` property is only intended to give human-friendly debug information and is subject to localisation.
+
+
+A JSON array with an entry of the result of each command in the order of input. An entry contains the following properties:
+
+- `status`: 1 meaning successful, zero meaning nothing happened
+- `message`: Feedback chat message as it would appear in-game. Please note is only intended to give human-friendly debug information and is subject to the localisation setting of Minecraft.
+- `command`: the input command itself
+- `data`: structured data that appears in the `message`. Please note that the keys may vary depending on the type of result, even for the same command.
 
 ## Example
 
 When posting following body to `POST /command`
 
 ```
-say start
-tp @p 0 70 0
-setblock 0 69 0 stone
-locate structure minecraft:pillager_outpost
-say end
+say hi
+locate structure minecraft:village_plains
+fill 20 -61 42 22 -48 40 minecraft:dirt
+kill @e[type=item]
+give @p minecraft:acacia_button
 ```
 
-each command will be executed line by line in the context of the overworld dimension. When complete a response is returned with return values for each command on separate lines. A return value can either be an integer or an error message. For example the request above might return:
+each command will be executed line by line in the context of the overworld dimension. For example the request above might return:
 
 ```json
 [
 	{
-		"status": 1
+		"status": 1,
+		"command": "say hi"
 	},
 	{
-		"status": 1
+		"status": 1,
+		"message": "The nearest minecraft:village_plains is at [112, ~, 208] (121 blocks away)",
+		"command": "locate structure minecraft:village_plains",
+		"data": {
+			"chat.coordinates": [
+				112,
+				"~",
+				208
+			],
+			"commands.locate.structure.success": [
+				"minecraft:village_plains",
+				121
+			]
+		}
 	},
 	{
-		"status": 1
-	},
-    {
-        "status": 1,
-        "message": "The nearest minecraft:pillager_outpost is at [-1376, ~, -912] (2301 blocks away)"
-    },
-	{
-		"status": 1
-	}
-]
-```
-
-And on a subsequent call, two of the commands will fail, so the return text will be:
-
-```json
-[
-	{
-		"status": 1
+		"status": 1,
+		"message": "Successfully filled 126 block(s)",
+		"command": "fill 20 -61 42 22 -48 40 minecraft:dirt",
+		"data": {
+			"commands.fill.success": [
+				126
+			]
+		}
 	},
 	{
-		"status": 1
+		"status": 1,
+		"message": "Killed 4 entities",
+		"command": "kill @e[type=item]",
+		"data": {
+			"commands.kill.success.multiple": [
+				4
+			]
+		}
 	},
 	{
-		"status": 0,
-		"message": "Could not set the block"
-	},
-	{
-		"status": 0,
-		"message": "No blocks were filled"
-	},
-	{
-		"status": 1
+		"status": 1,
+		"message": "Gave 1 [Acacia Button] to Dev",
+		"command": "give @p minecraft:acacia_button",
+		"data": {
+			"commands.give.success.single": [
+				1
+			]
+		}
 	}
 ]
 ```
