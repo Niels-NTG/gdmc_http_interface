@@ -158,8 +158,8 @@ public class BlocksHandler extends HandlerBase {
         }
         placementInstructions.values().parallelStream().forEach(placementInstruction -> {
             placementInstruction.parse();
-            if (placementInstruction.isValid) {
-                chunkPosMap.putIfAbsent(placementInstruction.chunkPos, serverLevel.getChunk(placementInstruction.chunkPos.x, placementInstruction.chunkPos.z));
+            if (placementInstruction.isValid && placementInstruction.blockNBT != null && !chunkPosMap.containsKey(placementInstruction.chunkPos)) {
+                chunkPosMap.put(placementInstruction.chunkPos, serverLevel.getChunk(placementInstruction.chunkPos.x, placementInstruction.chunkPos.z));
             }
         });
         for (BlockPlacementInstruction placementInstruction : placementInstructions.values()) {
