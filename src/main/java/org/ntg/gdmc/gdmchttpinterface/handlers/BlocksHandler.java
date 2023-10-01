@@ -1,13 +1,9 @@
 package org.ntg.gdmc.gdmchttpinterface.handlers;
 
-import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.server.level.FullChunkStatus;
-import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.levelgen.structure.BoundingBox;
-import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
@@ -17,28 +13,30 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.ntg.gdmc.gdmchttpinterface.utils.BuildArea;
 import org.ntg.gdmc.gdmchttpinterface.utils.TagUtils;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.Function;
 
 public class BlocksHandler extends HandlerBase {
@@ -163,7 +161,6 @@ public class BlocksHandler extends HandlerBase {
             if (placementInstruction.isValid) {
                 chunkPosMap.putIfAbsent(placementInstruction.chunkPos, serverLevel.getChunk(placementInstruction.chunkPos.x, placementInstruction.chunkPos.z));
             }
-            placementInstruction.updateNeighborsBlocks(serverLevel, blockFlags, placementInstructions);
         });
         for (BlockPlacementInstruction placementInstruction : placementInstructions.values()) {
             placementInstruction.setBlock(
@@ -357,11 +354,6 @@ public class BlocksHandler extends HandlerBase {
             }
         };
 
-    /**
-     * Copied from {@link net.minecraft.world.level.block.state.BlockBehaviour} class
-     */
-    private static final Direction[] UPDATE_SHAPE_ORDER = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP};
-
     private final class BlockPlacementInstruction {
 
         private final JsonObject inputData;
@@ -400,10 +392,10 @@ public class BlocksHandler extends HandlerBase {
                     commandSourceStack
                 );
                 if (BuildArea.isOutsideBuildArea(blockPos1, withinBuildArea)) {
-                    this.invalidate("position is outside build area " + inputData);
+                    invalidate("position is outside build area!");
                 }
             } catch (CommandSyntaxException e) {
-                this.invalidate(e.getMessage());
+                invalidate(e.getMessage());
             }
             blockPos = blockPos1;
             chunkPos = new ChunkPos(Objects.requireNonNull(blockPos1));
@@ -426,7 +418,7 @@ public class BlocksHandler extends HandlerBase {
             try {
                 // Skip if block id is missing
                 if (!inputData.has("id")) {
-                    invalidate("block id is missing in " + inputData);
+                    invalidate("block id is missing!");
                     return;
                 }
                 String blockId = inputData.get("id").getAsString();
@@ -463,38 +455,6 @@ public class BlocksHandler extends HandlerBase {
         }
 
         /**
-         * Update {@code BlockState} of neighboring blocks that aren't part of the current list of block placement instructions to match their shape
-         * with the to be placed blocks.
-         * If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
-         * in the west, east, north, south, down and up directions.
-         * Algorithm based on the {@code updateFromNeighbourShapes} method in {@link net.minecraft.world.level.block.Block} with the
-         * addition of it skipping all blocks that are also being placed within the same request.
-         *
-         * @param level     server level
-         * @param flags     block update flags
-         * @param blockPlacementInstructions    list of all placement instructions in the current PUT /blocks request
-         */
-        public void updateNeighborsBlocks(ServerLevel level, int flags, LinkedHashMap<BlockPos, BlockPlacementInstruction> blockPlacementInstructions) {
-            if (!isValid) {
-                return;
-            }
-
-            if ((flags & Block.UPDATE_NEIGHBORS) != 0) {
-                BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-                BlockState newBlockState = blockState;
-                for (Direction direction : UPDATE_SHAPE_ORDER) {
-                    mutableBlockPos.setWithOffset(blockPos, direction);
-                    if (!blockPlacementInstructions.containsKey(mutableBlockPos)) {
-                        newBlockState = newBlockState.updateShape(direction, level.getBlockState(mutableBlockPos), level, blockPos, mutableBlockPos);
-                    }
-                }
-                if (newBlockState != null && !newBlockState.isAir()) {
-                    blockState = newBlockState;
-                }
-            }
-        }
-
-        /**
          * Actually places the block in the level
          *
          * @param level     server level
@@ -505,15 +465,21 @@ public class BlocksHandler extends HandlerBase {
                 return;
             }
 
-            if (level.setBlock(blockPos, blockState, flags)) {
-                // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
-                // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
-                if ((flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
-                    blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
+            // If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
+            // in the north, west, south, east, up, down directions.
+            if ((flags & Block.UPDATE_NEIGHBORS) != 0) {
+                BlockState newBlockState = Block.updateFromNeighbourShapes(blockState, level, blockPos);
+                if (!newBlockState.isAir()) {
+                    blockState = newBlockState;
                 }
-                placementResult = true;
-            } else {
-                placementResult = false;
+            }
+
+            placementResult = level.setBlock(blockPos, blockState, flags);
+
+            // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
+            // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
+            if (placementResult && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+                blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
             }
         }
 
