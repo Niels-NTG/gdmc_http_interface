@@ -13,6 +13,7 @@ import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -37,7 +38,9 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.concurrent.*;
 import java.util.function.Function;
+import java.util.stream.IntStream;
 
 public class BlocksHandler extends HandlerBase {
 
@@ -139,7 +142,7 @@ public class BlocksHandler extends HandlerBase {
      * @return block placement results
      */
     private JsonArray putBlocksHandler(InputStream requestBody) {
-        JsonArray blockPlacementList = parseJsonArray(requestBody);
+        JsonArray inputList = parseJsonArray(requestBody);
 
         JsonArray returnValues = new JsonArray();
 
@@ -150,29 +153,97 @@ public class BlocksHandler extends HandlerBase {
 
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
-        LinkedHashMap<BlockPos, BlockPlacementInstruction> placementInstructions = new LinkedHashMap<>();
-        HashMap<ChunkPos, LevelChunk> chunkPosMap = new HashMap<>();
-        for (JsonElement blockPlacementInput : blockPlacementList) {
-            BlockPlacementInstruction placementInstruction = new BlockPlacementInstruction(blockPlacementInput.getAsJsonObject(), commandSourceStack);
-            placementInstructions.put(placementInstruction.blockPos, placementInstruction);
-        }
-        placementInstructions.values().parallelStream().forEach(placementInstruction -> {
-            placementInstruction.parse();
-            if (placementInstruction.isValid && placementInstruction.blockNBT != null && !chunkPosMap.containsKey(placementInstruction.chunkPos)) {
-                chunkPosMap.put(placementInstruction.chunkPos, serverLevel.getChunk(placementInstruction.chunkPos.x, placementInstruction.chunkPos.z));
-            }
-        });
-        for (BlockPlacementInstruction placementInstruction : placementInstructions.values()) {
-            placementInstruction.setBlock(
-                serverLevel,
-                blockFlags
-            );
-        }
-        placementInstructions.values().parallelStream().forEach(placementInstruction -> placementInstruction.setBlockNBT(serverLevel, chunkPosMap.get(placementInstruction.chunkPos), blockFlags));
 
-        for (BlockPlacementInstruction placementInstruction : placementInstructions.values()) {
-            returnValues.add(placementInstruction.getResult());
+        ConcurrentHashMap<Integer, PlacementInstructionFuturesRecord> placementInstructionsFuturesMap = new ConcurrentHashMap<>(inputList.size());
+        // Note the number of entries in this map may be smaller than inputList.size(), due to some input placement instructions being invalid or
+        // due to there being multiple entries for the same block position.
+        ConcurrentHashMap<BlockPos, PlacementInstructionsRecord> parsedPlacementInstructionsMap = new ConcurrentHashMap<>(inputList.size());
+        ConcurrentHashMap<Integer, JsonObject> placementResult = new ConcurrentHashMap<>(inputList.size());
+
+        ExecutorService executorService = Executors.newCachedThreadPool();
+        IntStream.range(0, inputList.size()).parallel().forEach(index -> {
+            JsonObject blockPlacementInput = inputList.get(index).getAsJsonObject();
+            Future<BlockPos> blockPosFuture = executorService.submit(() -> getBlockPosFromJSON(blockPlacementInput, commandSourceStack));
+            Future<BlockStateParser.BlockResult> blockStateParserFuture = executorService.submit(() -> getBlockStateFromJson(blockPlacementInput, commandSourceStack));
+            placementInstructionsFuturesMap.put(index, new PlacementInstructionFuturesRecord(blockPosFuture, blockStateParserFuture));
+        });
+        executorService.shutdown();
+        try {
+            if (!executorService.awaitTermination(10, TimeUnit.MINUTES)) {
+                executorService.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
+
+        ConcurrentHashMap<ChunkPos, LevelChunk> chunkPosMap = new ConcurrentHashMap<>();
+        IntStream.range(0, inputList.size()).parallel().forEach(index -> {
+            PlacementInstructionFuturesRecord placementInstructionFuturesRecord = placementInstructionsFuturesMap.get(index);
+            BlockPos blockPos;
+            ChunkPos chunkPos;
+            BlockState blockState;
+            CompoundTag nbt;
+            try {
+                blockPos = placementInstructionFuturesRecord.posFuture.get();
+                if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
+                    placementResult.put(index, instructionStatus(false, "Position is outside build area!"));
+                    return;
+                }
+                chunkPos = new ChunkPos(blockPos);
+            } catch (InterruptedException | ExecutionException | NullPointerException e) {
+                placementResult.put(index, instructionStatus(false, e.getMessage()));
+                return;
+            }
+            try {
+                BlockStateParser.BlockResult blockStateResult = placementInstructionFuturesRecord.blockStateFuture.get();
+                blockState = blockStateResult.blockState();
+
+                nbt = blockStateResult.nbt();
+                if (nbt != null && !chunkPosMap.containsKey(chunkPos)) {
+                    // Load the chunk data if the placement instruction at this position has NBT data.
+                    // Loading the chunks before applying the NBT data helps with performance.
+                    chunkPosMap.put(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z));
+                }
+            } catch (InterruptedException | ExecutionException | NullPointerException e) {
+                placementResult.put(index, instructionStatus(false, e.getMessage()));
+                return;
+            }
+            parsedPlacementInstructionsMap.put(blockPos, new PlacementInstructionsRecord(index, blockPos, blockState, nbt));
+        });
+
+        parsedPlacementInstructionsMap.values().parallelStream().forEach(placementInstruction -> {
+            boolean isBlockSet;
+            BlockPos blockPos = placementInstruction.blockPos;
+            ChunkPos chunkPos = new ChunkPos(blockPos);
+            BlockState blockState = placementInstruction.blockState;
+            blockState = updateBlockShape(blockPos, blockState, parsedPlacementInstructionsMap, chunkPosMap, serverLevel, blockFlags);
+            CompoundTag nbt = placementInstruction.nbt;
+            int index = placementInstruction.placementOrder;
+            try {
+                isBlockSet = setBlock(
+                    blockPos,
+                    blockState,
+                    serverLevel,
+                    blockFlags
+                );
+            } catch (ExecutionException | InterruptedException e) {
+                placementResult.put(index, instructionStatus(false, e.getMessage()));
+                return;
+            }
+            if (nbt != null) {
+	            isBlockSet |= setBlockNBT(
+		            blockPos,
+		            nbt,
+		            chunkPosMap.get(chunkPos),
+		            blockState,
+		            blockFlags
+	            );
+            }
+            placementResult.put(index, instructionStatus(isBlockSet));
+        });
+
+        IntStream.range(0, inputList.size()).forEach(index -> returnValues.add(placementResult.get(index)));
+
         return returnValues;
     }
 
@@ -245,7 +316,7 @@ public class BlocksHandler extends HandlerBase {
      * Valid values may be any positive or negative integer and can use tilde or caret notation.
      * see: <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>
      *
-     * @param str                       {@code String} which may or may not contain a valid block position coordinate.
+     * @param str                       {@link String} which may or may not contain a valid block position coordinate.
      * @param commandSourceStack        Origin for relative coordinates.
      * @return Valid {@link BlockPos}.
      * @throws CommandSyntaxException   If input string cannot be parsed into a valid {@link BlockPos}.
@@ -258,8 +329,65 @@ public class BlocksHandler extends HandlerBase {
     }
 
     /**
+     * Parse block position x y z.
+     * Valid values may be any positive or negative integer and can use tilde or caret notation.
+     * see: <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>
+     *
+     * @param json                      {@link JsonObject} which may or may not contain a valid block position coordinate.
+     * @param commandSourceStack        Origin for relative coordinates.
+     * @return Valid {@link BlockPos}.
+     * @throws CommandSyntaxException   If input string cannot be parsed into a valid {@link BlockPos}.
+     */
+    private static BlockPos getBlockPosFromJSON(JsonObject json, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+        String posXString = json.has("x") ? json.get("x").getAsString() : String.valueOf(commandSourceStack.getPosition().x);
+        String posYString = json.has("y") ? json.get("y").getAsString() : String.valueOf(commandSourceStack.getPosition().y);
+        String posZString = json.has("z") ? json.get("z").getAsString() : String.valueOf(commandSourceStack.getPosition().z);
+        return getBlockPosFromString(
+            posXString + " " + posYString + " " + posZString,
+            commandSourceStack
+        );
+    }
+
+    /**
+     * Extract a {@link BlockStateParser.BlockResult}, containing the {@link BlockState} and NBT {@link CompoundTag} data, from the input {@link JsonObject}.
+     *
+     * @param json                      Input JSON object.
+     * @param commandSourceStack        Origin point to resolve relative coordinates from. See <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>.
+     * @return                          The resulting {@link BlockStateParser.BlockResult}.
+     * @throws CommandSyntaxException   May be thrown if {@code "state"} or {@code "data"} field contain a syntax error.
+     */
+    private static BlockStateParser.BlockResult getBlockStateFromJson(JsonObject json, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+        // Skip if block id is missing
+        String blockId = json.get("id").getAsString();
+
+        // Check if JSON contains an JsonObject or string for block state.
+        String blockStateString = "";
+        if (json.has("state")) {
+            if (json.get("state").isJsonObject()) {
+                blockStateString = getBlockStateStringFromJSONObject(json.get("state").getAsJsonObject());
+            } else if (json.get("state").isJsonPrimitive()) {
+                blockStateString = json.get("state").getAsString();
+            }
+        }
+
+        // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
+        // for this block placement.
+        String blockNBTString = "";
+        if (json.has("data") && json.get("data").isJsonPrimitive()) {
+            blockNBTString = json.get("data").getAsString();
+        }
+
+        // Pass block Id and block state string into a Stringreader with the the block state parser.
+	    return BlockStateParser.parseForBlock(
+            commandSourceStack.getLevel().holderLookup(Registries.BLOCK),
+            blockId + blockStateString + blockNBTString,
+            true
+        );
+    }
+
+    /**
      * @param json  Valid flat {@link JsonObject} of keys with primitive values (Strings, numbers, booleans)
-     * @return      {@code String} which can be parsed by {@link BlockStateParser} and should be the same as the return value of {@link BlockState#toString()} of the {@link BlockState} resulting from that parser.
+     * @return      {@link String} which can be parsed by {@link BlockStateParser} and should be the same as the return value of {@link BlockState#toString()} of the {@link BlockState} resulting from that parser.
      */
     private static String getBlockStateStringFromJSONObject(JsonObject json) {
         ArrayList<String> blockStateList = new ArrayList<>(json.size());
@@ -322,6 +450,124 @@ public class BlocksHandler extends HandlerBase {
         return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block)).toString();
     }
 
+    /**
+     * Actually places the block in the level.
+     *
+     * @param blockPos                  Target position of the to-be-placed block.
+     * @param blockState                {@link BlockState} of the to-be-placed block. This also contains the block ID (eg. {@code minecraft:stone} {@code minecraft:gold_block}).
+     * @param level                     Level in which the block will be placed.
+     * @param flags                     Block update flags (see {@link #getBlockFlags}).
+     * @return                          False if block at target position has the same {@link BlockState} as the input, if the target positions was outside of the world bounds or if it couldn't be placed for some other reason.
+     * @throws ExecutionException       Thrown if Minecraft throws an internal error.
+     * @throws InterruptedException     Thrown if Minecraft throws an internal error.
+     */
+    private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) throws ExecutionException, InterruptedException {
+        CompletableFuture<Boolean> setBlockFuture = mcServer.submit(() -> {
+	        boolean isBlockSet = level.setBlock(blockPos, blockState, flags);
+            // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
+            // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
+            if (isBlockSet && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+                blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
+            }
+            return isBlockSet;
+        });
+        return setBlockFuture.get();
+    }
+
+    /**
+     * Applies NBT data to block in the level.
+     *
+     * @param blockPos      Absolute position of the block.
+     * @param blockNBT      NBT data to apply to the block.
+     * @param chunk         Chunk of the level that the target block can be found it.
+     * @param blockState    Original block state.
+     * @param flags         Block update flags (see {@link #getBlockFlags(boolean, boolean)}).
+     * @return              true if NBT of the block in the level got changed.
+     */
+    private static boolean setBlockNBT(BlockPos blockPos, @Nullable CompoundTag blockNBT, LevelChunk chunk, BlockState blockState, int flags) {
+        if (blockNBT == null) {
+            return false;
+        }
+        // If existing block entity is different from the value of blockNBT,
+        // overwrite existing block entity data with the new one, then notify
+        // the level of this change to make the change visible in the world.
+        BlockEntity existingBlockEntity = chunk.getExistingBlockEntity(blockPos);
+        if (existingBlockEntity != null) {
+            // If the NBT data on the existing block is the same as the NBT data
+            // from the input, do not bother applying the input NBT data.
+            if (TagUtils.contains(existingBlockEntity.serializeNBT(), blockNBT)) {
+                return false;
+            }
+            existingBlockEntity.deserializeNBT(blockNBT);
+            if (
+                (flags & Block.UPDATE_CLIENTS) != 0 && (
+                    !chunk.getLevel().isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
+                ) && (
+                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)
+                )
+            ) {
+                chunk.getLevel().sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Order of directions to update block shape with. Copied from {@link net.minecraft.world.level.block.state.BlockBehaviour}.
+     */
+    private static final Direction[] UPDATE_SHAPE_ORDER = new Direction[]{Direction.WEST, Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.DOWN, Direction.UP};
+
+    /**
+     * Changes the shape of the block depending on the blocks horizontally adjacent to it.
+     * <p>
+     * The "shape" of the block is defined in its {@link BlockState}. For example, the BlockState of a fence block
+     * that has a stone block east from it will be updated to have the property {@code east=true}, making the fence
+     * join up with the stone block.
+     * <p>
+     * Shape of the block will remain unchanged if it has no adjecent blocks that influence its shape,
+     * if the final shape resolves to air, or if the block placement flags ({@link #getBlockFlags(boolean, boolean)}
+     * do not allow for changing the block's shape.
+     *
+     * @param inputBlockPos             Position of block to change the shape of.
+     * @param inputBlockState           Original {@link BlockState}.
+     * @param placementInstructions     Other placement instructions to find neighbouring blocks in.
+     * @param chunkMap                  Cached chunks to find neighbouring blocks in.
+     * @param level                     Level to find neighbouring blocks in.
+     * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}.
+     * @return                          The updated {@link BlockState}.
+     */
+    private static BlockState updateBlockShape(BlockPos inputBlockPos, BlockState inputBlockState, ConcurrentHashMap<BlockPos, PlacementInstructionsRecord> placementInstructions, ConcurrentHashMap<ChunkPos, LevelChunk> chunkMap, ServerLevel level, int flags) {
+        if ((flags & Block.UPDATE_NEIGHBORS) == 0) {
+            return inputBlockState;
+        }
+        // If block placement flags allow for updating the block based on neighbouring blocks, do so in the north, west,
+        // south, east, up, down directions. Use block states from other placement instruction items to ensure the shape
+        // comforms when the placement instructions are resolved. If no placement instruction is present get the
+        // neighbouring BlockState from any preloaded chunks. If null, load the block state from the level.
+        BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
+        BlockState newBlockState = inputBlockState;
+        for (Direction direction : UPDATE_SHAPE_ORDER) {
+            mutableBlockPos.setWithOffset(inputBlockPos, direction);
+
+            PlacementInstructionsRecord otherPlacementInstruction = placementInstructions.get(mutableBlockPos);
+            if (otherPlacementInstruction != null) {
+                newBlockState = newBlockState.updateShape(direction, otherPlacementInstruction.blockState, level, inputBlockPos, mutableBlockPos);
+                continue;
+            }
+            LevelChunk chunk = chunkMap.get(new ChunkPos(mutableBlockPos));
+            if (chunk != null) {
+                newBlockState = newBlockState.updateShape(direction, chunk.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
+                continue;
+            }
+            newBlockState = newBlockState.updateShape(direction, level.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
+        }
+        if (newBlockState.isAir()) {
+            return inputBlockState;
+        }
+        return newBlockState;
+    }
+
     public static int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {
         /*
             flags:
@@ -336,6 +582,24 @@ public class BlocksHandler extends HandlerBase {
         // construct flags
         return Block.UPDATE_CLIENTS | (doBlockUpdates ? Block.UPDATE_NEIGHBORS : (Block.UPDATE_SUPPRESS_DROPS | Block.UPDATE_KNOWN_SHAPE)) | (spawnDrops ? 0 : Block.UPDATE_SUPPRESS_DROPS);
     }
+
+    /**
+     * Record to hold parsing Futures (tasks, promises, whatever you would like to call them) that belong to the same block placement instruction.
+     *
+     * @param posFuture         Task that parses a JSON object into a {@link BlockPos}.
+     * @param blockStateFuture  Task that parses a JSON object into a {@link BlockStateParser.BlockResult}, containing the {@link BlockState} and {@link CompoundTag}.
+     */
+    private record PlacementInstructionFuturesRecord(Future<BlockPos> posFuture, Future<BlockStateParser.BlockResult> blockStateFuture) {}
+
+    /**
+     * Record to hold the parsed block placement instruction.
+     *
+     * @param placementOrder    Order in which the placement instructions was submitted.
+     * @param blockPos          Absolute block position of the to-be-placed block.
+     * @param blockState        {@link BlockState} of the to-be-placed block.
+     * @param nbt               NBT data of the to-be-placed block. May be null if none was provided in the input data.
+     */
+    private record PlacementInstructionsRecord(int placementOrder, BlockPos blockPos, BlockState blockState, @Nullable CompoundTag nbt) {}
 
     // function that converts a bunch of Property/Comparable pairs into String/String pairs
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>> propertyToStringPairFunction =
@@ -354,175 +618,4 @@ public class BlocksHandler extends HandlerBase {
             }
         };
 
-    private final class BlockPlacementInstruction {
-
-        private final JsonObject inputData;
-
-        private final CommandSourceStack commandSourceStack;
-
-        public final BlockPos blockPos;
-        public final ChunkPos chunkPos;
-        private BlockState blockState;
-        private CompoundTag blockNBT;
-
-        public boolean isValid = true;
-        private JsonObject returnValue;
-        private boolean placementResult = false;
-
-        /**
-         * Data structure for each individual placement instruction
-         *
-         * @param placementInstructionInput     Json object that includes the block ID (required), xyz position (required),
-         *                                      block state (optional) and block NBT data (optional) for the to be placed block.
-         * @param commandSourceStack            Command source to be used as reference point if block position is relative.
-         */
-        BlockPlacementInstruction(JsonObject placementInstructionInput, CommandSourceStack commandSourceStack) {
-            inputData = placementInstructionInput;
-            this.commandSourceStack = commandSourceStack;
-            // Parse block position x y z. Use the position of the command source (set with the URL query parameters) if not defined in
-            // the block placement item JsonObject. Valid values may be any positive or negative integer and can use tilde or caret notation
-            // (see: https://minecraft.wiki/w/Coordinates#Relative_world_coordinates).
-            String posXString = inputData.has("x") ? inputData.get("x").getAsString() : String.valueOf(commandSourceStack.getPosition().x);
-            String posYString = inputData.has("y") ? inputData.get("y").getAsString() : String.valueOf(commandSourceStack.getPosition().y);
-            String posZString = inputData.has("z") ? inputData.get("z").getAsString() : String.valueOf(commandSourceStack.getPosition().z);
-            BlockPos blockPos1 = null;
-            try {
-                blockPos1 = getBlockPosFromString(
-                    posXString + " " + posYString + " " + posZString,
-                    commandSourceStack
-                );
-                if (BuildArea.isOutsideBuildArea(blockPos1, withinBuildArea)) {
-                    invalidate("position is outside build area!");
-                }
-            } catch (CommandSyntaxException e) {
-                invalidate(e.getMessage());
-            }
-            blockPos = blockPos1;
-            chunkPos = new ChunkPos(Objects.requireNonNull(blockPos1));
-        }
-
-        /**
-         * Invalidates the placement instruction for when the input data cannot be parsed correctly.
-         *
-         * @param message   status message
-         */
-        private void invalidate(String message) {
-            returnValue = instructionStatus(false, message);
-            isValid = false;
-        }
-
-        /**
-         * Parse block ID, block state string or JSON object into a {@code BlockState} and the SNBT string into a {@code CompoundTag}.
-         */
-        public void parse() {
-            try {
-                // Skip if block id is missing
-                if (!inputData.has("id")) {
-                    invalidate("block id is missing!");
-                    return;
-                }
-                String blockId = inputData.get("id").getAsString();
-
-                // Check if JSON contains an JsonObject or string for block state.
-                String blockStateString = "";
-                if (inputData.has("state")) {
-                    if (inputData.get("state").isJsonObject()) {
-                        blockStateString = getBlockStateStringFromJSONObject(inputData.get("state").getAsJsonObject());
-                    } else if (inputData.get("state").isJsonPrimitive()) {
-                        blockStateString = inputData.get("state").getAsString();
-                    }
-                }
-
-                // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
-                // for this block placement.
-                String blockNBTString = "";
-                if (inputData.has("data") && inputData.get("data").isJsonPrimitive()) {
-                    blockNBTString = inputData.get("data").getAsString();
-                }
-
-                // Pass block Id and block state string into a Stringreader with the the block state parser.
-                BlockStateParser.BlockResult parsedBlockState = BlockStateParser.parseForBlock(
-                    commandSourceStack.getLevel().holderLookup(Registries.BLOCK),
-                    blockId + blockStateString + blockNBTString,
-                    true
-                );
-                blockState = parsedBlockState.blockState();
-                blockNBT = parsedBlockState.nbt();
-
-            } catch (CommandSyntaxException e) {
-                invalidate(e.getMessage());
-            }
-        }
-
-        /**
-         * Actually places the block in the level
-         *
-         * @param level     server level
-         * @param flags     block update flags
-         */
-        public void setBlock(ServerLevel level, int flags) {
-            if (!isValid) {
-                return;
-            }
-
-            // If block placement flags allow for updating neighbouring blocks, update the shape neighbouring blocks
-            // in the north, west, south, east, up, down directions.
-            if ((flags & Block.UPDATE_NEIGHBORS) != 0) {
-                BlockState newBlockState = Block.updateFromNeighbourShapes(blockState, level, blockPos);
-                if (!newBlockState.isAir()) {
-                    blockState = newBlockState;
-                }
-            }
-
-            placementResult = level.setBlock(blockPos, blockState, flags);
-
-            // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
-            // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
-            if (placementResult && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
-                blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
-            }
-        }
-
-        /**
-         * Updates placed block with new NBT data, if provided.
-         *
-         * @param level     server level
-         * @param chunk     level chunk
-         * @param flags     block update flags
-         */
-        public void setBlockNBT(ServerLevel level, LevelChunk chunk, int flags) {
-            if (!isValid || blockNBT == null) {
-                return;
-            }
-
-            // If existing block entity is different from the value of blockNBT,
-            // overwrite existing block entity data with the new one, then notify
-            // the level of this change to make the change visible in the world.
-            BlockEntity existingBlockEntity = chunk.getExistingBlockEntity(blockPos);
-            if (existingBlockEntity != null) {
-                if (TagUtils.contains(existingBlockEntity.serializeNBT(), blockNBT)) {
-                    return;
-                }
-                existingBlockEntity.deserializeNBT(blockNBT);
-                if (
-                    (flags & Block.UPDATE_CLIENTS) != 0 && (
-                        !level.isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
-                    ) && (
-                        level.isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)
-                    )
-                ) {
-                    level.sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);
-                }
-                placementResult = true;
-            }
-        }
-
-        /**
-         * @return Json Object representing the final status of this block placement instruction
-         */
-        public JsonObject getResult() {
-            return Objects.requireNonNullElseGet(returnValue, () -> instructionStatus(placementResult));
-        }
-
-    }
 }
