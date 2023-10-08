@@ -12,7 +12,7 @@
                 "id": {
                     "type": "string",
                     "title": "Block ID",
-                    "description": "Any namespaced block ID",
+                    "description": "Any namespaced block ID (https://minecraft.wiki/w/Java_Edition_data_values#Blocks)",
                     "examples": [
                         "minecraft:stone",
                         "minecraft:clay",
@@ -76,7 +76,7 @@
                 }
             ],
             "title": "Position Axis",
-            "description": "Describe x/y/z placement position for block. If omitted, axis value defaults to the corresponding axis in the request URL."
+            "description": "Describe x/y/z placement position for block. If omitted, axis value defaults to the corresponding axis in the request URL. Each block position in the array of BlockPlacementInstructionElements should be unique."
         }
     }
 }

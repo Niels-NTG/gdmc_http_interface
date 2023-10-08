@@ -365,7 +365,7 @@ doBlockUpdates=True,  spawnDrops=True  -> 0000011
 
 ## Request body
 
-Request body should be a single JSON array of JSON objects according to this [schema](./schema.blocks.put.json).
+Request body should be a single JSON array of JSON objects according to this [schema](./schema.blocks.put.json), where each JSON object is for a single to-be-placed block.
 
 After receiving the request, GDMC-HTTP will first to attempt to parse the whole request body into valid JSON. If this fails it will return a response with HTTP status `400`.
 
