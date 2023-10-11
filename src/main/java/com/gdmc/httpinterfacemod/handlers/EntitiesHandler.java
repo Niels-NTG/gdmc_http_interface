@@ -43,11 +43,11 @@ public class EntitiesHandler extends HandlerBase {
 	private int dy;
 	private int dz;
 
-	// GET: Search entities using a Target Selector (https://minecraft.fandom.com/wiki/Target_selectors).
+	// GET: Search entities using a Target Selector (http://minecraft.wiki/w/Target_selectors).
 	// Defaults to "@e[x=x,y=y,z=z,dx=dx,dy=dy,dz=dz]" (find all entities within area).
 	private String entitySelectorString;
 
-	// GET: Whether to include entity data https://minecraft.fandom.com/wiki/Entity_format#Entity_Format
+	// GET: Whether to include entity data http://minecraft.wiki/w/Entity_format#Entity_Format
 	private boolean includeData;
 	private String dimension;
 

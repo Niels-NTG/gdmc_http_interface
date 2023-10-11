@@ -1,6 +1,6 @@
 # GDMC-HTTP 1.3.2 (Minecraft 1.19.2)
 
-- NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.fandom.com/wiki/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
+- NEW: Add `GET /heightmap` to get heightmap data of a given [type](http://minecraft.wiki/w/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
 - NEW: Add custom heightmap types `MOTION_BLOCKING_NO_PLANTS` and `OCEAN_FLOOR_NO_PLANTS`.
 - NEW: Add `withinBuildArea` flag to `GET /blocks`. If set to true it skips over positions outside of the build area.
 - NEW: Add `withinBuildArea` flag to `PUT /blocks`. If set to true it does not place blocks outside of the build area.
@@ -24,8 +24,8 @@
 # GDMC-HTTP 1.2.0 (Minecraft 1.19.2)
 
 - NEW: Add `GET /players` endpoint to get all players on the server. Thanks to [cmoyates](https://github.com/cmoyates)!
-- NEW: Add support for [target selector](https://minecraft.fandom.com/wiki/Target_selectors) for entities in the `GET /entities` endpoint using the `selector` query parameter.
-- NEW: Add support for [target selector](https://minecraft.fandom.com/wiki/Target_selectors) for players in the `GET /players` endpoint using the `selector` query parameter.
+- NEW: Add support for [target selector](http://minecraft.wiki/w/Target_selectors) for entities in the `GET /entities` endpoint using the `selector` query parameter.
+- NEW: Add support for [target selector](http://minecraft.wiki/w/Target_selectors) for players in the `GET /players` endpoint using the `selector` query parameter.
 - NEW: Unset build area by entering the `/setbuildarea` command without arguments.
 
 # GDMC-HTTP 1.1.1 (Minecraft 1.19.2)
@@ -34,7 +34,7 @@
 
 # GDMC-HTTP 1.1.0 (Minecraft 1.19.2)
 
-- NEW: `POST /command` now accepts `x`, `y`, `z` parameters, usefull for when using commands with [relative coordinates](https://minecraft.fandom.com/wiki/Coordinates#Relative_world_coordinates).
+- NEW: `POST /command` now accepts `x`, `y`, `z` parameters, usefull for when using commands with [relative coordinates](http://minecraft.wiki/w/Coordinates#Relative_world_coordinates).
 - NEW: Add `OPTIONS /` to get version of Minecraft and version of GDMC-HTTP interface.
 - NEW: Port number of the HTTP interface can be changed using the `/sethttpport <port>` Minecraft console command. This value will be saved to a config file and therefore will be persistent.
 - NEW: Get port number of the HTTP interface via the `/gethttpport` Minecraft console command.
@@ -43,8 +43,8 @@
 
 # GDMC-HTTP 1.0.0 (Minecraft 1.19.2)
 
-- BREAKING: JSON-formatted NBT-like data is no longer supported in request bodies. Use [SNBT notation](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format) instead.
-- BREAKING: Properties containing NBT values in JSON responses are no longer formatted as JSON, but as [SNBT strings](https://minecraft.fandom.com/wiki/NBT_format#SNBT_format).
+- BREAKING: JSON-formatted NBT-like data is no longer supported in request bodies. Use [SNBT notation](http://minecraft.wiki/w/NBT_format#SNBT_format) instead.
+- BREAKING: Properties containing NBT values in JSON responses are no longer formatted as JSON, but as [SNBT strings](http://minecraft.wiki/w/NBT_format#SNBT_format).
 - BREAKING: Plain-text formatted responses have been removed in favour of JSON.
 - BREAKING: Consistent error messages.
 - BREAKING: Plain-text request bodies are no longer accepted (except for `POST /command`). JSON-formatted request bodies are expected instead.
