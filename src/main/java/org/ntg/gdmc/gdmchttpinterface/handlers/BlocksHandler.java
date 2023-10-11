@@ -157,7 +157,7 @@ public class BlocksHandler extends HandlerBase {
         ConcurrentHashMap<Integer, PlacementInstructionFuturesRecord> placementInstructionsFuturesMap = new ConcurrentHashMap<>(inputList.size());
         // Note the number of entries in this map may be smaller than inputList.size(), due to some input placement instructions being invalid or
         // due to there being multiple entries for the same block position.
-        ConcurrentHashMap<BlockPos, PlacementInstructionsRecord> parsedPlacementInstructionsMap = new ConcurrentHashMap<>(inputList.size());
+        ConcurrentHashMap<BlockPos, PlacementInstructionRecord> parsedPlacementInstructionsMap = new ConcurrentHashMap<>(inputList.size());
         ConcurrentHashMap<Integer, JsonObject> placementResult = new ConcurrentHashMap<>(inputList.size());
 
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -208,7 +208,7 @@ public class BlocksHandler extends HandlerBase {
                 placementResult.put(index, instructionStatus(false, e.getMessage()));
                 return;
             }
-            parsedPlacementInstructionsMap.put(blockPos, new PlacementInstructionsRecord(index, blockPos, blockState, nbt));
+            parsedPlacementInstructionsMap.put(blockPos, new PlacementInstructionRecord(index, blockPos, blockState, nbt));
         });
 
         parsedPlacementInstructionsMap.values().parallelStream().forEach(placementInstruction -> {
@@ -537,7 +537,7 @@ public class BlocksHandler extends HandlerBase {
      * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}.
      * @return                          The updated {@link BlockState}.
      */
-    private static BlockState updateBlockShape(BlockPos inputBlockPos, BlockState inputBlockState, ConcurrentHashMap<BlockPos, PlacementInstructionsRecord> placementInstructions, ConcurrentHashMap<ChunkPos, LevelChunk> chunkMap, ServerLevel level, int flags) {
+    private static BlockState updateBlockShape(BlockPos inputBlockPos, BlockState inputBlockState, ConcurrentHashMap<BlockPos, PlacementInstructionRecord> placementInstructions, ConcurrentHashMap<ChunkPos, LevelChunk> chunkMap, ServerLevel level, int flags) {
         if ((flags & Block.UPDATE_NEIGHBORS) == 0) {
             return inputBlockState;
         }
@@ -550,7 +550,7 @@ public class BlocksHandler extends HandlerBase {
         for (Direction direction : UPDATE_SHAPE_ORDER) {
             mutableBlockPos.setWithOffset(inputBlockPos, direction);
 
-            PlacementInstructionsRecord otherPlacementInstruction = placementInstructions.get(mutableBlockPos);
+            PlacementInstructionRecord otherPlacementInstruction = placementInstructions.get(mutableBlockPos);
             if (otherPlacementInstruction != null) {
                 newBlockState = newBlockState.updateShape(direction, otherPlacementInstruction.blockState, level, inputBlockPos, mutableBlockPos);
                 continue;
@@ -599,7 +599,7 @@ public class BlocksHandler extends HandlerBase {
      * @param blockState        {@link BlockState} of the to-be-placed block.
      * @param nbt               NBT data of the to-be-placed block. May be null if none was provided in the input data.
      */
-    private record PlacementInstructionsRecord(int placementOrder, BlockPos blockPos, BlockState blockState, @Nullable CompoundTag nbt) {}
+    private record PlacementInstructionRecord(int placementOrder, BlockPos blockPos, BlockState blockState, @Nullable CompoundTag nbt) {}
 
     // function that converts a bunch of Property/Comparable pairs into String/String pairs
     private static final Function<Map.Entry<Property<?>, Comparable<?>>, Map.Entry<String, String>> propertyToStringPairFunction =
