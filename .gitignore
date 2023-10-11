@@ -22,11 +22,12 @@ build
 eclipse
 run
 mcmodsrepo
+logo-design
 
 # profiler
 *.jfr
 *.prof
+profiler
 
 # Files from Forge MDK
 forge*changelog.txt
-logo-design/

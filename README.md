@@ -32,9 +32,11 @@ Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#A
 
 When you open a Minecraft world, you will see a chat message that the mod has opened an HTTP connection at the address `localhost:9000`. This means that you can now send HTTP requests from an external program to Minecraft while the world is open.
 
-For testing and experimentation we recommend an API testing tool such as [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/) or a command line tool such as `cURL` or `wget`. When you want to build your own settlement generator or some other application, we recommend the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
+For testing and experimentation we recommend an API testing tool such as [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/) or a command line tool such as `cURL` or `wget`.
 
-Information in the following sections are primarily applicable to GDMC-HTTP version 1.3.0 or later.
+When you want to build your own settlement generator or some other application, we recommend the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
+
+Information in the following sections is primarily applicable to GDMC-HTTP version 1.3.0 or later.
 
 ### HTTP Endpoints
 
