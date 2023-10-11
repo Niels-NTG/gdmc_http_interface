@@ -8,35 +8,39 @@ With this interface you can use other applications and scripts running on the sa
 
 This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](http://gendesignmc.engineering.nyu.edu/), an annual competition for generative AI systems in Minecraft, where the challenge is to write an algorithm that creates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
 
-| Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                             |
-|-------------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| 1.20.2            | 📦 [GDMC-HTTP 1.4.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.4.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.4.0/docs) |
-| 1.19.2            | 📦 [GDMC-HTTP 1.3.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.3.2)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.3.2/docs) |
-| 1.16.5            | 📦 [GDMC-HTTP 0.4.2](https://github.com/nikigawlik/gdmc_http_interface/releases/tag/v0.4.2) | 📒 [API Docs](https://github.com/nikigawlik/gdmc_http_interface/wiki)            |
+| Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                       |
+|-------------------|---------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| 1.20.2            | 📦 [GDMC-HTTP 1.4.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.4.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.4.0/docs)           |
+| 1.19.2            | 📦 [GDMC-HTTP 1.3.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.3.2)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.3.2/docs/Endpoints) |
+| 1.16.5            | 📦 [GDMC-HTTP 0.4.2](https://github.com/nikigawlik/gdmc_http_interface/releases/tag/v0.4.2) | 📒 [API Docs](https://github.com/nikigawlik/gdmc_http_interface/wiki)                      |
 
 Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#Acknowledgements)
 
 ## Installation
 
 1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
-2. Get the [Forge Mod Installer](https://files.minecraftforge.net/) and download version 1.20.2-48.0.19, which you can find under the "1.20.2" > "Download Recommended" > "Installer". Open the downloaded file to install this version of Forge.
+2. Get the Forge Mod Installer and navigate to your version of Minecraft that is supported by this mod (1.20.2, 1.19.2 or 1.16.5). In the "Download Recommended" section click "Installer" to download. Open the downloaded file to install this version of Forge. Here are some troubleshooting resources If you have trouble opening this jar file:
+    - [macOS](https://discussions.apple.com/thread/252960079)
+    - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
 3. Download this mod's jar file from [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and move it in the mod folder:
     - On Windows: `%APPDATA%/.minecraft/mods`.
     - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
     - On Linux desktop: `~/.minecraft/mods`
-4. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on installation with version number 1.20.2-forge-48.0.19 to start Minecraft.
+4. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Forge installation in the list.
 
 ## Usage
 
 When you open a Minecraft world, you will see a chat message that the mod has opened an HTTP connection at the address `localhost:9000`. This means that you can now send HTTP requests from an external program to Minecraft while the world is open.
 
-For testing and experimentation we recommend an API testing tool such as [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/) or a command line tool such as `cURL` or `wget`. When you want to build your own settlement generator or some other application we recommend the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library).
+For testing and experimentation we recommend an API testing tool such as [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/) or a command line tool such as `cURL` or `wget`. When you want to build your own settlement generator or some other application, we recommend the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
+
+Information in the following sections are primarily applicable to GDMC-HTTP version 1.3.0 or later.
 
 ### HTTP Endpoints
 
 When the HTTP interface is active, you have access to the following HTTP endpoints:
 
-| HTTP method | URL          | description                                    |                                                                            |
+| HTTP method | URL          | Description                                    | Docs                                                                       |
 |-------------|--------------|------------------------------------------------|----------------------------------------------------------------------------|
 | `POST`      | `/commands`  | Send Minecraft console commands                | 📒[API Docs](./docs/Endpoints.md#Send-Commands-POST-commands)              |
 | `GET`       | `/blocks`    | Get information on blocks in a given area      | 📒[API Docs](./docs/Endpoints.md#Read-blocks-GET-blocks)                   |
@@ -60,7 +64,7 @@ Detailed documentation of the endpoints can be found at [docs/Endpoints](./docs/
 
 This mod adds the following custom console commands to the game:
 
-| command                                                   | description                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Command                                                   | Description                                                                                                                                                                                                                                                                                                                                                                                                                         |
 |-----------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `/setbuildarea <fromX> <fromY> <fromZ> <toX> <toY> <toZ>` | Sets virtual "build area" to a certain area of the world. `GET` endpoints use this as their default area. Endpoints that edit the world can use the `withinBuildArea` flag to constrain actions to this area. For the command arguments you can mix and match absolute, [local](https://minecraft.wiki/w/Coordinates#Local_coordinates) or [relative](https://minecraft.wiki/w/Coordinates#Relative_world_coordinates) coordinates. |
 | `/setbuildarea` (no arguments)                            | Unset build area                                                                                                                                                                                                                                                                                                                                                                                                                    |
