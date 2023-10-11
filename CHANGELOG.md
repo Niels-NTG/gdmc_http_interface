@@ -1,3 +1,9 @@
+# GDMC-HTTP 1.3.3 (Minecraft 1.19.2)
+
+- NEW: Add logo designed by [Blinkenlights](https://github.com/Flashing-Blinkenlights).
+- FIX: Improved documentation.
+- FIX: Replace links to Minecraft wiki the new domain (https://minecraft.wiki/).
+
 # GDMC-HTTP 1.3.2 (Minecraft 1.19.2)
 
 - NEW: Add `GET /heightmap` to get heightmap data of a given [type](http://minecraft.wiki/w/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
