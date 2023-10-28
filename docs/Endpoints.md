@@ -350,7 +350,9 @@ The flags are as follows:
 | `0100000`  | will prevent neighbour reactions from spawning drops.                        |
 | `1000000`  | will signify the block is being moved.                                       |
 
-You can combine these flags as you wish, for example 0100011 will cause a block update _and_ send the change to clients _and_ prevent neighbor reactions. You should always have the `0000010` flag active, otherwise you will get invisible block glitches.
+You can combine these flags as you wish, for example 0100011 will cause a block update _and_ send the change to clients _and_ prevent neighbor reactions. You should always have the `0000010` flag active, otherwise the placed blocks will remain invisible until the world is reloaded.
+
+Note that if `doBlockUpdates=false` or the block update flag is set to `0` some other way, GDMC-HTTP will place blocks faster than if block updates were enabled.
 
 The following list shows which block update flags `doBlockUpdates` and `spawnDrops` get evaluated to internally:
 
