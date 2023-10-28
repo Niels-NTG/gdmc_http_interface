@@ -154,14 +154,20 @@ public class BlocksHandler extends HandlerBase {
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
 
 
-        ConcurrentHashMap<Integer, PlacementInstructionFuturesRecord> placementInstructionsFuturesMap = new ConcurrentHashMap<>(inputList.size());
         // Note the number of entries in this map may be smaller than inputList.size(), due to some input placement instructions being invalid or
         // due to there being multiple entries for the same block position.
+        ConcurrentHashMap<Integer, PlacementInstructionFuturesRecord> placementInstructionsFuturesMap = new ConcurrentHashMap<>(inputList.size());
+        // Map to hold parsed placement instructions, one indexed by the order it was submitted in so placement can be resolved in the right order if needed,
+        // the other indexed by BlockPos to enable quick lookup of adjecent block positions for updating the block's shape.
         ConcurrentHashMap<Integer, PlacementInstructionRecord> parsedPlacementInstructionsIndexMap = new ConcurrentHashMap<>(inputList.size());
         ConcurrentHashMap<BlockPos, PlacementInstructionRecord> parsedPlacementInstructionsBlockPosMap = new ConcurrentHashMap<>(inputList.size());
 
+        // Map for storing the resulting parsing error, placement failure or placement success of each placement instruction from the input.
         ConcurrentHashMap<Integer, JsonObject> placementResult = new ConcurrentHashMap<>(inputList.size());
 
+        // Fill a map of records, each containing futures for parsing the BlockPos, BlockState and NBT CompoundTag data of a placement instruction.
+        // Submit all of these futures to the cached thread pool, which will resolve these in an undetermined yet efficient way.
+        // https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Executors.html#newCachedThreadPool()
         ExecutorService executorService = Executors.newCachedThreadPool();
         IntStream.range(0, inputList.size()).parallel().forEach(index -> {
             JsonObject blockPlacementInput = inputList.get(index).getAsJsonObject();
@@ -194,7 +200,7 @@ public class BlocksHandler extends HandlerBase {
 
                 ChunkPos chunkPos = new ChunkPos(blockPos);
                 if (!chunkPosMap.containsKey(chunkPos)) {
-                    // Load the chunk data if the placement instruction at this position has NBT data.
+                    // Load the chunk data for the chunk pos of this block position.
                     // Loading the chunks before applying the NBT data helps with performance.
                     chunkPosMap.put(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z));
                 }
@@ -204,6 +210,7 @@ public class BlocksHandler extends HandlerBase {
             }
 
             try {
+                // Extract BlockState (cannot be null, will be caught during parsing) and NBT CompoundTag (can be null).
                 BlockStateParser.BlockResult blockStateResult = placementInstructionFuturesRecord.blockStateFuture.get();
                 blockState = blockStateResult.blockState();
 
@@ -227,7 +234,6 @@ public class BlocksHandler extends HandlerBase {
                 return;
             }
             BlockPos blockPos = placementInstruction.blockPos;
-            LevelChunk chunk = chunkPosMap.get(new ChunkPos(blockPos));
             BlockState blockState = updateBlockShape(blockPos, placementInstruction.blockState, parsedPlacementInstructionsBlockPosMap, chunkPosMap, serverLevel, blockFlags);
             CompoundTag nbt = placementInstruction.nbt;
 
@@ -243,7 +249,7 @@ public class BlocksHandler extends HandlerBase {
                 isBlockSet |= setBlockNBT(
                     blockPos,
                     nbt,
-                    chunk,
+                    chunkPosMap.get(new ChunkPos(blockPos)),
                     blockState,
                     blockFlags
                 );
@@ -251,6 +257,7 @@ public class BlocksHandler extends HandlerBase {
             placementResult.put(index, instructionStatus(isBlockSet));
         });
 
+        // Gather placement/parsing results and put them back in the order the placement instructions were submitted.
         IntStream.range(0, inputList.size()).forEach(index -> returnValues.add(placementResult.get(index)));
 
         return returnValues;
@@ -469,6 +476,8 @@ public class BlocksHandler extends HandlerBase {
      * @return                          False if block at target position has the same {@link BlockState} as the input, if the target positions was outside of the world bounds or if it couldn't be placed for some other reason.
      */
     private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) throws ExecutionException, InterruptedException {
+        // Submit setBlock function call to the Minecraft server thread, allowing Minecraft to schedule this call, preventing interruptions of the
+        // server thread, resulting in faster placement overall and much less stuttering in-game when placing lots of blocks.
         CompletableFuture<Boolean> isBlockSetFuture = mcServer.submit(() -> level.setBlock(blockPos, blockState, flags));
         boolean isBlockSet = isBlockSetFuture.get();
 
