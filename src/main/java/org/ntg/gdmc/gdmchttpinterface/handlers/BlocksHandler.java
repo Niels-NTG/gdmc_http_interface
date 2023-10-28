@@ -478,15 +478,18 @@ public class BlocksHandler extends HandlerBase {
     private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) throws ExecutionException, InterruptedException {
         // Submit setBlock function call to the Minecraft server thread, allowing Minecraft to schedule this call, preventing interruptions of the
         // server thread, resulting in faster placement overall and much less stuttering in-game when placing lots of blocks.
-        CompletableFuture<Boolean> isBlockSetFuture = mcServer.submit(() -> level.setBlock(blockPos, blockState, flags));
-        boolean isBlockSet = isBlockSetFuture.get();
+        CompletableFuture<Boolean> isBlockSetFuture = mcServer.submit(() -> {
 
-        // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
-        // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
-        if (isBlockSet && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
-            blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
-        }
-        return isBlockSet;
+	        boolean isBlockSet = level.setBlock(blockPos, blockState, flags);
+
+            // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
+            // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
+            if (isBlockSet && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+                blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
+            }
+            return isBlockSet;
+        });
+        return isBlockSetFuture.get();
     }
 
     /**
