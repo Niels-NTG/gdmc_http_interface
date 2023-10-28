@@ -157,7 +157,9 @@ public class BlocksHandler extends HandlerBase {
         ConcurrentHashMap<Integer, PlacementInstructionFuturesRecord> placementInstructionsFuturesMap = new ConcurrentHashMap<>(inputList.size());
         // Note the number of entries in this map may be smaller than inputList.size(), due to some input placement instructions being invalid or
         // due to there being multiple entries for the same block position.
-        ConcurrentHashMap<BlockPos, PlacementInstructionRecord> parsedPlacementInstructionsMap = new ConcurrentHashMap<>(inputList.size());
+        ConcurrentHashMap<Integer, PlacementInstructionRecord> parsedPlacementInstructionsIndexMap = new ConcurrentHashMap<>(inputList.size());
+        ConcurrentHashMap<BlockPos, PlacementInstructionRecord> parsedPlacementInstructionsBlockPosMap = new ConcurrentHashMap<>(inputList.size());
+
         ConcurrentHashMap<Integer, JsonObject> placementResult = new ConcurrentHashMap<>(inputList.size());
 
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -180,26 +182,18 @@ public class BlocksHandler extends HandlerBase {
         IntStream.range(0, inputList.size()).parallel().forEach(index -> {
             PlacementInstructionFuturesRecord placementInstructionFuturesRecord = placementInstructionsFuturesMap.get(index);
             BlockPos blockPos;
-            ChunkPos chunkPos;
             BlockState blockState;
             CompoundTag nbt;
+
             try {
                 blockPos = placementInstructionFuturesRecord.posFuture.get();
                 if (BuildArea.isOutsideBuildArea(blockPos, withinBuildArea)) {
                     placementResult.put(index, instructionStatus(false, "Position is outside build area!"));
                     return;
                 }
-                chunkPos = new ChunkPos(blockPos);
-            } catch (InterruptedException | ExecutionException | NullPointerException e) {
-                placementResult.put(index, instructionStatus(false, e.getMessage()));
-                return;
-            }
-            try {
-                BlockStateParser.BlockResult blockStateResult = placementInstructionFuturesRecord.blockStateFuture.get();
-                blockState = blockStateResult.blockState();
 
-                nbt = blockStateResult.nbt();
-                if (nbt != null && !chunkPosMap.containsKey(chunkPos)) {
+                ChunkPos chunkPos = new ChunkPos(blockPos);
+                if (!chunkPosMap.containsKey(chunkPos)) {
                     // Load the chunk data if the placement instruction at this position has NBT data.
                     // Loading the chunks before applying the NBT data helps with performance.
                     chunkPosMap.put(chunkPos, serverLevel.getChunk(chunkPos.x, chunkPos.z));
@@ -208,36 +202,43 @@ public class BlocksHandler extends HandlerBase {
                 placementResult.put(index, instructionStatus(false, e.getMessage()));
                 return;
             }
-            parsedPlacementInstructionsMap.put(blockPos, new PlacementInstructionRecord(index, blockPos, blockState, nbt));
-        });
 
-        parsedPlacementInstructionsMap.values().parallelStream().forEach(placementInstruction -> {
-            boolean isBlockSet;
-            BlockPos blockPos = placementInstruction.blockPos;
-            ChunkPos chunkPos = new ChunkPos(blockPos);
-            BlockState blockState = placementInstruction.blockState;
-            blockState = updateBlockShape(blockPos, blockState, parsedPlacementInstructionsMap, chunkPosMap, serverLevel, blockFlags);
-            CompoundTag nbt = placementInstruction.nbt;
-            int index = placementInstruction.placementOrder;
             try {
-                isBlockSet = setBlock(
-                    blockPos,
-                    blockState,
-                    serverLevel,
-                    blockFlags
-                );
-            } catch (ExecutionException | InterruptedException e) {
+                BlockStateParser.BlockResult blockStateResult = placementInstructionFuturesRecord.blockStateFuture.get();
+                blockState = blockStateResult.blockState();
+
+                nbt = blockStateResult.nbt();
+            } catch (InterruptedException | ExecutionException | NullPointerException e) {
                 placementResult.put(index, instructionStatus(false, e.getMessage()));
                 return;
             }
+
+            PlacementInstructionRecord placementInstruction = new PlacementInstructionRecord(index, blockPos, blockState, nbt);
+            parsedPlacementInstructionsIndexMap.put(index, placementInstruction);
+            parsedPlacementInstructionsBlockPosMap.put(blockPos, placementInstruction);
+
+        });
+
+        IntStream.range(0, inputList.size()).forEach(index -> {
+            PlacementInstructionRecord placementInstruction = parsedPlacementInstructionsIndexMap.get(index);
+            if (placementInstruction == null) {
+                return;
+            }
+            BlockPos blockPos = placementInstruction.blockPos;
+            LevelChunk chunk = chunkPosMap.get(new ChunkPos(blockPos));
+            BlockState blockState = updateBlockShape(blockPos, placementInstruction.blockState, parsedPlacementInstructionsBlockPosMap, chunkPosMap, serverLevel, blockFlags);
+            CompoundTag nbt = placementInstruction.nbt;
+
+            boolean isBlockSet = setBlock(blockPos, blockState, serverLevel, blockFlags);
+
             if (nbt != null) {
-	            isBlockSet |= setBlockNBT(
-		            blockPos,
-		            nbt,
-		            chunkPosMap.get(chunkPos),
-		            blockState,
-		            blockFlags
-	            );
+                isBlockSet |= setBlockNBT(
+                    blockPos,
+                    nbt,
+                    chunk,
+                    blockState,
+                    blockFlags
+                );
             }
             placementResult.put(index, instructionStatus(isBlockSet));
         });
@@ -458,20 +459,16 @@ public class BlocksHandler extends HandlerBase {
      * @param level                     Level in which the block will be placed.
      * @param flags                     Block update flags (see {@link #getBlockFlags}).
      * @return                          False if block at target position has the same {@link BlockState} as the input, if the target positions was outside of the world bounds or if it couldn't be placed for some other reason.
-     * @throws ExecutionException       Thrown if Minecraft throws an internal error.
-     * @throws InterruptedException     Thrown if Minecraft throws an internal error.
      */
-    private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) throws ExecutionException, InterruptedException {
-        CompletableFuture<Boolean> setBlockFuture = mcServer.submit(() -> {
-	        boolean isBlockSet = level.setBlock(blockPos, blockState, flags);
-            // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
-            // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
-            if (isBlockSet && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
-                blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
-            }
-            return isBlockSet;
-        });
-        return setBlockFuture.get();
+    private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) {
+        boolean isBlockSet = level.setBlock(blockPos, blockState, flags);
+
+        // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
+        // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
+        if (isBlockSet && (flags & Block.UPDATE_KNOWN_SHAPE) == 0) {
+            blockState.getBlock().setPlacedBy(level, blockPos, blockState, blockPlaceEntity, new ItemStack(blockState.getBlock().asItem()));
+        }
+        return isBlockSet;
     }
 
     /**
@@ -531,13 +528,13 @@ public class BlocksHandler extends HandlerBase {
      *
      * @param inputBlockPos             Position of block to change the shape of.
      * @param inputBlockState           Original {@link BlockState}.
-     * @param placementInstructions     Other placement instructions to find neighbouring blocks in.
+     * @param placementInstructionsMap  Other placement instructions to find neighbouring blocks in.
      * @param chunkMap                  Cached chunks to find neighbouring blocks in.
      * @param level                     Level to find neighbouring blocks in.
      * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}.
      * @return                          The updated {@link BlockState}.
      */
-    private static BlockState updateBlockShape(BlockPos inputBlockPos, BlockState inputBlockState, ConcurrentHashMap<BlockPos, PlacementInstructionRecord> placementInstructions, ConcurrentHashMap<ChunkPos, LevelChunk> chunkMap, ServerLevel level, int flags) {
+    private static BlockState updateBlockShape(BlockPos inputBlockPos, BlockState inputBlockState, ConcurrentHashMap<BlockPos, PlacementInstructionRecord> placementInstructionsMap, ConcurrentHashMap<ChunkPos, LevelChunk> chunkMap, ServerLevel level, int flags) {
         if ((flags & Block.UPDATE_NEIGHBORS) == 0) {
             return inputBlockState;
         }
@@ -550,7 +547,7 @@ public class BlocksHandler extends HandlerBase {
         for (Direction direction : UPDATE_SHAPE_ORDER) {
             mutableBlockPos.setWithOffset(inputBlockPos, direction);
 
-            PlacementInstructionRecord otherPlacementInstruction = placementInstructions.get(mutableBlockPos);
+            PlacementInstructionRecord otherPlacementInstruction = placementInstructionsMap.get(mutableBlockPos);
             if (otherPlacementInstruction != null) {
                 newBlockState = newBlockState.updateShape(direction, otherPlacementInstruction.blockState, level, inputBlockPos, mutableBlockPos);
                 continue;
