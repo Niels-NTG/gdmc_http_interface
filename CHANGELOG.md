@@ -19,7 +19,8 @@ TL;DR:
 - NEW: Copy JSON representation of the current build area to clipboard when clicking on the chat message after setting it with the `/setbuildarea` command.
 - NEW: Display GDMC-HTTP server status in chat message when player joins the world.
 - NEW: Revert interface port to default (`9000`) if `/sethttpport` command has no arguments.
-- FIX: Requests to `PUT /blocks` are up to 30%[^1] faster!
+- FIX: Requests to `PUT /blocks` are up to 80%[^1] faster when block updates are enabled (default).
+- FIX: Requests to `PUT /blocks` are up to 90%[^1] faster when block updates are disabled.
 - FIX: Requests to `GET /blocks` are up to 60%[^1] faster!
 - FIX: Requests to `GET /chunks` are up to 60%[^1] faster!
 - FIX: Requests to `GET /heightmap` are now up to 85%[^1] faster!

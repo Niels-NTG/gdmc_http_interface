@@ -219,7 +219,9 @@ public class BlocksHandler extends HandlerBase {
 
         });
 
-        IntStream.range(0, inputList.size()).forEach(index -> {
+        // Allow for parallisation if blocks do not need to be updated, speeding up placement significantly.
+        IntStream iterator = (blockFlags & Block.UPDATE_NEIGHBORS) == 0 ? IntStream.range(0, inputList.size()).parallel() : IntStream.range(0, inputList.size());
+        iterator.forEach(index -> {
             PlacementInstructionRecord placementInstruction = parsedPlacementInstructionsIndexMap.get(index);
             if (placementInstruction == null) {
                 return;
@@ -229,7 +231,13 @@ public class BlocksHandler extends HandlerBase {
             BlockState blockState = updateBlockShape(blockPos, placementInstruction.blockState, parsedPlacementInstructionsBlockPosMap, chunkPosMap, serverLevel, blockFlags);
             CompoundTag nbt = placementInstruction.nbt;
 
-            boolean isBlockSet = setBlock(blockPos, blockState, serverLevel, blockFlags);
+            boolean isBlockSet;
+            try {
+                isBlockSet = setBlock(blockPos, blockState, serverLevel, blockFlags);
+            } catch (ExecutionException | InterruptedException e) {
+                placementResult.put(index, instructionStatus(false, e.getMessage()));
+                return;
+            }
 
             if (nbt != null) {
                 isBlockSet |= setBlockNBT(
@@ -460,8 +468,9 @@ public class BlocksHandler extends HandlerBase {
      * @param flags                     Block update flags (see {@link #getBlockFlags}).
      * @return                          False if block at target position has the same {@link BlockState} as the input, if the target positions was outside of the world bounds or if it couldn't be placed for some other reason.
      */
-    private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) {
-        boolean isBlockSet = level.setBlock(blockPos, blockState, flags);
+    private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) throws ExecutionException, InterruptedException {
+        CompletableFuture<Boolean> isBlockSetFuture = mcServer.submit(() -> level.setBlock(blockPos, blockState, flags));
+        boolean isBlockSet = isBlockSetFuture.get();
 
         // If block update flags allow for updating the shape of the block, perform a setPlaceBy action by a block place entity to "finalize"
         // the placement of the block. This is applicable for multi-part blocks that behave as one in-game, such as beds and doors.
