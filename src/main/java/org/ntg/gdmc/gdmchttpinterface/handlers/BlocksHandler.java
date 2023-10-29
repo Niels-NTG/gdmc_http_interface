@@ -179,13 +179,15 @@ public class BlocksHandler extends HandlerBase {
         try {
             if (!executorService.awaitTermination(10, TimeUnit.MINUTES)) {
                 executorService.shutdownNow();
+                throw new HttpException("Parsing of request payload took too long", 408);
             }
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            throw new HttpException("Something went wrong while parsing request payload " + e.getMessage(), 500);
         }
 
         ConcurrentHashMap<ChunkPos, LevelChunk> chunkPosMap = new ConcurrentHashMap<>();
         IntStream.range(0, inputList.size()).parallel().forEach(index -> {
+
             PlacementInstructionFuturesRecord placementInstructionFuturesRecord = placementInstructionsFuturesMap.get(index);
             BlockPos blockPos;
             BlockState blockState;

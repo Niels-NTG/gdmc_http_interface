@@ -39,6 +39,9 @@ The following error status codes are shared across multiple endpoints:
 - `405`: "Method not allowed"
   - Current endpoint does not support the method. See the methods listed in this documentation or the 405 error message to see what methods are supported.
 
+- `408`: "Parsing of request payload took too long"
+  - GDMC-HTTP could not parse the request body within a 10 minute time limit.
+
 - `500`: "Internal server error"
   - This type of error is unintended behaviour and could be a bug in either GDMC-HTTP or Minecraft itself. Feel free to submit an [issue](https://github.com/Niels-NTG/gdmc_http_interface/issues) with steps explaining how to reproduce this error.
 
