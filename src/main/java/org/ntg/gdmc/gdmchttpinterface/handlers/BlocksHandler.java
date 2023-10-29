@@ -374,16 +374,21 @@ public class BlocksHandler extends HandlerBase {
      * @return                          The resulting {@link BlockStateParser.BlockResult}.
      * @throws CommandSyntaxException   May be thrown if {@code "state"} or {@code "data"} field contain a syntax error.
      */
-    private static BlockStateParser.BlockResult getBlockStateFromJson(JsonObject json, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-        // Skip if block id is missing
-        String blockId = json.get("id").getAsString();
+    private static BlockStateParser.BlockResult getBlockStateFromJson(JsonObject json, CommandSourceStack commandSourceStack) throws Exception {
+        String blockId = null;
+        if (json.has("id") && json.get("id").isJsonPrimitive() && json.get("id").getAsJsonPrimitive().isString()) {
+            blockId = json.get("id").getAsString();
+        }
+        if (blockId == null) {
+            throw new Exception("Missing or malformed block ID");
+        }
 
         // Check if JSON contains an JsonObject or string for block state.
         String blockStateString = "";
         if (json.has("state")) {
             if (json.get("state").isJsonObject()) {
                 blockStateString = getBlockStateStringFromJSONObject(json.get("state").getAsJsonObject());
-            } else if (json.get("state").isJsonPrimitive()) {
+            } else if (json.get("state").isJsonPrimitive() && json.get("state").getAsJsonPrimitive().isString()) {
                 blockStateString = json.get("state").getAsString();
             }
         }
