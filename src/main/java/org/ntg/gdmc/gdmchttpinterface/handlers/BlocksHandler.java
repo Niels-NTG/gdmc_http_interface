@@ -357,9 +357,9 @@ public class BlocksHandler extends HandlerBase {
      * @throws CommandSyntaxException   If input string cannot be parsed into a valid {@link BlockPos}.
      */
     private static BlockPos getBlockPosFromJSON(JsonObject json, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-        String posXString = json.has("x") ? json.get("x").getAsString() : String.valueOf(commandSourceStack.getPosition().x);
-        String posYString = json.has("y") ? json.get("y").getAsString() : String.valueOf(commandSourceStack.getPosition().y);
-        String posZString = json.has("z") ? json.get("z").getAsString() : String.valueOf(commandSourceStack.getPosition().z);
+        String posXString = json.has("x") ? json.get("x").getAsString() : String.valueOf((int)commandSourceStack.getPosition().x);
+        String posYString = json.has("y") ? json.get("y").getAsString() : String.valueOf((int)commandSourceStack.getPosition().y);
+        String posZString = json.has("z") ? json.get("z").getAsString() : String.valueOf((int)commandSourceStack.getPosition().z);
         return getBlockPosFromString(
             posXString + " " + posYString + " " + posZString,
             commandSourceStack
