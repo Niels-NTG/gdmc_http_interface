@@ -44,9 +44,6 @@ import java.util.stream.IntStream;
 
 public class BlocksHandler extends HandlerBase {
 
-    private final CommandSourceStack cmdSrc;
-    private final LivingEntity blockPlaceEntity;
-
     // PUT/GET: x, y, z positions
     private int x;
     private int y;
@@ -80,8 +77,6 @@ public class BlocksHandler extends HandlerBase {
 
     public BlocksHandler(MinecraftServer mcServer) {
         super(mcServer);
-        cmdSrc = createCommandSource("GDMC-BlockHandler", dimension);
-        blockPlaceEntity = createLivingEntity(dimension);
     }
 
     @Override
@@ -147,7 +142,8 @@ public class BlocksHandler extends HandlerBase {
         JsonArray returnValues = new JsonArray();
 
         // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
-        CommandSourceStack commandSourceStack = cmdSrc.withPosition(new Vec3(x, y, z));
+        CommandSourceStack commandSourceStack = createCommandSource("GDMC-BlockHandler", dimension, new Vec3(x, y, z));
+        LivingEntity blockPlaceEntity = createLivingEntity(dimension);
 
         ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -241,7 +237,7 @@ public class BlocksHandler extends HandlerBase {
 
             boolean isBlockSet;
             try {
-                isBlockSet = setBlock(blockPos, blockState, serverLevel, blockFlags);
+                isBlockSet = setBlock(blockPos, blockState, serverLevel, blockPlaceEntity, blockFlags);
             } catch (ExecutionException | InterruptedException e) {
                 placementResult.put(index, instructionStatus(false, e.getMessage()));
                 return;
@@ -482,7 +478,7 @@ public class BlocksHandler extends HandlerBase {
      * @param flags                     Block update flags (see {@link #getBlockFlags}).
      * @return                          False if block at target position has the same {@link BlockState} as the input, if the target positions was outside of the world bounds or if it couldn't be placed for some other reason.
      */
-    private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, int flags) throws ExecutionException, InterruptedException {
+    private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, LivingEntity blockPlaceEntity, int flags) throws ExecutionException, InterruptedException {
         // Submit setBlock function call to the Minecraft server thread, allowing Minecraft to schedule this call, preventing interruptions of the
         // server thread, resulting in faster placement overall and much less stuttering in-game when placing lots of blocks.
         CompletableFuture<Boolean> isBlockSetFuture = mcServer.submit(() -> {
