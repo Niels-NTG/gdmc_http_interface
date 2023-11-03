@@ -253,11 +253,11 @@ public class EntitiesHandler extends HandlerBase {
 
 	private final static class SummonEntityInstruction {
 
-		private ResourceLocation entityResourceLocation;
-		private Vec3 entityPosition;
+		private final ResourceLocation entityResourceLocation;
+		private final Vec3 entityPosition;
 		private CompoundTag entityData;
 
-		SummonEntityInstruction(JsonObject summonInstructionInput, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+		SummonEntityInstruction(JsonObject summonInstructionInput, CommandSourceStack commandSourceStack) throws CommandSyntaxException, IllegalStateException, UnsupportedOperationException {
 			String positionArgumentString = "";
 			if (summonInstructionInput.has("x") && summonInstructionInput.has("y") && summonInstructionInput.has("z")) {
 				positionArgumentString = summonInstructionInput.get("x").getAsString() + " " + summonInstructionInput.get("y").getAsString() + " " + summonInstructionInput.get("z").getAsString();
@@ -265,11 +265,7 @@ public class EntitiesHandler extends HandlerBase {
 			String entityIDString = summonInstructionInput.has("id") ? summonInstructionInput.get("id").getAsString() : "";
 			String entityDataString = summonInstructionInput.has("data") ? summonInstructionInput.get("data").getAsString() : "";
 
-			parse(positionArgumentString + " " + entityIDString + " " + entityDataString, commandSourceStack);
-		}
-
-		private void parse(String inputData, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-			StringReader sr = new StringReader(inputData);
+			StringReader sr = new StringReader(positionArgumentString + " " + entityIDString + " " + entityDataString);
 
 			entityPosition = Vec3Argument.vec3().parse(sr).getPosition(commandSourceStack);
 			sr.skip();
@@ -278,7 +274,7 @@ public class EntitiesHandler extends HandlerBase {
 			sr.skip();
 
 			try {
-				String entityDataString = sr.getRemaining();
+				entityDataString = sr.getRemaining();
 				if (entityDataString.isBlank()) {
 					entityDataString = "{}";
 				}
@@ -286,6 +282,7 @@ public class EntitiesHandler extends HandlerBase {
 			} catch (StringIndexOutOfBoundsException e) {
 				entityData = new CompoundTag();
 			}
+
 		}
 
 		public JsonObject summon(ServerLevel level) {
