@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.utils;
+package nl.nielspoldervaart.gdmc.utils;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
@@ -81,12 +81,12 @@ public class CustomHeightmap {
 		@SuppressWarnings("unused") MOTION_BLOCKING_NO_PLANTS(
 			"MOTION_BLOCKING_NO_PLANTS",
 			(blockState) ->
-				(blockState.getMaterial().blocksMotion() || !blockState.getFluidState().isEmpty()) && NO_PLANTS.test(blockState)
+				(blockState.blocksMotion() || !blockState.getFluidState().isEmpty()) && NO_PLANTS.test(blockState)
 		),
 		@SuppressWarnings("unused") OCEAN_FLOOR_NO_PLANTS(
 			"OCEAN_FLOOR_NO_PLANTS",
 			(blockState) ->
-				blockState.getMaterial().blocksMotion() && NO_PLANTS.test(blockState)
+				blockState.blocksMotion() && NO_PLANTS.test(blockState)
 		);
 
 		private final String serializationKey;

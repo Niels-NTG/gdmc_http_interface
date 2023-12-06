@@ -1,6 +1,7 @@
-package com.gdmc.httpinterfacemod.handlers;
+package nl.nielspoldervaart.gdmc.handlers;
 
-import com.gdmc.httpinterfacemod.utils.TagMerger;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import nl.nielspoldervaart.gdmc.utils.TagUtils;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -9,7 +10,6 @@ import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.ReportedException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.commands.arguments.EntitySummonArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
@@ -25,8 +25,6 @@ import net.minecraft.world.phys.Vec3;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -43,12 +41,15 @@ public class EntitiesHandler extends HandlerBase {
 	private int dy;
 	private int dz;
 
-	// GET: Search entities using a Target Selector (http://minecraft.wiki/w/Target_selectors).
+	// GET: Search entities using a Target Selector (https://minecraft.wiki/w/Target_selectors).
 	// Defaults to "@e[x=x,y=y,z=z,dx=dx,dy=dy,dz=dz]" (find all entities within area).
 	private String entitySelectorString;
 
-	// GET: Whether to include entity data http://minecraft.wiki/w/Entity_format#Entity_Format
+	// GET: Whether to include entity data https://minecraft.wiki/w/Entity_format#Entity_Format
 	private boolean includeData;
+
+	// GET/PUT/DELETE/PATCH: Search for entities within a specific dimension.
+	// For GET requests this only works if selector string contains position arguments.
 	private String dimension;
 
 	public EntitiesHandler(MinecraftServer mcServer) {
@@ -75,8 +76,7 @@ public class EntitiesHandler extends HandlerBase {
 
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
-			String message = "Could not parse query parameter: " + e.getMessage();
-			throw new HttpException(message, 400);
+			throw new HttpException("Could not parse query parameter: " + e.getMessage(), 400);
 		}
 
 		String method = httpExchange.getRequestMethod().toLowerCase();
@@ -113,24 +113,18 @@ public class EntitiesHandler extends HandlerBase {
 	 * @return summon results
 	 */
 	private JsonArray putEntitiesHandler(InputStream requestBody) {
-		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
+		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension, new Vec3(x, y, z));
 		ServerLevel serverLevel = getServerLevel(dimension);
 
 		JsonArray returnValues = new JsonArray();
-		JsonArray entityDescriptionList;
-		try {
-			entityDescriptionList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-		} catch (JsonSyntaxException jsonSyntaxException) {
-			throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-		}
+		JsonArray entityDescriptionList = parseJsonArray(requestBody);
 
 		for (JsonElement entityDescription : entityDescriptionList) {
-			JsonObject json = entityDescription.getAsJsonObject();
-
 			SummonEntityInstruction summonEntityInstruction;
 			try {
+				JsonObject json = entityDescription.getAsJsonObject();
 				summonEntityInstruction = new SummonEntityInstruction(json, cmdSrc);
-			} catch (CommandSyntaxException e) {
+			} catch (UnsupportedOperationException | IllegalStateException | CommandSyntaxException e) {
 				returnValues.add(instructionStatus(false, e.getMessage()));
 				continue;
 			}
@@ -145,27 +139,14 @@ public class EntitiesHandler extends HandlerBase {
 	 */
 	private JsonArray getEntitiesHandler() {
 
-		// Calculate boundaries of area of blocks to gather information on.
-		int xOffset = x + dx;
-		int xMin = Math.min(x, xOffset);
-		int xMax = Math.max(x, xOffset);
-
-		int yOffset = y + dy;
-		int yMin = Math.min(y, yOffset);
-		int yMax = Math.max(y, yOffset);
-
-		int zOffset = z + dz;
-		int zMin = Math.min(z, zOffset);
-		int zMax = Math.max(z, zOffset);
-
 		StringReader entitySelectorStringReader = new StringReader(
 			entitySelectorString != null && !entitySelectorString.isBlank() ?
 				entitySelectorString :
-				"@e[x=%s,y=%s,z=%s,dx=%s,dy=%s,dz=%s]".formatted(xMin, yMin, zMin, xMax, yMax, zMax)
+				"@e[x=%s,y=%s,z=%s,dx=%s,dy=%s,dz=%s]".formatted(x, y, z, dx, dy, dz)
 		);
 		try {
 			EntitySelector entitySelector = EntityArgument.entities().parse(entitySelectorStringReader);
-			CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension).withPosition(new Vec3(x, y, z));
+			CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension, new Vec3(x, y, z));
 			List<? extends Entity> entityList = entitySelector.findEntities(cmdSrc);
 
 			JsonArray returnList = new JsonArray();
@@ -196,20 +177,20 @@ public class EntitiesHandler extends HandlerBase {
 
 		ServerLevel level = getServerLevel(dimension);
 
-		List<String> entityUUIDToBeRemoved;
-
 		JsonArray returnValues = new JsonArray();
 
-		JsonArray jsonListUUID;
-		try {
-			jsonListUUID = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-		} catch (JsonSyntaxException jsonSyntaxException) {
-			throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-		}
-		entityUUIDToBeRemoved = Arrays.asList(new Gson().fromJson(jsonListUUID, String[].class));
+		JsonArray jsonListUUID = parseJsonArray(requestBody);
 
-		for (String stringUUID : entityUUIDToBeRemoved) {
-			if (stringUUID.length() == 0) {
+		for (JsonElement jsonElement : jsonListUUID) {
+			String stringUUID;
+			try {
+				stringUUID = jsonElement.getAsString();
+			} catch (UnsupportedOperationException | IllegalStateException e) {
+				returnValues.add(instructionStatus(false, "Invalid UUID"));
+				continue;
+			}
+			if (stringUUID.isBlank()) {
+				returnValues.add(instructionStatus(false, "Invalid UUID"));
 				continue;
 			}
 			Entity entityToBeRemoved;
@@ -244,18 +225,14 @@ public class EntitiesHandler extends HandlerBase {
 
 		JsonArray returnValues = new JsonArray();
 
-		JsonArray jsonList;
-		try {
-			jsonList = JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
-		} catch (JsonSyntaxException jsonSyntaxException) {
-			throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
-		}
+		JsonArray jsonList = parseJsonArray(requestBody);
+
 		for (JsonElement entityDescription : jsonList) {
-			JsonObject json = entityDescription.getAsJsonObject();
 			PatchEntityInstruction patchEntityInstruction;
 			try {
+				JsonObject json = entityDescription.getAsJsonObject();
 				patchEntityInstruction = new PatchEntityInstruction(json);
-			} catch (IllegalArgumentException | CommandSyntaxException | UnsupportedOperationException e) {
+			} catch (IllegalStateException | UnsupportedOperationException | NullPointerException | IllegalArgumentException | CommandSyntaxException e) {
 				returnValues.add(instructionStatus(false, e.getMessage()));
 				continue;
 			}
@@ -276,11 +253,11 @@ public class EntitiesHandler extends HandlerBase {
 
 	private final static class SummonEntityInstruction {
 
-		private ResourceLocation entityResourceLocation;
-		private Vec3 entityPosition;
+		private final ResourceLocation entityResourceLocation;
+		private final Vec3 entityPosition;
 		private CompoundTag entityData;
 
-		SummonEntityInstruction(JsonObject summonInstructionInput, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
+		SummonEntityInstruction(JsonObject summonInstructionInput, CommandSourceStack commandSourceStack) throws CommandSyntaxException, IllegalStateException, UnsupportedOperationException {
 			String positionArgumentString = "";
 			if (summonInstructionInput.has("x") && summonInstructionInput.has("y") && summonInstructionInput.has("z")) {
 				positionArgumentString = summonInstructionInput.get("x").getAsString() + " " + summonInstructionInput.get("y").getAsString() + " " + summonInstructionInput.get("z").getAsString();
@@ -288,20 +265,16 @@ public class EntitiesHandler extends HandlerBase {
 			String entityIDString = summonInstructionInput.has("id") ? summonInstructionInput.get("id").getAsString() : "";
 			String entityDataString = summonInstructionInput.has("data") ? summonInstructionInput.get("data").getAsString() : "";
 
-			parse(positionArgumentString + " " + entityIDString + " " + entityDataString, commandSourceStack);
-		}
-
-		private void parse(String inputData, CommandSourceStack commandSourceStack) throws CommandSyntaxException {
-			StringReader sr = new StringReader(inputData);
+			StringReader sr = new StringReader(positionArgumentString + " " + entityIDString + " " + entityDataString);
 
 			entityPosition = Vec3Argument.vec3().parse(sr).getPosition(commandSourceStack);
 			sr.skip();
 
-			entityResourceLocation = EntitySummonArgument.id().parse(sr);
+			entityResourceLocation = ResourceLocationArgument.id().parse(sr);
 			sr.skip();
 
 			try {
-				String entityDataString = sr.getRemaining();
+				entityDataString = sr.getRemaining();
 				if (entityDataString.isBlank()) {
 					entityDataString = "{}";
 				}
@@ -309,10 +282,16 @@ public class EntitiesHandler extends HandlerBase {
 			} catch (StringIndexOutOfBoundsException e) {
 				entityData = new CompoundTag();
 			}
+
 		}
 
 		public JsonObject summon(ServerLevel level) {
-			if (!Level.isInSpawnableBounds(new BlockPos(entityPosition))) {
+
+			if (!Level.isInSpawnableBounds(new BlockPos(
+				(int)entityPosition.x,
+				(int)entityPosition.y,
+				(int)entityPosition.z
+			))) {
 				return instructionStatus(false, "Position is not in spawnable bounds");
 			}
 
@@ -344,7 +323,7 @@ public class EntitiesHandler extends HandlerBase {
 		private final UUID uuid;
 		private final CompoundTag patchData;
 
-		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException, UnsupportedOperationException {
+		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException, UnsupportedOperationException, NullPointerException {
 			uuid = UUID.fromString(inputData.get("uuid").getAsString());
 			patchData = TagParser.parseTag(inputData.get("data").getAsString());
 		}
@@ -358,7 +337,7 @@ public class EntitiesHandler extends HandlerBase {
 				return false;
 			}
 
-			CompoundTag patchedData = TagMerger.merge(entity.serializeNBT(), patchData);
+			CompoundTag patchedData = TagUtils.mergeTags(entity.serializeNBT(), patchData);
 			if (entity.serializeNBT().equals(patchedData)) {
 				return false;
 			}

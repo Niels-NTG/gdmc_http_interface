@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.handlers;
+package nl.nielspoldervaart.gdmc.handlers;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -17,11 +17,6 @@ import java.util.List;
 import java.util.Map;
 
 public class PlayersHandler extends HandlerBase {
-    private String playerSelectorString;
-
-    private boolean includeData;
-
-    private String dimension;
 
     public PlayersHandler(MinecraftServer mcServer) {
         super(mcServer);
@@ -40,7 +35,17 @@ public class PlayersHandler extends HandlerBase {
         // Query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
 
-        // Check if they want all data included
+        // GET: Search players using a Target Selector (https://minecraft.wiki/w/Target_selectors).
+        // Defaults to "@a" (find all players).
+        String playerSelectorString;
+
+        // GET: Whether to include entity data https://minecraft.wiki/w/Entity_format#Entity_Format
+        boolean includeData;
+
+        // GET: Search for players within a specific dimension. Only works if selector string contains
+        // position arguments.
+        String dimension;
+
         try {
             playerSelectorString = queryParams.getOrDefault("selector", "@a");
 

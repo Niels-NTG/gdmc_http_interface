@@ -12,7 +12,7 @@
                 "id": {
                     "type": "string",
                     "title": "Block ID",
-                    "description": "Any namespaced block ID",
+                    "description": "Any namespaced block ID (https://minecraft.wiki/w/Java_Edition_data_values#Blocks)",
                     "examples": [
                         "minecraft:stone",
                         "minecraft:clay",
@@ -31,7 +31,7 @@
                 "state": {
                     "type": "object",
                     "title": "Block State",
-                    "description": "Object containing block state (http://minecraft.wiki/w/Block_states) information",
+                    "description": "Object containing block state (https://minecraft.wiki/w/Block_states) information",
                     "examples": [
                         {
                             "facing": "east",
@@ -43,7 +43,7 @@
                 "data": {
                     "type": "string",
                     "title": "Block Entity Data",
-                    "description": "SNBT-formatted string (http://minecraft.wiki/w/NBT_format#SNBT_format) containing block entity data (http://minecraft.wiki/w/Chunk_format#Block_entity_format) information",
+                    "description": "SNBT-formatted string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing block entity data (https://minecraft.wiki/w/Chunk_format#Block_entity_format) information",
                     "examples": [
                         "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
                     ],
@@ -67,7 +67,7 @@
                 },
                 {
                     "type": "string",
-                    "description": "Any negative or positive whole number to represent absolute world coordinates, a relative coordinate (http://minecraft.wiki/w/Coordinates#Relative_world_coordinates) or a local coordinate (http://minecraft.wiki/w/Coordinates#Local_coordinates)",
+                    "description": "Any negative or positive whole number to represent absolute world coordinates, a relative coordinate (https://minecraft.wiki/w/Coordinates#Relative_world_coordinates) or a local coordinate (https://minecraft.wiki/w/Coordinates#Local_coordinates)",
                     "examples": [
                         "-2",
                         "~84",
@@ -76,7 +76,7 @@
                 }
             ],
             "title": "Position Axis",
-            "description": "Describe x/y/z placement position for block. If omitted, axis value defaults to the corresponding axis in the request URL."
+            "description": "Describe x/y/z placement position for block. If omitted, axis value defaults to the corresponding axis in the request URL. Each block position in the array of BlockPlacementInstructionElements should be unique."
         }
     }
 }

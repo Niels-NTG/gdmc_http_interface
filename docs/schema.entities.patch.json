@@ -12,12 +12,12 @@
 				"uuid": {
                     "type": "string",
                     "title": "UUID",
-                    "description": "Universally unique identifier (http://minecraft.wiki/w/Universally_unique_identifier) of an entity in the world"
+                    "description": "Universally unique identifier (https://minecraft.wiki/w/Universally_unique_identifier) of an entity in the world"
                 },
 				"data": {
 					"type": "string",
                     "title": "Entity Data",
-                    "description": "SNBT-formatted string (http://minecraft.wiki/w/NBT_format#SNBT_format) containing entity data (http://minecraft.wiki/w/Entity_format#Entity_Format) information that should be changed",
+                    "description": "SNBT-formatted string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing entity data (https://minecraft.wiki/w/Entity_format#Entity_Format) information that should be changed",
                     "examples": [
 					  "{variant:\"minecraft:red\",hasVisualFire:true,Invulnerable:true}"
                     ]

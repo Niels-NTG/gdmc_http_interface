@@ -1,11 +1,14 @@
-package com.gdmc.httpinterfacemod.handlers;
+package nl.nielspoldervaart.gdmc.handlers;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -15,14 +18,18 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import nl.nielspoldervaart.gdmc.utils.CustomCommandSource;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
@@ -33,8 +40,8 @@ import java.util.Map;
 public abstract class HandlerBase implements HttpHandler {
 
     public static class HttpException extends RuntimeException {
-        public final String message;
-        public final int statusCode;
+        private final String message;
+        private final int statusCode;
         public HttpException(String message, int statusCode) {
             this.message = message;
             this.statusCode = statusCode;
@@ -127,7 +134,7 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static String getHeader(Headers headers, String key, String defaultValue) {
         List<String> list = headers.get(key);
-        if(list == null || list.size() == 0) {
+        if(list == null || list.isEmpty()) {
             return defaultValue;
         }
         return list.get(0);
@@ -214,21 +221,39 @@ public abstract class HandlerBase implements HttpHandler {
                     result.put(URLDecoder.decode(qs.substring(last, eqPos), StandardCharsets.UTF_8), URLDecoder.decode(qs.substring(eqPos + 1, next), StandardCharsets.UTF_8));
                 }
             }
-            last = next + 1;
+        last = next + 1;
         }
         return result;
+    }
+
+    protected static JsonArray parseJsonArray(InputStream requestBody) {
+        try {
+            return JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonArray();
+        } catch (JsonSyntaxException | IllegalStateException jsonSyntaxException) {
+            throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
+        }
     }
 
     protected static JsonObject instructionStatus(boolean isSuccess) {
         return instructionStatus(isSuccess, null);
     }
     protected static JsonObject instructionStatus(boolean isSuccess, String message) {
+        return instructionStatus(isSuccess ? 1 : 0, message);
+    }
+    protected static JsonObject instructionStatus(int status, String message) {
         JsonObject json = new JsonObject();
-        json.addProperty("status", isSuccess ? 1 : 0);
+        json.addProperty("status", status);
         if (message != null) {
             json.addProperty("message", message);
         }
         return json;
+    }
+
+    protected static BoundingBox createBoundingBox(int x, int y, int z, int dx, int dy, int dz) {
+        return BoundingBox.fromCorners(
+            new Vec3i(x, y, z),
+            new Vec3i(x + dx, y + dy, z + dz)
+        );
     }
 
     protected CommandSourceStack createCommandSource(String name, String dimension) {
@@ -246,25 +271,8 @@ public abstract class HandlerBase implements HttpHandler {
      * @return              An instance of {@link CommandSourceStack}.
      */
     protected CommandSourceStack createCommandSource(String name, String dimension, Vec3 pos) {
-        CommandSource commandSource = new CommandSource() {
-            @Override
-            public void sendSystemMessage(Component p_230797_) {}
 
-            @Override
-            public boolean acceptsSuccess() {
-                return false;
-            }
-
-            @Override
-            public boolean acceptsFailure() {
-                return false;
-            }
-
-            @Override
-            public boolean shouldInformAdmins() {
-                return false;
-            }
-        };
+        CustomCommandSource commandSource = new CustomCommandSource();
 
         return new CommandSourceStack(
             commandSource,
@@ -273,10 +281,14 @@ public abstract class HandlerBase implements HttpHandler {
             this.getServerLevel(dimension),
             4,
             name,
-            Component.nullToEmpty(name),
+            Component.literal(name),
             mcServer,
             null
         );
+    }
+
+    protected CustomCommandSource getCustomCommandSource(CommandSourceStack commandSourceStack) {
+        return (CustomCommandSource) commandSourceStack.source;
     }
 
     /**

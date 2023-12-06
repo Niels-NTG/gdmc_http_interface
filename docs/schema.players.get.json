@@ -21,7 +21,7 @@
         "data": {
           "type": "string",
           "title": "Player Data",
-          "description": "SNBT string (http://minecraft.wiki/w/NBT_format#SNBT_format) containing player data (http://minecraft.wiki/w/Player.dat_format#NBT_structure) information. This is only included if URL parameter `includeData=true` is present. Example data is truncated, real player data is often much bigger.",
+          "description": "SNBT string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing player data (https://minecraft.wiki/w/Player.dat_format#NBT_structure) information. This is only included if URL parameter `includeData=true` is present. Example data is truncated, real player data is often much bigger.",
           "examples": [
             "{AbsorptionAmount:0.0f,Air:300s,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.10000000149011612d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"}],Brain:{memories:{}}..."
           ]

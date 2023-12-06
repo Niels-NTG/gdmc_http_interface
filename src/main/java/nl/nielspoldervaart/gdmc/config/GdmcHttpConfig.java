@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.config;
+package nl.nielspoldervaart.gdmc.config;
 
 import net.minecraftforge.common.ForgeConfigSpec;
 

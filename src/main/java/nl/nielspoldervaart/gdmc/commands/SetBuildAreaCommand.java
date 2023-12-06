@@ -1,6 +1,5 @@
-package com.gdmc.httpinterfacemod.commands;
+package nl.nielspoldervaart.gdmc.commands;
 
-import com.gdmc.httpinterfacemod.handlers.BuildAreaHandler;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.Commands;
@@ -8,13 +7,12 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.Component;
+import nl.nielspoldervaart.gdmc.utils.BuildArea;
+import nl.nielspoldervaart.gdmc.utils.Feedback;
 
 public final class SetBuildAreaCommand {
 
     private static final String COMMAND_NAME = "setbuildarea";
-
-    private SetBuildAreaCommand() { }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(COMMAND_NAME)
@@ -31,15 +29,22 @@ public final class SetBuildAreaCommand {
     }
 
     private static int unsetBuildArea(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
-        BuildAreaHandler.unsetBuildArea();
-        commandSourceStackCommandContext.getSource().sendSuccess(Component.nullToEmpty("Build area unset"), true);
+        BuildArea.unsetBuildArea();
+        commandSourceStackCommandContext.getSource().sendSuccess(() -> Feedback.chatMessage("Build area unset"), true);
         return 1;
     }
 
     private static int setBuildArea(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
-        BuildAreaHandler.setBuildArea(from, to);
-        String feedback = String.format("Build area set to %s to %s", from.toShortString(), to.toShortString());
-        commandSourceContext.getSource().sendSuccess(Component.nullToEmpty(feedback), true);
+        BuildArea.BuildAreaInstance newBuildArea = BuildArea.setBuildArea(from, to);
+        commandSourceContext.getSource().sendSuccess(() ->
+            Feedback.chatMessage("Build area set ").append(
+                Feedback.copyOnClickText(
+                    String.format("from %s to %s", newBuildArea.from.toShortString(), newBuildArea.to.toShortString()),
+                    BuildArea.toJSONString()
+                )
+            ),
+            true
+        );
         return 1;
     }
 }

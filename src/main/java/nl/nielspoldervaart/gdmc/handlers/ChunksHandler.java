@@ -1,4 +1,4 @@
-package com.gdmc.httpinterfacemod.handlers;
+package nl.nielspoldervaart.gdmc.handlers;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -7,24 +7,32 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.levelgen.structure.BoundingBox;
+import nl.nielspoldervaart.gdmc.utils.BuildArea;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.zip.GZIPOutputStream;
 
-public class ChunkHandler extends HandlerBase {
+public class ChunksHandler extends HandlerBase {
 
-    public ChunkHandler(MinecraftServer mcServer) {
+    public ChunksHandler(MinecraftServer mcServer) {
         super(mcServer);
     }
 
     @Override
     public void internalHandle(HttpExchange httpExchange) throws IOException {
+
+        String method = httpExchange.getRequestMethod().toLowerCase();
+        if(!method.equals("get")) {
+            throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
+        }
 
         // query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
@@ -37,24 +45,44 @@ public class ChunkHandler extends HandlerBase {
         int chunkDX;
         int chunkDZ;
 
+        // GET: if true, constrain getting biomes within the current build area.
+        boolean withinBuildArea;
+
         String dimension;
 
-        try {
-            chunkX = Integer.parseInt(queryParams.getOrDefault("x", "0"));
-            chunkZ = Integer.parseInt(queryParams.getOrDefault("z", "0"));
+        BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
 
-            chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
-            chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
+        try {
+            if (queryParams.get("x") == null && buildArea != null) {
+                chunkX = buildArea.sectionFrom.x;
+            } else {
+                chunkX = Integer.parseInt(queryParams.getOrDefault("x", "0"));
+            }
+
+            if (queryParams.get("z") == null && buildArea != null) {
+                chunkZ = buildArea.sectionFrom.z;
+            } else {
+                chunkZ = Integer.parseInt(queryParams.getOrDefault("z", "0"));
+            }
+
+            if (queryParams.get("dx") == null && buildArea != null) {
+                chunkDX = buildArea.sectionTo.x - buildArea.sectionFrom.x;
+            } else {
+                chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1")) - 1;
+            }
+
+            if (queryParams.get("dz") == null && buildArea != null) {
+                chunkDZ = buildArea.sectionTo.z - buildArea.sectionFrom.z;
+            } else {
+                chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1")) - 1;
+            }
+
+            withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
 
             dimension = queryParams.getOrDefault("dimension", null);
         } catch (NumberFormatException e) {
             String message = "Could not parse query parameter: " + e.getMessage();
             throw new HttpException(message, 400);
-        }
-
-        String method = httpExchange.getRequestMethod().toLowerCase();
-        if(!method.equals("get")) {
-            throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
         }
 
         // Check if clients wants a response in plain-text. If not, return response
@@ -71,33 +99,32 @@ public class ChunkHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         // Gather all chunk data within the given range.
-        CompletableFuture<ListTag> cfs = CompletableFuture.supplyAsync(() -> {
-            int xOffset = chunkX + chunkDX;
-            int xMin = Math.min(chunkX, xOffset);
-            int xMax = Math.max(chunkX, xOffset);
+        // Constrain start and end position to that of the build area if withinBuildArea is true.
+        BoundingBox box = BuildArea.clampChunksToBuildArea(createBoundingBox(
+            chunkX, 0, chunkZ,
+            chunkDX, 0, chunkDZ
+        ), withinBuildArea);
 
-            int zOffset = chunkZ + chunkDZ;
-            int zMin = Math.min(chunkZ, zOffset);
-            int zMax = Math.max(chunkZ, zOffset);
-            ListTag returnList = new ListTag();
-            for (int rangeZ = zMin; rangeZ < zMax; rangeZ++)
-                for (int rangeX = xMin; rangeX < xMax; rangeX++) {
-                    LevelChunk chunk = serverLevel.getChunk(rangeX, rangeZ);
-                    CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
-                    returnList.add(chunkNBT);
-                }
-            return returnList;
-        }, mcServer);
-
-        // block this thread until the above code has run on the main thread
-        ListTag chunkList = cfs.join();
+        LinkedHashMap<ChunkPos, CompoundTag> chunkMap = new LinkedHashMap<>();
+        for (int rangeZ = box.minZ(); rangeZ <= box.maxZ(); rangeZ++) {
+            for (int rangeX = box.minX(); rangeX <= box.maxX(); rangeX++) {
+                chunkMap.put(new ChunkPos(rangeX, rangeZ), null);
+            }
+        }
+        chunkMap.keySet().parallelStream().forEach(chunkPos -> {
+            LevelChunk chunk = serverLevel.getChunk(chunkPos.x, chunkPos.z);
+            CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
+            chunkMap.replace(chunkPos, chunkNBT);
+        });
+        ListTag chunkList = new ListTag();
+        chunkList.addAll(chunkMap.values());
 
         CompoundTag bodyNBT = new CompoundTag();
         bodyNBT.put("Chunks", chunkList);
-        bodyNBT.putInt("ChunkX", chunkX);
-        bodyNBT.putInt("ChunkZ", chunkZ);
-        bodyNBT.putInt("ChunkDX", chunkDX);
-        bodyNBT.putInt("ChunkDZ", chunkDZ);
+        bodyNBT.putInt("ChunkX", box.minX());
+        bodyNBT.putInt("ChunkZ", box.minZ());
+        bodyNBT.putInt("ChunkDX", (box.maxX() - box.minX()) + 1);
+        bodyNBT.putInt("ChunkDZ", (box.maxZ() - box.minZ()) + 1);
 
         // Response header and response body
         Headers responseHeaders = httpExchange.getResponseHeaders();

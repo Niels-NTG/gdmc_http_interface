@@ -17,7 +17,7 @@
                 "data": {
                     "type": "string",
                     "title": "Entity Data",
-                    "description": "SNBT string (http://minecraft.wiki/w/NBT_format#SNBT_format) containing entity data (http://minecraft.wiki/w/Entity_format#Entity_Format) information. This is only included if URL parameter `includeData=true` is present. Example data is truncated, real entity data is often much bigger.",
+                    "description": "SNBT string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing entity data (https://minecraft.wiki/w/Entity_format#Entity_Format) information. This is only included if URL parameter `includeData=true` is present. Example data is truncated, real entity data is often much bigger.",
                     "examples": [
                         "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}]}",
                         "{OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-16.675752318023665d,1.0d,-13.779639264516527d],RestocksToday:0,Rotation:[324.41544f,0.0f]}"

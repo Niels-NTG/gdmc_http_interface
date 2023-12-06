@@ -1,13 +1,16 @@
-package com.gdmc.httpinterfacemod.handlers;
+package nl.nielspoldervaart.gdmc.handlers;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.Vec3;
+import nl.nielspoldervaart.gdmc.utils.ChatComponentDataExtractor;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +18,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public class CommandHandler extends HandlerBase {
 
@@ -51,24 +53,10 @@ public class CommandHandler extends HandlerBase {
 
         JsonArray returnValues = new JsonArray();
         for (String command: commands) {
-            if (command.length() == 0) {
+            if (command.isBlank()) {
                 continue;
             }
-            // requests to run the actual command execution on the main thread
-            CompletableFuture<JsonObject> cfs = CompletableFuture.supplyAsync(() -> {
-                try {
-                    int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
-                    return instructionStatus(
-                        commandStatus != 0,
-                        commandStatus != 1 && commandStatus != 0 ? String.valueOf(commandStatus) : null
-                    );
-                } catch (CommandSyntaxException e) {
-                    return instructionStatus(false, e.getMessage());
-                }
-            }, mcServer);
-
-            // block this thread until the above code has run on the main thread
-            returnValues.add(cfs.join());
+            returnValues.add(executeCommand(command, cmdSrc));
         }
 
         // Response headers
@@ -77,5 +65,25 @@ public class CommandHandler extends HandlerBase {
 
         // body
         resolveRequest(httpExchange, returnValues.toString());
+    }
+
+    private JsonObject executeCommand(String command, CommandSourceStack cmdSrc) {
+	    try {
+		    int commandStatus = mcServer.getCommands().getDispatcher().execute(command, cmdSrc);
+		    MutableComponent lastCommandResult = getCustomCommandSource(cmdSrc).getLastOutput();
+		    JsonObject json = instructionStatus(
+			    commandStatus != 0,
+			    lastCommandResult != null ? lastCommandResult.getString() : null
+		    );
+		    if (lastCommandResult != null) {
+			    JsonElement data = ChatComponentDataExtractor.toJsonTree(lastCommandResult);
+			    if (!data.getAsJsonObject().isEmpty()) {
+				    json.add("data", data);
+			    }
+		    }
+		    return json;
+	    } catch (CommandSyntaxException e) {
+		    return instructionStatus(false, e.getMessage());
+	    }
     }
 }
