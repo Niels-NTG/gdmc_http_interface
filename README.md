@@ -19,14 +19,18 @@ Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#A
 ## Installation
 
 1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
-2. Get the Forge Mod Installer and navigate to your version of Minecraft that is supported by this mod (1.20.2, 1.19.2 or 1.16.5). In the "Download Recommended" section click "Installer" to download. Open the downloaded file to install this version of Forge. Here are some troubleshooting resources If you have trouble opening this jar file:
-    - [macOS](https://discussions.apple.com/thread/252960079)
-    - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
-3. Download this mod's jar file from [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and move it in the mod folder:
+2. Get the [Forge Mod Installer](https://files.minecraftforge.net/net/minecraftforge/forge/) and navigate to your version of Minecraft that is supported by this mod (1.20.2, 1.19.2 or 1.16.5).
+    - For Minecraft 1.20.2, download the installer for Forge with version number 1.20.2-48.0.49, found under the "Show all Versions" section [here](https://files.minecraftforge.net/net/minecraftforge/forge/index_1.20.2.html).
+    - For Minecraft 1.19.2 or 1.16.5, navigate to "Download Recommended" section click "Installer" to download.
+3. Open the downloaded file to install this version of Forge.
+    - Here are some troubleshooting resources If you have trouble opening this jar file:
+        - [macOS](https://discussions.apple.com/thread/252960079)
+        - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
+4. Download this mod's jar file from [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and move it in the mod folder:
     - On Windows: `%APPDATA%/.minecraft/mods`.
     - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
     - On Linux desktop: `~/.minecraft/mods`
-4. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Forge installation in the list.
+5. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Forge installation in the list.
 
 ## Usage
 
