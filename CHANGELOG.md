@@ -1,3 +1,7 @@
+# GDMC-HTTP 1.4.1 (Minecraft 1.20.2)
+
+- FIX: Upgrade to Forge 1.20.2-48.1.0
+
 # GDMC-HTTP 1.4.0 (Minecraft 1.20.2)
 
 TL;DR:
