@@ -43,6 +43,12 @@ TL;DR:
 
 [^1]: Tested using an AMD Ryzen 3600 6-core CPU. Actual performance gains may vary depending on the amount of available CPU threads
 
+# GDMC-HTTP 1.3.3 (Minecraft 1.19.2)
+
+- NEW: Add logo designed by [Blinkenlights](https://github.com/Flashing-Blinkenlights).
+- FIX: Improved documentation.
+- FIX: Replace links to Minecraft wiki the new domain (https://minecraft.wiki/).
+
 # GDMC-HTTP 1.3.2 (Minecraft 1.19.2)
 
 - NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.wiki/w/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!

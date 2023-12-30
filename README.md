@@ -11,7 +11,7 @@ This is designed as a tool for the [Generative Design in Minecraft Competition (
 | Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                          |
 |-------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|
 | 1.20.2            | 📦 [GDMC-HTTP 1.4.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.4.2)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.4.2/docs/Endpoints.md) |
-| 1.19.2            | 📦 [GDMC-HTTP 1.3.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.3.2)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.3.2/docs/Endpoints.md) |
+| 1.19.2            | 📦 [GDMC-HTTP 1.3.3](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.3.3)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.3.3/docs/Endpoints.md) |
 | 1.16.5            | 📦 [GDMC-HTTP 0.4.2](https://github.com/nikigawlik/gdmc_http_interface/releases/tag/v0.4.2) | 📒 [API Docs](https://github.com/nikigawlik/gdmc_http_interface/wiki)                         |
 
 Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#Acknowledgements)
