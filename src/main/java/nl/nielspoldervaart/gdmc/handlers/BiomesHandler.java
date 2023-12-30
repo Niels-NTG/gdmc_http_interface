@@ -77,13 +77,7 @@ public class BiomesHandler extends HandlerBase {
 		ServerLevel serverLevel = getServerLevel(dimension);
 
 		// Calculate boundaries of area of blocks to gather biome information on.
-		BoundingBox box;
-		try {
-			box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
-		} catch (HttpException e) {
-			resolveRequest(httpExchange, responseList.toString());
-			return;
-		}
+		BoundingBox box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
 
 		// Create an ordered map with an entry for every block position we want to know the biome of.
 		LinkedHashMap<BlockPos, JsonObject> blockPosMap = new LinkedHashMap<>();
