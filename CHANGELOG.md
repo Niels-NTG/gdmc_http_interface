@@ -1,3 +1,9 @@
+# GDMC-HTTP 1.4.2 (Minecraft 1.20.2)
+
+- FIX: `GET /biomes` do not return entries for positions beyond the world's build height range.
+- FIX: Respond with `404` status when `GET /biomes` has the `withinBuildArea=true` flag while no build area has been set using the `/setbuildarea` command.
+- FIX: Respond with `404` status when `GET /blocks` has the `withinBuildArea=true` flag while no build area has been set using the `/setbuildarea` command.
+
 # GDMC-HTTP 1.4.1 (Minecraft 1.20.2)
 
 - FIX: Upgrade to Forge 1.20.2-48.1.0
