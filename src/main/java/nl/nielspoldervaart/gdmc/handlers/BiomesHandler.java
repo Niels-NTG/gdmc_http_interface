@@ -103,22 +103,22 @@ public class BiomesHandler extends HandlerBase {
 			LevelChunk levelChunk = chunkPosMap.get(new ChunkPos(blockPos));
 			Optional<ResourceKey<Biome>> biomeResourceKey = levelChunk.getNoiseBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ()).unwrapKey();
 			if (biomeResourceKey.isPresent()) {
-				String biomeName = "";
 				if (!serverLevel.isOutsideBuildHeight(blockPos)) {
-					biomeName = biomeResourceKey.get().location().toString();
+					JsonObject json = new JsonObject();
+					json.addProperty("id", biomeResourceKey.get().location().toString());
+					json.addProperty("x", blockPos.getX());
+					json.addProperty("y", blockPos.getY());
+					json.addProperty("z", blockPos.getZ());
+					blockPosMap.replace(blockPos, json);
 				}
-				JsonObject json = new JsonObject();
-				json.addProperty("id", biomeName);
-				json.addProperty("x", blockPos.getX());
-				json.addProperty("y", blockPos.getY());
-				json.addProperty("z", blockPos.getZ());
-				blockPosMap.replace(blockPos, json);
 			}
 		});
 		// Create a JsonArray with JsonObject, each contain a key-value pair for
 		// the x, y, z position and the namespaced biome name.
 		for (JsonObject biomeJson : blockPosMap.values()) {
-			responseList.add(biomeJson);
+			if (biomeJson != null) {
+				responseList.add(biomeJson);
+			}
 		}
 
 		resolveRequest(httpExchange, responseList.toString());
