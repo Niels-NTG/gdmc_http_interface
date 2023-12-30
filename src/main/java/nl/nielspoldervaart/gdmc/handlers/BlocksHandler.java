@@ -273,13 +273,7 @@ public class BlocksHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         // Calculate boundaries of area of blocks to gather information on.
-        BoundingBox box;
-        try {
-            box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
-        } catch (HttpException e) {
-            // Return empty list if entire requested area is outside of build area (if withinBuildArea is true).
-            return jsonArray;
-        }
+        BoundingBox box = BuildArea.clampToBuildArea(createBoundingBox(x, y, z, dx, dy, dz), withinBuildArea);
 
         // Create ordered map to store information for each position within the given area,
         // as well as a map containing the chunks of this area that this block information
