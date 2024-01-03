@@ -1,5 +1,6 @@
 package nl.nielspoldervaart.gdmc.handlers;
 
+import net.minecraft.SharedConstants;
 import nl.nielspoldervaart.gdmc.GdmcHttpMod;
 import com.google.gson.JsonObject;
 import com.sun.net.httpserver.Headers;
@@ -27,7 +28,11 @@ public class InterfaceInfoHandler extends HandlerBase {
 		setDefaultResponseHeaders(responseHeaders);
 
 		JsonObject json = new JsonObject();
-		json.addProperty("minecraftVersion", mcServer.getServerVersion());
+		json.addProperty("minecraftVersion", SharedConstants.getCurrentVersion().getName());
+		// Return DataVersion (https://minecraft.wiki/w/Data_version) of current Minecraft version.
+		// Beware that the current server world might be created in an older version of Minecraft and
+		// hence might have a different DataVersion.
+		json.addProperty(SharedConstants.DATA_VERSION_TAG, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
 		Optional<String> modVersion = JarVersionLookupHandler.getImplementationVersion(GdmcHttpMod.class);
 		if (modVersion.isPresent()) {
 			json.addProperty("interfaceVersion", modVersion.get());

@@ -1086,12 +1086,12 @@ Plain-text response with the Minecraft version number.
 
 `GET /version` returns:
 ```
-1.19.2
+1.20.2
 ```
 
 # Read HTTP interface information `OPTIONS /`
 
-Get the information about GDMC HTTP itself.
+Get the information about your instance of GDMC-HTTP and Minecraft.
 
 ## URL parameters
 
@@ -1112,14 +1112,16 @@ N/A
 ## Response body
 
 JSON object containing the following:
-- `minecraftVersion`
-- `interfaceVersion`
+- `minecraftVersion`: String version number of the currently running version of Minecraft
+- `DataVersion`: Integer version number of the [Data Version](https://minecraft.wiki/w/Data_version) of the currently running version of Minecraft.
+- `interfaceVersion`: String version of the currently loaded version of GDMC-HTTP
 
 ## Example
 
 ```json
 {
-  "minecraftVersion": "1.19.2",
-  "interfaceVersion": "1.1.0"
+  "minecraftVersion": "1.20.2",
+  "DataVersion": 3578,
+  "interfaceVersion": "1.4.3"
 }
 ```
