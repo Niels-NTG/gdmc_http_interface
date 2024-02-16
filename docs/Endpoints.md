@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.4.2 (Minecraft 1.20.2)
+# Endpoints GDMC-HTTP 1.4.3 (Minecraft 1.20.2)
 
 [TOC]
 

@@ -1,3 +1,8 @@
+# GDMC-HTTP 1.4.3 (Minecraft 1.20.2)
+
+- FIX: `OPTIONS /` now also returns the [`DataVersion`](https://minecraft.wiki/w/Data_version) field.
+- FIX: Expanded and updated documentation.
+
 # GDMC-HTTP 1.4.2 (Minecraft 1.20.2)
 
 - FIX: `GET /biomes` do not return entries for positions beyond the world's build height range.
