@@ -547,7 +547,6 @@ Table below only applies if the request header `Accept: application/octet-stream
 
 | key                         | value                      | description                                                                                   |
 |-----------------------------|----------------------------|-----------------------------------------------------------------------------------------------|
-| Access-Control-Allow-Origin | `*`                        |                                                                                               |
 | Content-Disposition         | `attachment`               | Allows some clients automatically treat the output as a file instead of displaying it inline. |
 | Content-Type                | `application/octet-stream` |                                                                                               |
 | Content-Encoding            | `gzip`                     | Only if same `Accept-Encoding: gzip` was present in the request header.                       |
@@ -619,7 +618,6 @@ Table below only applies if the request header `Accept: application/octet-stream
 
 | key                         | value                      | description                                                                               |
 |-----------------------------|----------------------------|-------------------------------------------------------------------------------------------|
-| Access-Control-Allow-Origin | `*`                        |                                                                                           |
 | Content-Disposition         | `attachment`               | Allows some clients automatically treat output as a file instead of displaying it inline. |
 | Content-Type                | `application/octet-stream` |                                                                                           |
 | Content-Encoding            | `gzip`                     | Only if request header has `Accept-Encoding: gzip`.                                       |
@@ -956,11 +954,7 @@ N/A
 
 ## Response headers
 
-| key                         | value                             | description |
-|-----------------------------|-----------------------------------|-------------|
-| Access-Control-Allow-Origin | `*`                               |             |
-| Content-Disposition         | `inline`                          |             |
-| Content-Type                | `application/json; charset=UTF-8` |             |
+[Default](#Response-headers)
 
 ## Response body
 
