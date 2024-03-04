@@ -47,20 +47,20 @@ public class CustomHeightmap {
 		return customHeightmap;
 	}
 
-	private void setHeight(int p_64246_, int p_64247_, int p_64248_) {
-		this.data.set(getIndex(p_64246_, p_64247_), p_64248_ - this.chunk.getMinBuildHeight());
+	private void setHeight(int x, int z, int y) {
+		this.data.set(getIndex(x, z), y - this.chunk.getMinBuildHeight());
 	}
 
-	public int getFirstAvailable(int p_64243_, int p_64244_) {
-		return this.getFirstAvailable(getIndex(p_64243_, p_64244_));
+	public int getFirstAvailable(int x, int z) {
+		return this.getFirstAvailable(getIndex(x, z));
 	}
 
-	private int getFirstAvailable(int p_64241_) {
-		return this.data.get(p_64241_) + this.chunk.getMinBuildHeight();
+	private int getFirstAvailable(int index) {
+		return this.data.get(index) + this.chunk.getMinBuildHeight();
 	}
 
-	private static int getIndex(int p_64266_, int p_64267_) {
-		return p_64266_ + p_64267_ * 16;
+	private static int getIndex(int x, int z) {
+		return x + z * 16;
 	}
 
 	private static final Predicate<BlockState> NO_PLANTS = blockState ->
