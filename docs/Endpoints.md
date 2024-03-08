@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.4.3 (Minecraft 1.20.2)
+# Endpoints GDMC-HTTP 1.4.4 (Minecraft 1.20.2)
 
 [TOC]
 
@@ -566,7 +566,7 @@ Response should be encoded as an [NBT](https://minecraft.wiki/w/NBT_format) or [
 Get a single chunk at position x=0, z=8 in the Nether with the request `GET /chunks?x=0&z=8&dimension=nether` with the header `Accept: text/plain` to get something that is human-readable:
 
 ```
-{ChunkDX:1,ChunkDZ:1,ChunkX:0,ChunkZ:8,Chunks:[{DataVersion:3120,Heightmaps:{MOTION_BLOCKING:[L;2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L, ...
+{ChunkDX:1,ChunkDZ:1,ChunkX:0,ChunkZ:8,Chunks:[{DataVersion:3578,Heightmaps:{MOTION_BLOCKING:[L;2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L, ...
 ```
 
 # Create NBT structure file `GET /structure`

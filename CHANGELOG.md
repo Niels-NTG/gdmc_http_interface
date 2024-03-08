@@ -1,3 +1,9 @@
+# GDMC-HTTP 1.4.4 (Minecraft 1.20.2)
+
+- FIX: Allow `GET /chunks` to be used without having to set a build area.
+- FIX: Off-by-one bugs for block/chunk ranges in request URLs.
+- FIX: Documentation cleanup.
+
 # GDMC-HTTP 1.4.3 (Minecraft 1.20.2)
 
 - FIX: `OPTIONS /` now also returns the [`DataVersion`](https://minecraft.wiki/w/Data_version) field.
