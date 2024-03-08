@@ -250,6 +250,9 @@ public abstract class HandlerBase implements HttpHandler {
     }
 
     protected static BoundingBox createBoundingBox(int x, int y, int z, int dx, int dy, int dz) {
+        dx = dx > 0 ? dx - 1 : dx;
+        dy = dy > 0 ? dy - 1 : dy;
+        dz = dz > 0 ? dz - 1 : dz;
         return BoundingBox.fromCorners(
             new Vec3i(x, y, z),
             new Vec3i(x + dx, y + dy, z + dz)

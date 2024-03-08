@@ -68,13 +68,13 @@ public class ChunksHandler extends HandlerBase {
             if (queryParams.get("dx") == null && buildArea != null) {
                 chunkDX = buildArea.sectionTo.x - buildArea.sectionFrom.x;
             } else {
-                chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1")) - 1;
+                chunkDX = Integer.parseInt(queryParams.getOrDefault("dx", "1"));
             }
 
             if (queryParams.get("dz") == null && buildArea != null) {
                 chunkDZ = buildArea.sectionTo.z - buildArea.sectionFrom.z;
             } else {
-                chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1")) - 1;
+                chunkDZ = Integer.parseInt(queryParams.getOrDefault("dz", "1"));
             }
 
             withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
