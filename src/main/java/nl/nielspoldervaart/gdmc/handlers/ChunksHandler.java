@@ -50,7 +50,10 @@ public class ChunksHandler extends HandlerBase {
 
         String dimension;
 
-        BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
+        BuildArea.BuildAreaInstance buildArea = null;
+        try {
+            buildArea = BuildArea.getBuildArea();
+        } catch (HttpException ignored) {}
 
         try {
             if (queryParams.get("x") == null && buildArea != null) {
