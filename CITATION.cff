@@ -1,0 +1,7 @@
+@software{gdmc_http_interface,
+	author={Poldervaart, Niels and Gawlik, Niki},
+	title={GDMC HTTP Interface Mod},
+	url={https://github.com/Niels-NTG/gdmc_http_interface/},
+	version={1.4.4},
+	year={2024}
+}
