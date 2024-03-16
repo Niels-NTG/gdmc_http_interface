@@ -1,7 +1,33 @@
-@software{gdmc_http_interface,
-    author={Poldervaart, Niels and Gawlik, Niki},
-    title={GDMC HTTP Interface Mod},
-    url={https://github.com/Niels-NTG/gdmc_http_interface/},
-    version={1.4.4},
-    year={2024}
-}
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: GDMC HTTP Interface Mod
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Niels
+    family-names: Poldervaart
+  - given-names: Niki
+    family-names: Gawlik
+repository-code: 'https://github.com/Niels-NTG/gdmc_http_interface/'
+url: 'http://gdmc.nielspoldervaart.nl'
+abstract: >-
+  Minecraft Forge Mod that implements an HTTP interface for
+  reading and writing blocks (and more) with an external
+  program or script. Intended for use in the GDMC
+  competition.
+keywords:
+  - minecraft
+  - procedural-content-generation
+  - generative
+  - PCG
+  - architecture
+  - game-design
+  - level-editor
+license: MIT
+commit: 8a5ef7a4dfaa64457a6b00dd0fc8aa82320fa541
+version: 1.4.4
+date-released: '2024-03-08'
