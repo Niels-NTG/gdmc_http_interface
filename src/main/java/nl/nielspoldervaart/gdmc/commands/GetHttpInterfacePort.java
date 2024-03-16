@@ -20,7 +20,7 @@ public class GetHttpInterfacePort {
 
 	private static int perform(CommandContext<CommandSourceStack> commandSourceContext) {
 		int currentPort = GdmcHttpServer.getCurrentHttpPort();
-		commandSourceContext.getSource().sendSuccess(() -> Feedback.chatMessage("Current GDMC-HTTP port: ").append(Feedback.copyOnClickText(String.valueOf(currentPort))), true);
+		commandSourceContext.getSource().sendSuccess(Feedback.chatMessage("Current GDMC-HTTP port: ").append(Feedback.copyOnClickText(String.valueOf(currentPort))), true);
 		return currentPort;
 	}
 }

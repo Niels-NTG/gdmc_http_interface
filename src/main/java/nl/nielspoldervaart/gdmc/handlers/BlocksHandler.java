@@ -8,16 +8,18 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.FullChunkStatus;
+import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -30,9 +32,9 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.ForgeRegistries;
+import nl.nielspoldervaart.gdmc.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.utils.TagUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import nl.nielspoldervaart.gdmc.utils.BuildArea;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -392,8 +394,8 @@ public class BlocksHandler extends HandlerBase {
 
         // Pass block Id and block state string into a Stringreader with the the block state parser.
 	    return BlockStateParser.parseForBlock(
-            commandSourceStack.getLevel().holderLookup(Registries.BLOCK),
-            blockId + blockStateString + blockNBTString,
+            getBlockRegisteryLookup(commandSourceStack),
+            new StringReader(blockId + blockStateString + blockNBTString),
             true
         );
     }
@@ -463,6 +465,10 @@ public class BlocksHandler extends HandlerBase {
         return Objects.requireNonNull(ForgeRegistries.BLOCKS.getKey(block)).toString();
     }
 
+    private static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
+        return new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+    }
+
     /**
      * Actually places the block in the level.
      *
@@ -518,7 +524,7 @@ public class BlocksHandler extends HandlerBase {
                 (flags & Block.UPDATE_CLIENTS) != 0 && (
                     !chunk.getLevel().isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
                 ) && (
-                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)
+                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(ChunkHolder.FullChunkStatus.TICKING)
                 )
             ) {
                 chunk.getLevel().sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);
