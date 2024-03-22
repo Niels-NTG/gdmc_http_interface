@@ -19,6 +19,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.FullChunkStatus;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -478,6 +479,13 @@ public class BlocksHandler extends HandlerBase {
         // Submit setBlock function call to the Minecraft server thread, allowing Minecraft to schedule this call, preventing interruptions of the
         // server thread, resulting in faster placement overall and much less stuttering in-game when placing lots of blocks.
         CompletableFuture<Boolean> isBlockSetFuture = mcServer.submit(() -> {
+
+            // If placement should not spawn drops, make sure any entities at that location are cleared to prevent items
+            // (eg. contents of a chest) from dropping.
+            if ((flags & Block.UPDATE_SUPPRESS_DROPS) != 0) {
+                BlockEntity blockEntityToClear = level.getExistingBlockEntity(blockPos);
+                Clearable.tryClear(blockEntityToClear);
+            }
 
 	        boolean isBlockSet = level.setBlock(blockPos, blockState, flags);
 
