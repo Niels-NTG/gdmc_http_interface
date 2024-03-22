@@ -244,15 +244,17 @@ public class BlocksHandler extends HandlerBase {
             }
 
             if (nbt != null) {
-                isBlockSet |= setBlockNBT(
+                placementResult.put(index, setBlockNBT(
                     blockPos,
                     nbt,
                     chunkPosMap.get(new ChunkPos(blockPos)),
                     blockState,
-                    blockFlags
-                );
+                    blockFlags,
+                    isBlockSet
+                ));
+            } else {
+                placementResult.put(index, instructionStatus(isBlockSet));
             }
-            placementResult.put(index, instructionStatus(isBlockSet));
         });
 
         // Gather placement/parsing results and put them back in the order the placement instructions were submitted.
@@ -497,11 +499,12 @@ public class BlocksHandler extends HandlerBase {
      * @param chunk         Chunk of the level that the target block can be found it.
      * @param blockState    Original block state.
      * @param flags         Block update flags (see {@link #getBlockFlags(boolean, boolean)}).
-     * @return              true if NBT of the block in the level got changed.
+     * @param isBlockSet    is true if block state is already placed in the world.
+     * @return              Return JSON-formatted status for placement instruction.
      */
-    private static boolean setBlockNBT(BlockPos blockPos, @Nullable CompoundTag blockNBT, LevelChunk chunk, BlockState blockState, int flags) {
+    private static JsonObject setBlockNBT(BlockPos blockPos, @Nullable CompoundTag blockNBT, LevelChunk chunk, BlockState blockState, int flags, boolean isBlockSet) {
         if (blockNBT == null) {
-            return false;
+            return instructionStatus(isBlockSet);
         }
         // If existing block entity is different from the value of blockNBT,
         // overwrite existing block entity data with the new one, then notify
@@ -511,9 +514,25 @@ public class BlocksHandler extends HandlerBase {
             // If the NBT data on the existing block is the same as the NBT data
             // from the input, do not bother applying the input NBT data.
             if (TagUtils.contains(existingBlockEntity.serializeNBT(), blockNBT)) {
-                return false;
+                return instructionStatus(isBlockSet);
             }
-            existingBlockEntity.deserializeNBT(blockNBT);
+            try {
+                existingBlockEntity.deserializeNBT(blockNBT);
+            } catch (NullPointerException e) {
+                for (StackTraceElement stackTraceElement : e.getStackTrace()) {
+                    // Return special error message for if input NBT data for sign was formatted incorrectly.
+                    // Malformed NBT data would normally be caught during parsing, throwing a CommandSyntaxException,
+                    // but due to a bug in Minecraft buried in the SignBlockEntity class certain formatting causes a
+                    // NullPointerException when it tries to construct the SignBlockEntity.
+                    if (stackTraceElement.getClassName().equals("net.minecraft.world.level.block.entity.SignBlockEntity")) {
+                        return instructionStatus(
+	                        isBlockSet,
+                            "Input data for sign block was formatted incorrectly"
+                        );
+                    }
+                }
+                return instructionStatus(isBlockSet);
+            }
             if (
                 (flags & Block.UPDATE_CLIENTS) != 0 && (
                     !chunk.getLevel().isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
@@ -523,9 +542,9 @@ public class BlocksHandler extends HandlerBase {
             ) {
                 chunk.getLevel().sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);
             }
-            return true;
+            return instructionStatus(true);
         }
-        return false;
+        return instructionStatus(isBlockSet);
     }
 
     /**
