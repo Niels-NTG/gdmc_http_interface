@@ -1,3 +1,10 @@
+# GDMC-HTTP 1.4.5 (Minecraft 1.20.2)
+
+- NEW: GDMC-HTTP can now also be obtained via the [Modrinth](https://modrinth.com/mod/gdmc-http-interface/) mod portal!
+- FIX: Add proper error handling for some instances where NBT data for a sign block submitted via `PUT /blocks` was formatted incorrectly ([#26](https://github.com/Niels-NTG/gdmc_http_interface/issues/26)).
+- FIX: Restore `spawnDrops` flag of `PUT /blocks` back to working order ([#27](https://github.com/Niels-NTG/gdmc_http_interface/issues/27)).
+- FIX: `/item` command now works as expected when called via the `POST /commands` endpoint ([#28](https://github.com/Niels-NTG/gdmc_http_interface/issues/28)).
+
 # GDMC-HTTP 1.4.4 (Minecraft 1.20.2)
 
 - FIX: Allow `GET /chunks` to be used without having to set a build area.

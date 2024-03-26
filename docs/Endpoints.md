@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.4.4 (Minecraft 1.20.2)
+# Endpoints GDMC-HTTP 1.4.5 (Minecraft 1.20.2)
 
 [TOC]
 
@@ -109,7 +109,7 @@ A JSON array with an entry of the result of each command in the order of input. 
 
 - `status`: 1 meaning successful, zero meaning nothing happened
 - `message`: Feedback chat message as it would appear in-game. Please note is only intended to give human-friendly debug information and is subject to the localisation setting of Minecraft.
-- `data`: structured data that appears in the `message`. Please note that the keys may vary depending on the type of result, even for the same command.
+- `data`: structured data version of the information that appears in the `message`. Please note that the structure of this data may vary depending on the type of result, even for the same command.
 
 ## Example
 
