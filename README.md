@@ -8,13 +8,10 @@ With this interface you can use other applications and scripts running on the sa
 
 This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](https://gendesignmc.wikidot.com), an annual competition for generative AI systems in Minecraft, where the challenge is to write an algorithm that creates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
 
-| Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                          | GDMC competition year[^1]                                                                                                                                             |
+| Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                          | GDMC competition year                                                                                                                                                    |
 |-------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1.20.2            | 📦 [GDMC-HTTP 1.4.5](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.4.5)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.4.5/docs/Endpoints.md) | [2024](https://gendesignmc.wikidot.com/wiki:2024-settlement-generation-competition)                                                                                |
-| 1.19.2            | 📦 [GDMC-HTTP 1.3.3](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.3.3)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.3.3/docs/Endpoints.md) | [2023](https://gendesignmc.wikidot.com/wiki:2023-settlement-generation-competition)                                                                                      |
-| 1.16.5            | 📦 [GDMC-HTTP 0.4.2](https://github.com/nikigawlik/gdmc_http_interface/releases/tag/v0.4.2) | 📒 [API Docs](https://github.com/nikigawlik/gdmc_http_interface/wiki)                         | [2022](https://gendesignmc.wikidot.com/wiki:2022-settlement-generation-competition), [2021](https://gendesignmc.wikidot.com/wiki:2021-settlement-generation-competition) |
-
-[^1]: Any script or program written to work with GDMC-HTTP version 1.0.0 or later *should* be compatible with any future version of GDMC-HTTP 1.x.x. If you find this is not the case, feel free to let us know by submitting an [issue](https://github.com/Niels-NTG/gdmc_http_interface/issues) or sending a message to the *#http-support* channel on our Discord server.
+| 1.19.2 + 1.20.2   | 📦 [GDMC-HTTP 1.5.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.5.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.5.0/docs/Endpoints.md) | [2023](https://gendesignmc.wikidot.com/wiki:2023-settlement-generation-competition), [2024](https://gendesignmc.wikidot.com/wiki:2024-settlement-generation-competition) |
+| 1.16.5            | 📦 [GDMC-HTTP 0.4.2](https://github.com/nikigawlik/gdmc_http_interface/releases/tag/v0.4.2) | 📒 [API Docs](https://github.com/nikigawlik/gdmc_http_interface/wiki)                         | [2021](https://gendesignmc.wikidot.com/wiki:2021-settlement-generation-competition), [2022](https://gendesignmc.wikidot.com/wiki:2022-settlement-generation-competition) |
 
 Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#Acknowledgements)
 
@@ -40,29 +37,27 @@ For testing and experimentation we recommend an API testing tool such as [Insomn
 
 When you want to build your own settlement generator or some other application, we recommend the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
 
-Information in the following sections is primarily applicable to GDMC-HTTP version 1.4.0 or later. For the previous version, go to the [README for 1.3.3](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.3.3/README.md#Usage).
-
 ### HTTP Endpoints
 
 When the HTTP interface is active, you have access to the following HTTP endpoints:
 
 | HTTP method | URL          | Description                                    | Docs                                                                                                                                   |
 |-------------|--------------|------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `POST`      | `/commands`  | Send Minecraft console commands                | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Send-Commands-POST-commands)              |
-| `GET`       | `/blocks`    | Get information on blocks in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Read-blocks-GET-blocks)                   |
-| `PUT`       | `/blocks`    | Place blocks                                   | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Place-blocks-PUT-blocks)                  |
-| `GET`       | `/biomes`    | Get information on biomes in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Read-biomes-GET-biomes)                   |
-| `GET`       | `/chunks`    | Get raw chunk data in a given area             | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Read-chunk-data-get-chunks)               |
-| `GET`       | `/structure` | Create an NBT structure file from a given area | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Create-NBT-structure-file-get-structure)  |
-| `POST`      | `/structure` | Place an NBT structure file into the world     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Place-NBT-structure-file-POST-structure)  |
-| `GET`       | `/entities`  | Get information on entities in a given area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Read-entities-GET-entities)               |
-| `PUT`       | `/entities`  | Summon entities into the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Create-entities-PUT-entities)             |
-| `PATCH`     | `/entities`  | Edit entities that already exist in the world  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Edit-entities-PATCH-entities)             |
-| `DELETE`    | `/entities`  | Remove entities from the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Remove-entities-DELETE-entities)          |
-| `GET`       | `/players`   | Get information on players in a given area     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Read-players-GET-players)                 |
-| `GET`       | `/buildarea` | Get information on the current build area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Get-build-area-GET-buildarea)             |
-| `GET`       | `/heightmap` | Get heightmap information of the build area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Get-heightmap-GET-heightmap)              |
-| `OPTIONS`   | `/`          | Get current Minecraft and mod version          | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.4.5/docs/Endpoints.md#Read-HTTP-interface-information-OPTIONS-) |
+| `POST`      | `/commands`  | Send Minecraft console commands                | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Send-Commands-POST-commands)              |
+| `GET`       | `/blocks`    | Get information on blocks in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-blocks-GET-blocks)                   |
+| `PUT`       | `/blocks`    | Place blocks                                   | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Place-blocks-PUT-blocks)                  |
+| `GET`       | `/biomes`    | Get information on biomes in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-biomes-GET-biomes)                   |
+| `GET`       | `/chunks`    | Get raw chunk data in a given area             | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-chunk-data-get-chunks)               |
+| `GET`       | `/structure` | Create an NBT structure file from a given area | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Create-NBT-structure-file-get-structure)  |
+| `POST`      | `/structure` | Place an NBT structure file into the world     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Place-NBT-structure-file-POST-structure)  |
+| `GET`       | `/entities`  | Get information on entities in a given area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-entities-GET-entities)               |
+| `PUT`       | `/entities`  | Summon entities into the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Create-entities-PUT-entities)             |
+| `PATCH`     | `/entities`  | Edit entities that already exist in the world  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Edit-entities-PATCH-entities)             |
+| `DELETE`    | `/entities`  | Remove entities from the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Remove-entities-DELETE-entities)          |
+| `GET`       | `/players`   | Get information on players in a given area     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-players-GET-players)                 |
+| `GET`       | `/buildarea` | Get information on the current build area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-build-area-GET-buildarea)             |
+| `GET`       | `/heightmap` | Get heightmap information of the build area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-heightmap-GET-heightmap)              |
+| `OPTIONS`   | `/`          | Get current Minecraft and mod version          | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-HTTP-interface-information-OPTIONS-) |
 
 Detailed documentation of the endpoints can be found at [docs/Endpoints](./docs/Endpoints.md).
 
