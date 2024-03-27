@@ -80,7 +80,7 @@ public class CommandHandler extends HandlerBase {
 				    );
 				    if (lastCommandResult != null) {
 					    JsonElement data = ChatComponentDataExtractor.toJsonTree(lastCommandResult);
-					    if (!data.getAsJsonObject().isEmpty()) {
+					    if (!data.getAsJsonObject().entrySet().isEmpty()) {
 						    json.add("data", data);
 					    }
 				    }

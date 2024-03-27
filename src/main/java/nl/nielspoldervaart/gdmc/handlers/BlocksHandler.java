@@ -14,10 +14,20 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+#if (MC_VER == MC_1_19_2)
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.Registry;
+#else
 import net.minecraft.core.registries.Registries;
+#endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+#if (MC_VER == MC_1_19_2)
+import net.minecraft.server.level.ChunkHolder;
+#else
 import net.minecraft.server.level.FullChunkStatus;
+#endif
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.LivingEntity;
@@ -395,8 +405,8 @@ public class BlocksHandler extends HandlerBase {
 
         // Pass block Id and block state string into a Stringreader with the the block state parser.
 	    return BlockStateParser.parseForBlock(
-            commandSourceStack.getLevel().holderLookup(Registries.BLOCK),
-            blockId + blockStateString + blockNBTString,
+            getBlockRegisteryLookup(commandSourceStack),
+            new StringReader(blockId + blockStateString + blockNBTString),
             true
         );
     }
@@ -456,6 +466,14 @@ public class BlocksHandler extends HandlerBase {
      */
     private static String getBlockRegistryName(BlockState blockState) {
         return getBlockRegistryName(blockState.getBlock());
+    }
+
+    private static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
+        #if (MC_VER == MC_1_19_2)
+        return new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+        #else
+        return commandSourceStack.getLevel().holderLookup(Registries.BLOCK);
+        #endif
     }
 
     /**
@@ -545,7 +563,13 @@ public class BlocksHandler extends HandlerBase {
                 (flags & Block.UPDATE_CLIENTS) != 0 && (
                     !chunk.getLevel().isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
                 ) && (
-                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)
+                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(
+                        #if (MC_VER == MC_1_19_2)
+                        ChunkHolder.FullChunkStatus.TICKING
+                        #else
+                        FullChunkStatus.BLOCK_TICKING
+                        #endif
+                    )
                 )
             ) {
                 chunk.getLevel().sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);

@@ -1,3 +1,7 @@
+# GDMC-HTTP 1.5.0 (Minecraft 1.19.2 + 1.20.2)
+
+- NEW: To enhance backwards compatibility, all features introduced in GDMC-HTTP 1.4.0 are now also available for Minecraft 1.19.2!
+
 # GDMC-HTTP 1.4.5 (Minecraft 1.20.2)
 
 - NEW: GDMC-HTTP can now also be obtained via the [Modrinth](https://modrinth.com/mod/gdmc-http-interface/) mod portal!
