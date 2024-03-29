@@ -59,22 +59,23 @@ All Gradle tasks such as `publish` and `runClient` can only run for one Minecraf
 
 ## Updating GDMC-HTTP
 
-Our version numbers follow follow the [Semantic Versioning schema](https://semver.org/). 
+Our version numbers follow follow the [Semantic Versioning schema](https://semver.org/).
 
 1. When you have picked the appropriate version number set the `mod_version` property in `gradle.properties` to this value. 
-2. Find-and-replace the previous version number with the new one in the documentation. This includes the following places
+2. Find-and-replace the previous version number with the new one in the documentation. This includes the following places:
    - In the versions table in `README.md`, which has a link to the release page and the API docs page which includes the version tag in the text and URL.
-   - The heading at the top of `docs/Endpoints.md`
+   - The heading at the top of `docs/Endpoints.md`.
    - The example output of the `OPTIONS /` endpoint as documented in `docs/Endpoints.md` needs to be updated to match the new output.
 3. Update `CHANGELOG.md` with an list of items that are `NEW:`, `FIX:` and/or `BREAKING:`.
 4. When relevant, update documentation.
 5. Run the `buildAll.sh` script to build `jar` files for each supported Minecraft version/modding framework.
 6. Do some final (manual) tests, preferably on all supported Minecraft/modding framework versions.
 7. Commit all relevant changes, including everything we did in the previous steps.
-8. Tag this commit with `v<newVersionNumber>` (eg. `v1.4.6`)
+8. Tag this commit with `v<newVersionNumber>` (eg. `v1.4.6`).
 9. Push the commit and the tag.
 10. Draft a new release on GitHub. Paste the items for this version from the changelog into the release notes section. Upload the jar files for this version for each Minecraft/modding framework we support.
 11. Inform the people on the GDMC Discord about the update.
+12. Update `CITATION.cff` with the latest version number, commit hash of the release and date of release.
 
 ## Updating to a new version of Minecraft/modding framework
 
