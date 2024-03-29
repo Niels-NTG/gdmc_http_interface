@@ -18,6 +18,19 @@ Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#A
 
 ## Installation
 
+## Automated installation (recommended)
+
+Custom Minecraft launchers such as [Modrinth App](https://modrinth.com/app) or [Prism Launcher](https://prismlauncher.org/) makes it easy to create separate instances of the game and automatically installing the mods you want for you, including any dependencies these mods may require such as modding frameworks.
+
+The following instructions are for the Modrinth App, but other custom launchers will follow similar steps.
+
+1. Download and install the free and open source [Modrinth App](https://modrinth.com/app). When starting it for the first time, you will be prompted to authenticate the Microsoft/Minecraft account.
+2. Click the 🔎 "Browse" button in the sidebar and search in the mods category for "[GDMC HTTP Interface](https://modrinth.com/mod/gdmc-http-interface/)".
+3. Clicking "Install" will install the latest version, including the necessary dependencies. Alternatively you can pick a specific version from the "Versions" section on the mod's page. In the installation modal you can choose to add the mod to an existing compatible instance or create a new one.
+4. After the app has finished preparing the instance, you can click "Play" to launch your modded version of Minecraft.
+
+## Manual installation
+
 1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
 2. Get the [Forge Mod Installer](https://files.minecraftforge.net/net/minecraftforge/forge/) and navigate to your version of Minecraft that is supported by this mod (1.20.2, 1.19.2 or 1.16.5) and click "Installer" under the "Download Recommended" section to download.
 3. Open the downloaded file to install this version of Forge.
