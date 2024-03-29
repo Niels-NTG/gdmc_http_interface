@@ -8,49 +8,35 @@ plugins {
 }
 
 /**
- * Creates the list of preprocessors to use.
+ * Creates a list of values of Minecraft versions for the Manifold preprocessors.
  * Source: https://gitlab.com/jeseibel/distant-horizons/-/blob/870c0f68d3faf6aa7c76a1c094d19c802f59f06b/build.gradle
  *
- * @param mcVers array of all MC versions
- * @param mcIndex array index of the currently active MC version
+ * @param mcVersions array of all MC versions
+ * @param targetMinecraftIndex array index of the currently active MC version
  */
-def writeBuildGradlePredefine(List<String> mcVers, int mcIndex)
+def writeBuildGradlePredefine(List<String> mcVersions, int targetMinecraftIndex)
 {
-    // Build the list of preprocessors to use
-    StringBuilder sb = new StringBuilder();
-
-    sb.append("# DON'T TOUCH THIS FILE, This is handled by the build script\n");
-
-    for (int i = 0; i < mcVers.size(); i++)
-    {
-        String verStr = mcVers[i].replace(".", "_");
-        sb.append("MC_" + verStr + "=" + i.toString() + "\n");
-
-        if (mcIndex == i)
-            sb.append("MC_VER=" + i.toString() + "\n");
+    StringBuilder sb = new StringBuilder()
+    sb.append("# DON'T TOUCH THIS FILE, This is handled by the build script\n")
+    for (int i = 0; i < mcVersions.size(); i++) {
+        String verStr = mcVersions[i].replace(".", "_");
+        sb.append("MC_" + verStr + "=" + i.toString() + "\n")
+        if (targetMinecraftIndex == i) {
+            sb.append("MC_VER=" + i.toString() + "\n")
+        }
     }
-
-
-    // Check if this is a development build
-    if (mod_version.toLowerCase().contains("dev"))
-    {
-        // WARNING: only use this for logging, we don't want to have confusion
-        // when a method doesn't work correctly in the release build.
-        sb.append("DEV_BUILD=\n");
-    }
-
     new File(projectDir, "build.properties").text = sb.toString()
 }
+
 // Transfers the values set in settings.gradle to the rest of the project
 project.gradle.ext.getProperties().each { prop ->
     rootProject.ext.set(prop.key, prop.value)
-//    println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
+    println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
 }
 // Sets up manifold stuff
-writeBuildGradlePredefine(rootProject.mcVers, rootProject.mcIndex)
+writeBuildGradlePredefine(rootProject.targetMinecraftVersions, rootProject.targetMinecraftVersionIndex)
 
-rootProject.versionStr = rootProject.mod_version + "-" + rootProject.minecraft_version
-version = rootProject.versionStr
+version = rootProject.mod_version + "-" + rootProject.minecraft_version
 group = mod_group_id
 
 base {
@@ -163,12 +149,6 @@ repositories {
     // Put repositories for dependencies here
     // ForgeGradle automatically adds the Forge maven and Maven Central for you
 
-    // If you have mod jar dependencies in ./libs, you can declare them as a repository like so.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html#sub:flat_dir_resolver
-    // flatDir {
-    //     dir 'libs'
-    // }
-    mavenCentral()
     maven {
         url 'https://oss.sonatype.org/content/repositories/snapshots/'
     }
@@ -218,7 +198,7 @@ tasks.named('processResources', ProcessResources).configure {
             minecraft_version: rootProject.minecraft_version, minecraft_version_range: rootProject.minecraft_version_range,
             forge_version: rootProject.forge_version, forge_version_range: rootProject.forge_version_range,
             loader_version_range: rootProject.loader_version_range,
-            mod_id: rootProject.mod_id, mod_name: rootProject.mod_name, mod_license: rootProject.mod_license, mod_version: rootProject.versionStr,
+            mod_id: rootProject.mod_id, mod_name: rootProject.mod_name, mod_license: rootProject.mod_license, mod_version: version,
             mod_authors: rootProject.mod_authors, mod_description: rootProject.mod_description,
     ]
     inputs.properties replaceProperties
