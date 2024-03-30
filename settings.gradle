@@ -11,3 +11,42 @@ pluginManagement {
 plugins {
     id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
 }
+
+/**
+ * Add Minecraft version-specific properties to build properties
+ */
+def loadProperties() {
+    String defaultMinecraftVersion = '1.20.2'
+    String currentTargetMinecraftVersion = ''
+    ArrayList<String> targetMinecraftVersionsList = fileTree('versionProperties').files.name // Get all the files in "versionProperties"
+    for (int i = 0; i < targetMinecraftVersionsList.size(); i++) {
+        targetMinecraftVersionsList[i] = targetMinecraftVersionsList[i].replaceAll('\\.properties', '') // As we are getting the file names, we should remove the ".properties" at the end to get the versions
+    }
+    targetMinecraftVersionsList.sort() // Sort so it always goes from oldest to newest
+
+    int minecraftVersionIndex = -1
+    println "Available MC versions: ${targetMinecraftVersionsList}"
+    if (hasProperty('targetMinecraftVersion')) {
+        currentTargetMinecraftVersion = targetMinecraftVersion
+        minecraftVersionIndex = targetMinecraftVersionsList.indexOf(targetMinecraftVersion)
+    }
+    if (minecraftVersionIndex == -1) {
+        println 'No targetMinecraftVersion set or the set targetMinecraftVersion is invalid! Defaulting to ' + defaultMinecraftVersion + '.'
+        println 'Tip: Use -PtargetMinecraftVersion="' + defaultMinecraftVersion + '" in cmd arg to set targetMinecraftVersion.'
+        currentTargetMinecraftVersion = defaultMinecraftVersion
+        minecraftVersionIndex = targetMinecraftVersionsList.indexOf(defaultMinecraftVersion)
+        assert minecraftVersionIndex != -1
+    }
+
+    println 'Loading properties file at ' + currentTargetMinecraftVersion + '.properties'
+    Properties props = new Properties()
+    props.load(new FileInputStream(String.valueOf(rootDir) + '/versionProperties/' +"$currentTargetMinecraftVersion"+ '.properties'))
+
+    props.each { prop ->
+        gradle.ext.set(prop.key, prop.value)
+        println "Added prop [key:" + prop.key + ", value:" + prop.value + "]"
+    }
+    gradle.ext.targetMinecraftVersions = targetMinecraftVersionsList
+    gradle.ext.targetMinecraftVersionIndex = minecraftVersionIndex
+}
+loadProperties()

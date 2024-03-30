@@ -14,10 +14,20 @@ import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+#if (MC_VER == MC_1_19_2)
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.core.Registry;
+#else
 import net.minecraft.core.registries.Registries;
+#endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
+#if (MC_VER == MC_1_19_2)
+import net.minecraft.server.level.ChunkHolder;
+#else
 import net.minecraft.server.level.FullChunkStatus;
+#endif
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.LivingEntity;
@@ -149,7 +159,7 @@ public class BlocksHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
-
+        boolean canPlaceInParallel = (blockFlags & Block.UPDATE_NEIGHBORS) == 0;
 
         // Note the number of entries in this map may be smaller than inputList.size(), due to some input placement instructions being invalid or
         // due to there being multiple entries for the same block position.
@@ -220,19 +230,36 @@ public class BlocksHandler extends HandlerBase {
             }
 
             PlacementInstructionRecord placementInstruction = new PlacementInstructionRecord(index, blockPos, blockState, nbt);
+            // Only keep the last placement instruction for any given position, no matter the order in which the instructions
+            // were parsed.
+            parsedPlacementInstructionsBlockPosMap.compute(blockPos, (k, v) -> {
+                if (v != null && v.placementOrder > index) {
+                    return v;
+                }
+                return placementInstruction;
+            });
             parsedPlacementInstructionsIndexMap.put(index, placementInstruction);
-            parsedPlacementInstructionsBlockPosMap.put(blockPos, placementInstruction);
 
         });
 
         // Allow for parallisation if blocks do not need to be updated, speeding up placement significantly.
-        IntStream iterator = (blockFlags & Block.UPDATE_NEIGHBORS) == 0 ? IntStream.range(0, inputList.size()).parallel() : IntStream.range(0, inputList.size());
+        IntStream iterator = canPlaceInParallel ? IntStream.range(0, inputList.size()).parallel() : IntStream.range(0, inputList.size());
         iterator.forEach(index -> {
             PlacementInstructionRecord placementInstruction = parsedPlacementInstructionsIndexMap.get(index);
             if (placementInstruction == null) {
                 return;
             }
             BlockPos blockPos = placementInstruction.blockPos;
+            // When placing blocks in parallel, skip all placement instructions for a position that has duplicate entries except for the one in
+            // parsedPlacementInstructionsBlockPosMap, which is the last instruction for this position. This prevents undefined behaviour where
+            // it cannot be predicted which instruction for the same position ends up being placed.
+            if (canPlaceInParallel) {
+                PlacementInstructionRecord placementInstructionForSameBlockPos = parsedPlacementInstructionsBlockPosMap.get(blockPos);
+                if (placementInstructionForSameBlockPos != null && placementInstructionForSameBlockPos.placementOrder > index) {
+                    placementResult.put(index, instructionStatus(false, "Duplicate instruction"));
+                    return;
+                }
+            }
             BlockState blockState = updateBlockShape(blockPos, placementInstruction.blockState, parsedPlacementInstructionsBlockPosMap, chunkPosMap, serverLevel, blockFlags);
             CompoundTag nbt = placementInstruction.nbt;
 
@@ -395,8 +422,8 @@ public class BlocksHandler extends HandlerBase {
 
         // Pass block Id and block state string into a Stringreader with the the block state parser.
 	    return BlockStateParser.parseForBlock(
-            commandSourceStack.getLevel().holderLookup(Registries.BLOCK),
-            blockId + blockStateString + blockNBTString,
+            getBlockRegisteryLookup(commandSourceStack),
+            new StringReader(blockId + blockStateString + blockNBTString),
             true
         );
     }
@@ -456,6 +483,14 @@ public class BlocksHandler extends HandlerBase {
      */
     private static String getBlockRegistryName(BlockState blockState) {
         return getBlockRegistryName(blockState.getBlock());
+    }
+
+    private static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
+        #if (MC_VER == MC_1_19_2)
+        return new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
+        #else
+        return commandSourceStack.getLevel().holderLookup(Registries.BLOCK);
+        #endif
     }
 
     /**
@@ -545,7 +580,13 @@ public class BlocksHandler extends HandlerBase {
                 (flags & Block.UPDATE_CLIENTS) != 0 && (
                     !chunk.getLevel().isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
                 ) && (
-                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(FullChunkStatus.BLOCK_TICKING)
+                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(
+                        #if (MC_VER == MC_1_19_2)
+                        ChunkHolder.FullChunkStatus.TICKING
+                        #else
+                        FullChunkStatus.BLOCK_TICKING
+                        #endif
+                    )
                 )
             ) {
                 chunk.getLevel().sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);

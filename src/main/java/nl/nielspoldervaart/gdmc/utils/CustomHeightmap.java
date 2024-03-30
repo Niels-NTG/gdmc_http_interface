@@ -81,12 +81,23 @@ public class CustomHeightmap {
 		@SuppressWarnings("unused") MOTION_BLOCKING_NO_PLANTS(
 			"MOTION_BLOCKING_NO_PLANTS",
 			(blockState) ->
-				(blockState.blocksMotion() || !blockState.getFluidState().isEmpty()) && NO_PLANTS.test(blockState)
+				(
+					#if (MC_VER == MC_1_19_2)
+					blockState.getMaterial().blocksMotion()
+					#else
+					blockState.blocksMotion()
+					#endif
+					|| !blockState.getFluidState().isEmpty()) && NO_PLANTS.test(blockState)
 		),
 		@SuppressWarnings("unused") OCEAN_FLOOR_NO_PLANTS(
 			"OCEAN_FLOOR_NO_PLANTS",
 			(blockState) ->
-				blockState.blocksMotion() && NO_PLANTS.test(blockState)
+				#if (MC_VER == MC_1_19_2)
+				blockState.getMaterial().blocksMotion()
+				#else
+				blockState.blocksMotion()
+				#endif
+				&& NO_PLANTS.test(blockState)
 		);
 
 		private final String serializationKey;
