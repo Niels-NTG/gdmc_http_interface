@@ -159,7 +159,7 @@ public class BlocksHandler extends HandlerBase {
         ServerLevel serverLevel = getServerLevel(dimension);
 
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
-
+        boolean canPlaceInParallel = (blockFlags & Block.UPDATE_NEIGHBORS) == 0;
 
         // Note the number of entries in this map may be smaller than inputList.size(), due to some input placement instructions being invalid or
         // due to there being multiple entries for the same block position.
@@ -230,19 +230,36 @@ public class BlocksHandler extends HandlerBase {
             }
 
             PlacementInstructionRecord placementInstruction = new PlacementInstructionRecord(index, blockPos, blockState, nbt);
+            // Only keep the last placement instruction for any given position, no matter the order in which the instructions
+            // were parsed.
+            parsedPlacementInstructionsBlockPosMap.compute(blockPos, (k, v) -> {
+                if (v != null && v.placementOrder > index) {
+                    return v;
+                }
+                return placementInstruction;
+            });
             parsedPlacementInstructionsIndexMap.put(index, placementInstruction);
-            parsedPlacementInstructionsBlockPosMap.put(blockPos, placementInstruction);
 
         });
 
         // Allow for parallisation if blocks do not need to be updated, speeding up placement significantly.
-        IntStream iterator = (blockFlags & Block.UPDATE_NEIGHBORS) == 0 ? IntStream.range(0, inputList.size()).parallel() : IntStream.range(0, inputList.size());
+        IntStream iterator = canPlaceInParallel ? IntStream.range(0, inputList.size()).parallel() : IntStream.range(0, inputList.size());
         iterator.forEach(index -> {
             PlacementInstructionRecord placementInstruction = parsedPlacementInstructionsIndexMap.get(index);
             if (placementInstruction == null) {
                 return;
             }
             BlockPos blockPos = placementInstruction.blockPos;
+            // When placing blocks in parallel, skip all placement instructions for a position that has duplicate entries except for the one in
+            // parsedPlacementInstructionsBlockPosMap, which is the last instruction for this position. This prevents undefined behaviour where
+            // it cannot be predicted which instruction for the same position ends up being placed.
+            if (canPlaceInParallel) {
+                PlacementInstructionRecord placementInstructionForSameBlockPos = parsedPlacementInstructionsBlockPosMap.get(blockPos);
+                if (placementInstructionForSameBlockPos != null && placementInstructionForSameBlockPos.placementOrder > index) {
+                    placementResult.put(index, instructionStatus(false, "Duplicate instruction"));
+                    return;
+                }
+            }
             BlockState blockState = updateBlockShape(blockPos, placementInstruction.blockState, parsedPlacementInstructionsBlockPosMap, chunkPosMap, serverLevel, blockFlags);
             CompoundTag nbt = placementInstruction.nbt;
 
