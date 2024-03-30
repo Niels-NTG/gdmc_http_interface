@@ -28,6 +28,6 @@ keywords:
   - game-design
   - level-editor
 license: MIT
-commit: 6de1fe355eefc165d9dbfbba68d0984f5a4ac408
+commit: 5b62105aa8642f5035cec06efc4140a95f08f9e3
 version: 1.4.6
-date-released: '2024-03-08'
+date-released: '2024-03-30'
