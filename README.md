@@ -20,11 +20,11 @@ Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#A
 
 ## Automated installation (recommended)
 
-Custom Minecraft launchers such as [Modrinth App](https://modrinth.com/app) or [Prism Launcher](https://prismlauncher.org/) makes it easy to create separate instances of the game and automatically installing the mods you want for you, including any dependencies these mods may require such as modding frameworks.
+Custom Minecraft launchers such as [Modrinth App](https://modrinth.com/app) or [Prism Launcher](https://prismlauncher.org/) make it easy to create separate instances of the game and can automatically install the mods you want for you, including any dependencies these mods may require such as modding frameworks.
 
 The following instructions are for the Modrinth App, but other custom launchers will follow similar steps.
 
-1. Download and install the free and open source [Modrinth App](https://modrinth.com/app). When starting it for the first time, you will be prompted to authenticate the Microsoft/Minecraft account.
+1. Download and install the free and open source [Modrinth App](https://modrinth.com/app). When starting it for the first time, you will be prompted to authenticate with your Microsoft/Minecraft account.
 2. Click the 🔎 "Browse" button in the sidebar and search in the mods category for "[GDMC HTTP Interface](https://modrinth.com/mod/gdmc-http-interface/)".
 3. Clicking "Install" will install the latest version, including the necessary dependencies. Alternatively you can pick a specific version from the "Versions" section on the mod's page. In the installation modal you can choose to add the mod to an existing compatible instance or create a new one.
 4. After the app has finished preparing the instance, you can click "Play" to launch your modded version of Minecraft.
@@ -49,7 +49,7 @@ When you open a Minecraft world, you will see a chat message that the mod has op
 
 For testing and experimentation we recommend an API testing tool such as [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/) or a command line tool such as `cURL` or `wget`.
 
-When you want to build your own settlement generator or some other application, we recommend the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
+When you want to build your own settlement generator or some other application, we recommend using the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
 
 ### HTTP Endpoints
 
