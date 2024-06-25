@@ -59,6 +59,9 @@ public class StructureHandler extends HandlerBase {
 	// POST: Defaults to false. If true, block updates cause item drops after placement.
 	private boolean spawnDrops;
 
+	// POST: Defaults to true. If false, remove water sources already present at placement location of structure.
+	private boolean keepLiquids;
+
 	// POST: Overrides both doBlockUpdates and spawnDrops if set. For more information see #getBlockFlags and
 	// https://minecraft.wiki/w/Block_update
 	private int customFlags; // -1 == no custom flags
@@ -101,6 +104,8 @@ public class StructureHandler extends HandlerBase {
 			customFlags = Integer.parseInt(queryParams.getOrDefault("customFlags", "-1"), 2);
 
 			withinBuildArea = Boolean.parseBoolean(queryParams.getOrDefault("withinBuildArea", "false"));
+
+			keepLiquids = Boolean.parseBoolean(queryParams.getOrDefault("keepLiquids", "true"));
 
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
@@ -196,6 +201,7 @@ public class StructureHandler extends HandlerBase {
 		}
 		structurePlaceSettings.setRotationPivot(new BlockPos(pivotX, 0, pivotZ));
 		structurePlaceSettings.setIgnoreEntities(!includeEntities);
+		structurePlaceSettings.setKeepLiquids(keepLiquids);
 
 		ServerLevel serverLevel = getServerLevel(dimension);
 
