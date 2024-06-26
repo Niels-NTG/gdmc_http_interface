@@ -7,12 +7,16 @@ import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Clearable;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
@@ -23,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -210,16 +215,41 @@ public class StructureHandler extends HandlerBase {
 			}
 			int blockPlacementFlags = customFlags >= 0 ? customFlags : BlocksHandler.getBlockFlags(doBlockUpdates, spawnDrops);
 
+			// If placement should not spawn drops, make sure any entities at that location are cleared to prevent items
+			// (eg. contents of a chest) from dropping.
+			ArrayList<BlockPos> positionsToClear = new ArrayList<>();
+			if ((blockPlacementFlags & Block.UPDATE_SUPPRESS_DROPS) != 0) {
+				structureCompound.getList("blocks", CompoundTag.TAG_COMPOUND).forEach(entry -> {
+					CompoundTag tag = (CompoundTag) entry;
+					if (tag.contains("pos")) {
+						ListTag posTag = tag.getList("pos", CompoundTag.TAG_INT);
+						positionsToClear.add(origin.offset(StructureTemplate.calculateRelativePosition(
+							structurePlaceSettings,
+							new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2))
+						)));
+					}
+				});
+			}
+
 			// Place the structure into the world on the server thread to ensure NBT data within the blocks of the structure
 			// get placed at the same time as the blocks themselves.
-			CompletableFuture<Boolean> hasPlacedFuture = mcServer.submit(() -> structureTemplate.placeInWorld(
-				serverLevel,
-				origin,
-				origin,
-				structurePlaceSettings,
-				serverLevel.getRandom(),
-				blockPlacementFlags
-			));
+			CompletableFuture<Boolean> hasPlacedFuture = mcServer.submit(() -> {
+				if (!positionsToClear.isEmpty()) {
+					for (BlockPos pos : positionsToClear) {
+						BlockEntity blockEntityToClear = serverLevel.getExistingBlockEntity(pos);
+						Clearable.tryClear(blockEntityToClear);
+					}
+				}
+
+				return structureTemplate.placeInWorld(
+					serverLevel,
+					origin,
+					origin,
+					structurePlaceSettings,
+					serverLevel.getRandom(),
+					blockPlacementFlags
+				);
+			});
 
 			// Wait for the placement to resolve and create a response status.
 			boolean hasPlaced = hasPlacedFuture.get();
