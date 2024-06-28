@@ -1,15 +1,23 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
+        maven { // Used for Vanilla Minecraft's libraries
+            name = 'Sponge'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
         maven {
             name = 'MinecraftForge'
             url = 'https://maven.minecraftforge.net/'
+        }
+        maven {
+            name = 'Architectury'
+            url = 'https://maven.architectury.dev/'
         }
     }
 }
 
 plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.7.0'
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
 }
 
 /**
@@ -50,3 +58,11 @@ def loadProperties() {
     gradle.ext.targetMinecraftVersionIndex = minecraftVersionIndex
 }
 loadProperties()
+
+include('common')
+// Enables or disables the subprojects depending on whats in the versionProperties/mcVer.properties
+for (loader in ((String) gradle.builds_for).split(',')) {
+    def loaderName = loader.strip() // Strip it in case a space is added before or after the comma
+    println "Adding loader " + loaderName
+    include(loaderName)
+}
