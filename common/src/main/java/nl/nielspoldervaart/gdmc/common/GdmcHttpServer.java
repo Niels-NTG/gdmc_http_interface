@@ -13,19 +13,8 @@ public class GdmcHttpServer {
 
     public static boolean hasHtppServerStarted = false;
 
-    public static int getHttpServerPortConfig() {
-        return 9000;
-    }
-
     public static int getCurrentHttpPort() {
         return httpServer.getAddress().getPort();
-    }
-
-    public static void startServer(MinecraftServer mcServer) throws IOException {
-        if (GdmcHttpServer.mcServer != mcServer) {
-            GdmcHttpServer.mcServer = mcServer;
-        }
-        startServer(getHttpServerPortConfig());
     }
 
     public static void startServer(int portNumber) throws IOException {

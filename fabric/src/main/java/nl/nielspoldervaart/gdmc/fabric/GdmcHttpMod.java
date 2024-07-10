@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import nl.nielspoldervaart.gdmc.common.GdmcHttpServer;
 import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
 import nl.nielspoldervaart.gdmc.fabric.utils.RegistryHandler;
 import org.apache.logging.log4j.LogManager;
@@ -56,7 +55,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 		RegistryHandler.registerCommands(minecraftServer);
 
 		try {
-			GdmcHttpServer.startServer(minecraftServer);
+			FabricGdmcHttpServer.startServer(minecraftServer);
 			minecraftServer.sendSystemMessage(successMessage());
 		} catch (IOException e) {
 			LOGGER.warn("Unable to start server!");
@@ -67,7 +66,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 	@Override
 	public void onServerStopping(MinecraftServer server) {
 		LOGGER.info("Server stopping");
-		GdmcHttpServer.stopServer();
+		FabricGdmcHttpServer.stopServer();
 		GdmcHttpConfig.saveConfig(configFilePath);
 	}
 
@@ -75,13 +74,13 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 	public void onPlayReady(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server) {
 		ServerPlayer player = handler.getPlayer();
 		player.sendSystemMessage(
-			GdmcHttpServer.hasHtppServerStarted ? successMessage() : failureMessage()
+			FabricGdmcHttpServer.hasHtppServerStarted ? successMessage() : failureMessage()
 		);
 	}
 
 	private static Component successMessage() {
 		return Feedback.chatMessage("Server started at ").append(
-			Feedback.copyOnClickText(String.format("http://localhost:%s/", GdmcHttpServer.getCurrentHttpPort()))
+			Feedback.copyOnClickText(String.format("http://localhost:%s/", FabricGdmcHttpServer.getCurrentHttpPort()))
 		);
 	}
 

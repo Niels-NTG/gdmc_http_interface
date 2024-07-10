@@ -19,7 +19,6 @@ public class GdmcHttpConfig {
 	public static int HTTP_INTERFACE_PORT = DEFAULT_HTTP_INTERFACE_PORT;
 
 	public static void loadConfig(String filePath) {
-		// TODO replace with more proper config class
 		try {
 			JsonElement json = JsonParser.parseReader(new FileReader(filePath));
 			if (json.isJsonObject()) {

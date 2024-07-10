@@ -20,7 +20,7 @@ public final class SetHttpInterfacePort {
 	}
 
 	public static int unsetInterfacePort(CommandContext<CommandSourceStack> commandSourceStack) {
-		int defaultPort = GdmcHttpConfig.HTTP_INTERFACE_PORT;
+		int defaultPort = GdmcHttpConfig.DEFAULT_HTTP_INTERFACE_PORT;
 		GdmcHttpConfig.HTTP_INTERFACE_PORT = defaultPort;
 		Feedback.sendSucces(
 			commandSourceStack,
