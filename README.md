@@ -47,7 +47,7 @@ The following instructions are for the Modrinth App, but other custom launchers 
 
 When you open a Minecraft world, you will see a chat message that the mod has opened an HTTP connection at the address `localhost:9000`. This means that you can now send HTTP requests from an external program to Minecraft while the world is open.
 
-For testing and experimentation we recommend an API testing tool such as [Insomnia](https://insomnia.rest/) or [Postman](https://www.postman.com/) or a command line tool such as `cURL` or `wget`.
+For testing and experimentation we recommend an API testing tool such as [Kreya](https://kreya.app), [Yaak](https://yaak.app) or a command line tool such as `cURL` or `wget`.
 
 When you want to build your own settlement generator or some other application, we recommend using the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
 
