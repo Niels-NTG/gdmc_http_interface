@@ -1,13 +1,18 @@
 plugins {
 	id 'java'
-
 	id 'idea'
+
+	// Plugin to put dependencies inside our final jar
+	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
+
+	// Plugin to create merged jars
+	id 'io.github.pacifistmc.forgix' version '1.2.9'
 
 	// Manifold preprocessor
 	id 'systems.manifold.manifold-gradle-plugin' version '0.0.2-alpha'
 
 	// Architectury is used here only as a replacement for forge's own loom
-	id 'dev.architectury.loom' version '1.6-SNAPSHOT' apply false
+	id 'dev.architectury.loom' version '1.6.396' apply false
 }
 
 /**
@@ -22,7 +27,7 @@ def writeBuildGradlePredefine(List<String> mcVersions, int targetMinecraftIndex)
 	StringBuilder sb = new StringBuilder()
 	sb.append("# DON'T TOUCH THIS FILE, This is handled by the build script\n")
 	for (int i = 0; i < mcVersions.size(); i++) {
-		String verStr = mcVersions[i].replace(".", "_");
+		String verStr = mcVersions[i].replace(".", "_")
 		sb.append("MC_" + verStr + "=" + i.toString() + "\n")
 		if (targetMinecraftIndex == i) {
 			sb.append("MC_VER=" + i.toString() + "\n")
@@ -42,11 +47,30 @@ writeBuildGradlePredefine(rootProject.targetMinecraftVersions, rootProject.targe
 rootProject.versionStr = rootProject.mod_version + '-' + rootProject.minecraft_version
 rootProject.group = mod_group_id
 
+forgix {
+	group = rootProject.group
+	mergedJarName = "${rootProject.mod_id}-${rootProject.versionStr}.jar"
+
+	if (findProject(':forge')) {
+		forge {
+			jarLocation = "build/libs/${rootProject.mod_id}-forge-${rootProject.versionStr}.jar"
+		}
+	}
+
+	if (findProject(':fabric')) {
+		fabric {
+			jarLocation = "build/libs/${rootProject.mod_id}-fabric-${rootProject.versionStr}.jar"
+		}
+	}
+}
+
+
 subprojects { p ->
 
 	def isMinecraftSubProject = p != project(':common')
 
 	apply plugin: 'java'
+	apply plugin: 'com.github.johnrengelman.shadow'
 	apply plugin: 'systems.manifold.manifold-gradle-plugin'
 
 	if (
@@ -57,7 +81,11 @@ subprojects { p ->
 	}
 
 	configurations {
+		shadowMe
+		implementation.extendsFrom(shadowMe)
 		common
+		shadowCommon
+		shadowMe.extendsFrom(common)
 		compileClasspath.extendsFrom(common)
 		runtimeClasspath.extendsFrom(common)
 
@@ -68,6 +96,12 @@ subprojects { p ->
 			if (findProject(':neoforge')) {
 				developmentNeoForge.extendsFrom(common)
 			}
+			if (findProject(':fabric') && p != project(':fabric')) {
+				fabric
+				shadowFabric
+				compileClasspath.extendsFrom(fabric)
+				runtimeClasspath.extendsFrom(fabric)
+			}
 		}
 	}
 
@@ -76,13 +110,28 @@ subprojects { p ->
 
 		if (isMinecraftSubProject) {
 			common(project(':common')) { transitive false }
+			shadowCommon(project(':common')) { transitive false }
+
+			if (findProject(':fabric') && p != project(':fabric')) {
+				fabric(project(path: ':fabric')) { transitive false }
+				shadowFabric(project(path: ':fabric')) { transitive false }
+			}
 		}
 	}
+
+	shadowJar {
+		configurations = [project.configurations.shadowMe]
+
+		mergeServiceFiles()
+	}
+
+	jar.dependsOn(shadowJar)
 
 	processResources {
 		def resourceTargets = [
 			// For Forge
 			"META-INF/mods.toml",
+			"fabric.mod.json",
 		]
 		def intoTargets = ["$buildDir/resources/main/"]
 
@@ -92,6 +141,8 @@ subprojects { p ->
 			forge_version: rootProject.forge_version,
 			forge_version_range: rootProject.forge_version_range,
 			forge_loader_version_range: rootProject.forge_loader_version_range,
+			fabric_version: rootProject.fabric_version,
+			fabric_loader_version: rootProject.fabric_loader_version,
 			mod_id: rootProject.mod_id,
 			mod_name: rootProject.mod_name,
 			mod_license: rootProject.mod_license,
@@ -136,12 +187,10 @@ subprojects { p ->
 
 allprojects { p -> {
 
-	def isMinecraftSubProject = p != project(':common')
-
 	apply plugin: 'java'
 	apply plugin: 'maven-publish'
 
-	archivesBaseName = rootProject.mod_name
+	archivesBaseName = rootProject.mod_id
 	version = project.name + '-' + rootProject.versionStr
 	group = rootProject.group
 
@@ -163,10 +212,21 @@ allprojects { p -> {
 			url 'https://oss.sonatype.org/content/repositories/snapshots/'
 		}
 
+		// For Git repositories
+		maven {
+			url 'https://jitpack.io'
+		}
+
 		flatDir {
 			dirs "${rootDir}/mods/forge"
 			content {
 				includeGroup 'forge-mod'
+			}
+		}
+		flatDir {
+			dirs "${rootDir}/mods/fabric"
+			content {
+				includeGroup 'fabric-mod'
 			}
 		}
 	}
@@ -187,3 +247,16 @@ allprojects { p -> {
 	}
 
 }}
+
+// Delete the merged folder when running clean
+task cleanMergedJars() {
+	def mergedFolder = file('Merged')
+	if (mergedFolder.exists()) {
+		delete(mergedFolder)
+	}
+}
+// add cleanMergedJars to the end of the "clean" task
+tasks['clean'].finalizedBy(cleanMergedJars)
+
+// TODO https://gitlab.com/jeseibel/distant-horizons/-/blob/main/build.gradle?ref_type=heads
+// TODO https://gitlab.com/jeseibel/distant-horizons/-/blob/main/forge/build.gradle?ref_type=heads

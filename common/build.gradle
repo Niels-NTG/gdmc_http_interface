@@ -5,3 +5,17 @@ plugins {
 minecraft {
 	version(rootProject.minecraft_version)
 }
+
+publishing {
+	publications {
+		mavenCommon(MavenPublication) {
+			artifactId = rootProject.mod_id
+			from components.java
+		}
+	}
+
+	// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+	repositories {
+		// Add repositories to publish to here.
+	}
+}

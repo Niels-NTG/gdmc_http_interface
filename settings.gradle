@@ -1,6 +1,5 @@
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         maven { // Used for Vanilla Minecraft's libraries
             name = 'Sponge'
             url = 'https://repo.spongepowered.org/repository/maven-public/'
@@ -10,9 +9,15 @@ pluginManagement {
             url = 'https://maven.minecraftforge.net/'
         }
         maven {
+            name = 'Fabric'
+            url = 'https://maven.fabricmc.net/'
+        }
+        maven {
             name = 'Architectury'
             url = 'https://maven.architectury.dev/'
         }
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
 
