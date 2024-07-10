@@ -1,6 +1,5 @@
 plugins {
 	id 'java'
-	id 'idea'
 
 	// Plugin to put dependencies inside our final jar
 	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
@@ -62,6 +61,10 @@ forgix {
 			jarLocation = "build/libs/${rootProject.mod_id}-fabric-${rootProject.versionStr}.jar"
 		}
 	}
+
+	// TODO removeDuplicates causes a ClassNotFoundException with Forge.
+	//		it would be good if we could use it since it downsizes the output .jar file quite a bit.
+	// removeDuplicate 'nl.nielspoldervaart.gdmc'
 }
 
 
@@ -83,18 +86,16 @@ subprojects { p ->
 	configurations {
 		shadowMe
 		implementation.extendsFrom(shadowMe)
-		common
-		shadowCommon
-		shadowMe.extendsFrom(common)
-		compileClasspath.extendsFrom(common)
-		runtimeClasspath.extendsFrom(common)
 
 		if (isMinecraftSubProject) {
+			common
+			shadowCommon
+			shadowMe.extendsFrom(common)
+			compileClasspath.extendsFrom(common)
+			runtimeClasspath.extendsFrom(common)
+
 			if (findProject(':forge')) {
 				developmentForge.extendsFrom(common)
-			}
-			if (findProject(':neoforge')) {
-				developmentNeoForge.extendsFrom(common)
 			}
 			if (findProject(':fabric') && p != project(':fabric')) {
 				fabric
@@ -210,24 +211,6 @@ allprojects { p -> {
 		// Manifold
 		maven {
 			url 'https://oss.sonatype.org/content/repositories/snapshots/'
-		}
-
-		// For Git repositories
-		maven {
-			url 'https://jitpack.io'
-		}
-
-		flatDir {
-			dirs "${rootDir}/mods/forge"
-			content {
-				includeGroup 'forge-mod'
-			}
-		}
-		flatDir {
-			dirs "${rootDir}/mods/fabric"
-			content {
-				includeGroup 'fabric-mod'
-			}
 		}
 	}
 

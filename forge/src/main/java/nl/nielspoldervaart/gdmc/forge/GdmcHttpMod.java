@@ -10,6 +10,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
+import nl.nielspoldervaart.gdmc.common.GdmcHttpServer;
 import nl.nielspoldervaart.gdmc.forge.utils.RegistryHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +45,7 @@ public final class GdmcHttpMod
         MinecraftServer minecraftServer = event.getServer();
 
         try {
-            ForgeGdmcHttpServer.startServer(minecraftServer);
+            GdmcHttpServer.startServer(ForgeGdmcHttpServer.getHttpServerPortConfig());
             minecraftServer.sendSystemMessage(successMessage());
         } catch (IOException e) {
             LOGGER.warn("Unable to start server!");

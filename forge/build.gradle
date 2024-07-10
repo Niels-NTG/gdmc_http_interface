@@ -17,14 +17,10 @@ loom {
     runs {
         client {
             client()
-            setConfigName("Forge Client")
-            ideConfigGenerated(true)
             runDir("../run")
         }
         server {
             server()
-            setConfigName("Forge Server")
-            ideConfigGenerated(true)
             runDir("../run")
         }
     }
