@@ -487,7 +487,11 @@ public class BlocksHandler extends HandlerBase {
      * @return              Namespaced name of the block material.
      */
     private static String getBlockRegistryName(BlockState blockState) {
+        #if (MC_VER == MC_1_19_2)
+        return Registry.BLOCK.getKey(blockState.getBlock()).toString();
+        #else
         return BuiltInRegistries.BLOCK.getKey(blockState.getBlock()).toString();
+        #endif
     }
 
     private static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {

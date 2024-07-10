@@ -45,7 +45,7 @@ public final class GdmcHttpMod
         MinecraftServer minecraftServer = event.getServer();
 
         try {
-            GdmcHttpServer.startServer(ForgeGdmcHttpServer.getHttpServerPortConfig());
+            ForgeGdmcHttpServer.startServer(minecraftServer);
             minecraftServer.sendSystemMessage(successMessage());
         } catch (IOException e) {
             LOGGER.warn("Unable to start server!");
