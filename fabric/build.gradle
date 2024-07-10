@@ -54,11 +54,11 @@ task deleteResources(type: Delete) {
 }
 
 processResources {
-	dependsOn(copyCoreResources)
+	dependsOn(copyCommonResources)
 }
 
 runClient {
-	dependsOn(copyCoreResources)
+	dependsOn(copyCommonResources)
 	finalizedBy(deleteResources)
 }
 

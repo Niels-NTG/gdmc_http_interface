@@ -214,9 +214,9 @@ allprojects { p -> {
 		}
 	}
 
-	task copyCoreResources(type: Copy) {
-		from fileTree(project(":common").file("src/main/resources"))
-		into p.file("build/resources/main")
+	task copyCommonResources(type: Copy) {
+		from project(":common").file("src/main/resources")
+		into(file(p.file("build/resources/main")))
 	}
 
 	tasks.withType(JavaCompile).configureEach {
