@@ -71,7 +71,7 @@ Our version numbers follow follow the [Semantic Versioning schema](https://semve
 5. Run the `buildAll.sh` script to build `jar` files for each supported Minecraft version/modding framework.
 6. Do some final (manual) tests, preferably on all supported Minecraft/modding framework versions.
 7. Commit all relevant changes, including everything we did in the previous steps.
-8. Tag this commit with `v<newVersionNumber>` (eg. `v1.4.6`).
+8. Tag this commit with `v<newVersionNumber>` (eg. `v1.5.0`).
 9. Push the commit and the tag.
 10. Draft a new release on GitHub. Paste the items for this version from the changelog into the release notes section. Upload the jar files for this version for each Minecraft/modding framework we support.
 11. Inform the people on the GDMC Discord about the update.
@@ -82,6 +82,3 @@ Our version numbers follow follow the [Semantic Versioning schema](https://semve
 Of each minor version of Minecraft we tend to only support one version. Depending on how the timeline of Minecraft's release schedule and GDMC lines up, we pick the most recent version of the game and wait for a few patches to have rolled out. This is then set as the target version for the coming GDMC Settlement Generation Challenge.
 
 To start supporting a new version of Minecraft, first check if there is a stable version of a relevant modding framework (eg. Forge, NeoForged) that supports this version. If so, create a new file in the `versionProperties` folder named `<mcVersion>.properties` (eg.` 1.20.2.properties`). This file contains properties relevant for this specific version of the game, including the version of the modding framework. You can find listings of releases of Forge [here](https://files.minecraftforge.net/net/minecraftforge/forge/). Prefer using the "Recommended" version that matches the relevant version of Minecraft. Don't forget the set the  `targetMinecraftVersion` property in the `gradle.properties` file to your new Minecraft version. After all this is done, reload your Gradle project and run `genIntellijRuns` (or `genEclipseRuns`) so all relevant dependencies are installed. 
-
-
-
