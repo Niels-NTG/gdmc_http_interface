@@ -16,6 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import nl.nielspoldervaart.gdmc.common.GdmcHttpServer;
+import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
 import nl.nielspoldervaart.gdmc.fabric.utils.RegistryHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -38,6 +39,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 		ModContainer modData = loader.getModContainer(MODID).get();
 
 		MOD_VERSION = modData.getMetadata().getVersion().getFriendlyString();
+		ModVersionRecord.setModVersion(MOD_VERSION);
 		configFilePath = loader.getConfigDir() + "/" + MODID + ".json";
 
 		ServerLifecycleEvents.SERVER_STARTING.register(this);
