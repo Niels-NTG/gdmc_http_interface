@@ -502,11 +502,11 @@ public class BlocksHandler extends HandlerBase {
         #endif
     }
 
-    private static BlockEntity getExistingBlockEntity(BlockPos pos, LevelChunk levelChunk) {
+    public static BlockEntity getExistingBlockEntity(BlockPos pos, LevelChunk levelChunk) {
         return levelChunk.getBlockEntities().get(pos);
     }
 
-    private static BlockEntity getExistingBlockEntity(BlockPos pos, ServerLevel serverLevel) {
+    public static BlockEntity getExistingBlockEntity(BlockPos pos, ServerLevel serverLevel) {
         return getExistingBlockEntity(pos, serverLevel.getChunkAt(pos));
     }
 

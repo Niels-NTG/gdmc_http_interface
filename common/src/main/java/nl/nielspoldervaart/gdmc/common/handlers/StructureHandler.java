@@ -242,7 +242,7 @@ public class StructureHandler extends HandlerBase {
 			CompletableFuture<Boolean> hasPlacedFuture = mcServer.submit(() -> {
 				if (!positionsToClear.isEmpty()) {
 					for (BlockPos pos : positionsToClear) {
-						BlockEntity blockEntityToClear = serverLevel.getExistingBlockEntity(pos);
+						BlockEntity blockEntityToClear = BlocksHandler.getExistingBlockEntity(pos, serverLevel);
 						Clearable.tryClear(blockEntityToClear);
 					}
 				}
