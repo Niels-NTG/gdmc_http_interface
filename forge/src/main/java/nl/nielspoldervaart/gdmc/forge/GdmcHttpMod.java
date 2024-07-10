@@ -10,12 +10,11 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
-import nl.nielspoldervaart.gdmc.common.GdmcHttpServer;
-import nl.nielspoldervaart.gdmc.forge.utils.RegistryHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import nl.nielspoldervaart.gdmc.forge.config.GdmcHttpConfig;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
+import nl.nielspoldervaart.gdmc.forge.utils.RegistryHandler;
+import nl.nielspoldervaart.gdmc.forge.config.GdmcHttpConfig;
 
 import java.io.IOException;
 

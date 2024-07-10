@@ -16,6 +16,6 @@ public final class ForgeGdmcHttpServer extends GdmcHttpServer {
         if (ForgeGdmcHttpServer.mcServer != mcServer) {
             ForgeGdmcHttpServer.mcServer = mcServer;
         }
-        GdmcHttpServer.startServer(ForgeGdmcHttpServer.getHttpServerPortConfig());
+        ForgeGdmcHttpServer.startServer(ForgeGdmcHttpServer.getHttpServerPortConfig());
     }
 }

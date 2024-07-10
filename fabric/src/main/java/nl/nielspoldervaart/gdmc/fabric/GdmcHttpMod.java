@@ -15,11 +15,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
-import nl.nielspoldervaart.gdmc.fabric.utils.RegistryHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
+import nl.nielspoldervaart.gdmc.fabric.utils.RegistryHandler;
 import nl.nielspoldervaart.gdmc.fabric.config.GdmcHttpConfig;
 
 public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStopping, Join {
