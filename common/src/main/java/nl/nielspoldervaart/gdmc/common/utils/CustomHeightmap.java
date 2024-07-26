@@ -35,31 +35,16 @@ public class CustomHeightmap {
 
 	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap.Types heightmapType) {
 		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, heightmapType);
-		int j = chunk.getHighestSectionPosition() + 16;
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-
-		for(int k = 0; k < 16; ++k) {
-			for(int l = 0; l < 16; ++l) {
-				for(int i1 = j - 1; i1 >= chunk.getMinBuildHeight(); --i1) {
-					blockpos$mutableblockpos.set(k, i1, l);
-					BlockState blockstate = chunk.getBlockState(blockpos$mutableblockpos);
-					if (!blockstate.is(Blocks.AIR)) {
-						if (customHeightmap.isOpaque.test(blockstate)) {
-							customHeightmap.setHeight(k, l, i1 + 1);
-							break;
-						}
-					}
-				}
-			}
-		}
-		return customHeightmap;
+		return primeHeightmaps(chunk, customHeightmap);
 	}
 
 	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList) {
-
 		Predicate<BlockState> isOpaque = o -> !blockList.contains(o);
 		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque);
+		return primeHeightmaps(chunk, customHeightmap);
+	}
 
+	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
 		int j = chunk.getHighestSectionPosition() + 16;
 		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 		for(int k = 0; k < 16; ++k) {
