@@ -10,6 +10,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
+import java.util.ArrayList;
 import java.util.function.Predicate;
 
 public class CustomHeightmap {
@@ -25,11 +26,42 @@ public class CustomHeightmap {
 		this.data = new SimpleBitStorage(i, 256);
 	}
 
+	public CustomHeightmap(ChunkAccess chunk, Predicate<BlockState> isOpaque) {
+		this.isOpaque = isOpaque;
+		this.chunk = chunk;
+		int i = Mth.ceillog2(chunk.getHeight() + 1);
+		this.data = new SimpleBitStorage(i, 256);
+	}
+
 	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap.Types heightmapType) {
 		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, heightmapType);
 		int j = chunk.getHighestSectionPosition() + 16;
 		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 
+		for(int k = 0; k < 16; ++k) {
+			for(int l = 0; l < 16; ++l) {
+				for(int i1 = j - 1; i1 >= chunk.getMinBuildHeight(); --i1) {
+					blockpos$mutableblockpos.set(k, i1, l);
+					BlockState blockstate = chunk.getBlockState(blockpos$mutableblockpos);
+					if (!blockstate.is(Blocks.AIR)) {
+						if (customHeightmap.isOpaque.test(blockstate)) {
+							customHeightmap.setHeight(k, l, i1 + 1);
+							break;
+						}
+					}
+				}
+			}
+		}
+		return customHeightmap;
+	}
+
+	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList) {
+
+		Predicate<BlockState> isOpaque = o -> !blockList.contains(o);
+		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque);
+
+		int j = chunk.getHighestSectionPosition() + 16;
+		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 		for(int k = 0; k < 16; ++k) {
 			for(int l = 0; l < 16; ++l) {
 				for(int i1 = j - 1; i1 >= chunk.getMinBuildHeight(); --i1) {

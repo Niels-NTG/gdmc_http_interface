@@ -494,7 +494,7 @@ public class BlocksHandler extends HandlerBase {
         #endif
     }
 
-    private static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
+    public static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
         #if (MC_VER == MC_1_19_2)
         return new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
         #else
