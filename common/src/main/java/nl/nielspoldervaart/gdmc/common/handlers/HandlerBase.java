@@ -235,6 +235,14 @@ public abstract class HandlerBase implements HttpHandler {
         }
     }
 
+    protected static JsonObject parseJsonObject(InputStream requestBody) {
+        try {
+            return JsonParser.parseReader(new InputStreamReader(requestBody)).getAsJsonObject();
+        } catch (JsonSyntaxException | IllegalStateException jsonSyntaxException) {
+            throw new HttpException("Malformed JSON: " + jsonSyntaxException.getMessage(), 400);
+        }
+    }
+
     protected static JsonObject instructionStatus(boolean isSuccess) {
         return instructionStatus(isSuccess, null);
     }

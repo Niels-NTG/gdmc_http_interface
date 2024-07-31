@@ -1,5 +1,8 @@
 package nl.nielspoldervaart.gdmc.common.handlers;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
@@ -18,10 +21,14 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Map;
 
 public class HeightmapHandler extends HandlerBase {
+
+    // GET/POST: the dimension to get the heightmap data from
+    private String dimension;
 
     public HeightmapHandler(MinecraftServer mcServer) {
         super(mcServer);
@@ -30,44 +37,56 @@ public class HeightmapHandler extends HandlerBase {
     @Override
     protected void internalHandle(HttpExchange httpExchange) throws IOException {
 
-        String method = httpExchange.getRequestMethod().toLowerCase();
-
-        if (!method.equals("get")) {
-            throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
-        }
-
         // Get query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
 
         // Try to parse a type argument from them
-        String inputHeightmapPreset = queryParams.getOrDefault("type", "WORLD_SURFACE");
+        String heightmapType = queryParams.getOrDefault("type", "WORLD_SURFACE");
 
-        String inputCustomBlockList = queryParams.get("blocks");
-        String[] customBlockList = inputCustomBlockList == null ? new String[0] : inputCustomBlockList.split(",");
-
-        String dimension = queryParams.getOrDefault("dimension", null);
-
-        // Get a reference to the map/level
-        ServerLevel serverlevel = getServerLevel(dimension);
-
-        BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
+        dimension = queryParams.getOrDefault("dimension", null);
 
         int[][] heightmap;
-        if (customBlockList.length > 0) {
-            CommandSourceStack commandSourceStack = createCommandSource(
-                "GDMC-HeightmapHandler",
-                dimension,
-                buildArea.box.getCenter().getCenter()
-            );
-            heightmap = getHeightmap(serverlevel, customBlockList, commandSourceStack);
-        } else {
-            heightmap = getHeightmap(serverlevel, inputHeightmapPreset);
+
+        switch (httpExchange.getRequestMethod().toLowerCase()) {
+            case "get" -> {
+                heightmap = getHeightmapHandler(heightmapType);
+            }
+            case "post" -> {
+                heightmap = postHeightmapHandler(httpExchange.getRequestBody());
+            }
+            default -> throw new HttpException("Method not allowed. Only GET and POST requests are supported.", 405);
         }
 
         // Respond with that array as a string
         Headers responseHeaders = httpExchange.getResponseHeaders();
         setDefaultResponseHeaders(responseHeaders);
         resolveRequest(httpExchange, new Gson().toJson(heightmap));
+    }
+
+    private int[][] getHeightmapHandler(String heightmapType) {
+        return getHeightmap(getServerLevel(dimension), heightmapType);
+    }
+
+    private int[][] postHeightmapHandler(InputStream requestBody) {
+        JsonObject customHeightMap = parseJsonObject(requestBody);
+
+        JsonArray blockList = null;
+        if (customHeightMap.has("blocks") && !customHeightMap.getAsJsonArray("blocks").isEmpty()) {
+            blockList = customHeightMap.getAsJsonArray("blocks");
+        }
+
+        boolean transparentLiquids = false;
+        if (customHeightMap.has("transparentLiquids") && customHeightMap.getAsJsonPrimitive("transparentLiquids").isBoolean()) {
+            transparentLiquids = customHeightMap.getAsJsonPrimitive("transparentLiquids").getAsBoolean();
+        }
+
+        CommandSourceStack commandSourceStack = createCommandSource(
+            "GDMC-HeightmapHandler",
+            dimension,
+            BuildArea.getBuildArea().box.getCenter().getCenter()
+        );
+
+        return getHeightmap(getServerLevel(dimension), commandSourceStack, blockList, transparentLiquids);
     }
 
     private static int[][] initHeightmapData() {
@@ -112,32 +131,6 @@ public class HeightmapHandler extends HandlerBase {
         }
     }
 
-    private static int[][] getHeightmap(ServerLevel serverlevel, String[] blockList, CommandSourceStack commandSourceStack) {
-        int[][] heightmap = initHeightmapData();
-
-        ArrayList<BlockState> blockStateList = new ArrayList<>();
-        for (String blockString : blockList) {
-            try {
-                BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(
-                    BlocksHandler.getBlockRegisteryLookup(commandSourceStack),
-                    new StringReader(blockString),
-                    true
-                );
-                blockStateList.add(blockResult.blockState());
-            } catch (CommandSyntaxException e) {
-                System.out.println(blockString + " is not a valid block. " + e.getMessage());
-            }
-        }
-
-        getChunkPosList().parallelStream().forEach(chunkPos -> {
-            LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
-            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList);
-            getFirstAvailableHeightAt(heightmap, chunkPos, null, customChunkHeightmap);
-        });
-
-        return heightmap;
-    }
-
     private static int[][] getHeightmap(ServerLevel serverlevel, String heightmapTypeString) {
         int[][] heightmap = initHeightmapData();
 
@@ -162,6 +155,37 @@ public class HeightmapHandler extends HandlerBase {
         });
 
         // Return the completed heightmap array
+        return heightmap;
+    }
+
+    private static int[][] getHeightmap(ServerLevel serverlevel, CommandSourceStack commandSourceStack, JsonArray blockList, boolean transparentLiquids) {
+        if (blockList == null || blockList.isEmpty()) {
+            throw new HttpException("list of transparent blocks is undefined or empty.", 400);
+        }
+
+        ArrayList<BlockState> blockStateList = new ArrayList<>();
+        for (JsonElement jsonElement : blockList.asList()) {
+	        try {
+                String blockString = jsonElement.getAsString();
+	            BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(
+	                BlocksHandler.getBlockRegisteryLookup(commandSourceStack),
+	                new StringReader(blockString),
+	                true
+	            );
+	            blockStateList.add(blockResult.blockState());
+	        } catch (UnsupportedOperationException | IllegalStateException | CommandSyntaxException e) {
+                throw new HttpException("Missing or malformed block ID " + jsonElement + " (" + e.getMessage() + ")", 400);
+	        }
+        }
+
+        int[][] heightmap = initHeightmapData();
+
+        getChunkPosList().parallelStream().forEach(chunkPos -> {
+            LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
+            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, transparentLiquids);
+            getFirstAvailableHeightAt(heightmap, chunkPos, null, customChunkHeightmap);
+        });
+
         return heightmap;
     }
 }
