@@ -71,6 +71,7 @@ When the HTTP interface is active, you have access to the following HTTP endpoin
 | `GET`       | `/players`   | Get information on players in a given area     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-players-GET-players)                 |
 | `GET`       | `/buildarea` | Get information on the current build area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-build-area-GET-buildarea)             |
 | `GET`       | `/heightmap` | Get heightmap information of the build area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-heightmap-GET-heightmap)              |
+| `POST`      | `/heightmap` | Create custom heightmap of the build area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Query-custom-heightmap-POST-heightmap)    |
 | `OPTIONS`   | `/`          | Get current Minecraft and mod version          | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-HTTP-interface-information-OPTIONS-) |
 
 Detailed documentation of the endpoints can be found at [docs/Endpoints](./docs/Endpoints.md).

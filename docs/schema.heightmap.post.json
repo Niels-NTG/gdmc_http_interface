@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "$ref": "#/definitions/TransparentBlocksForHeightmap",
+  "definitions": {
+	"TransparentBlocksForHeightmap": {
+	  "type": "object",
+	  "additionalProperties": false,
+	  "properties": {
+		"blocks": {
+		  "type": "array",
+		  "items": {
+			"type": "string"
+		  }
+		},
+		"transparentLiquids": {
+		  "type": "boolean",
+		  "default": false
+		}
+	  },
+	  "required": [],
+	  "title": "TransparentBlocksForHeightmap"
+	}
+  }
+}

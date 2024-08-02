@@ -1051,6 +1051,73 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, 
 ]
 ```
 
+# Query custom heightmap `POST /heightmap`
+
+Returns a custom heightmap for the current build area with a list of blocks that should be considered "transparent".
+
+The heightmap is calculated by iterating from the top of world until it encounters a block that isn't air and isn't in the list of blocks that should be considered as "transparent" for this heightmap.
+
+## URL parameters
+
+| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                            |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
+
+## Request headers
+
+[Default](#Request-headers)
+
+## Request body
+
+Request body should be a single JSON object following to this [schema](./schema.heightmap.post.json). This contains `"blocks"`: an array of block ID strings for blocks that are considered "transparent" when calculating the heightmap. Additionally you can set `"transparentLiquids": true` to make liquids (water and lava) transparent for the heightmap as well.
+
+If no options are provided in the request body the heightmap data in the response will be equal to the built-in heightmap type `WORLD_SURFACE`.
+
+## Response headers
+
+[Default](#Response-headers)
+
+## Response body
+
+A 2D array with integer values representing the heightmap of the x-z dimensions of the build area.
+
+A `404` error is returned if no build area has been set.
+
+A `400` is returned if one or more of the block ID strings are invalid.
+
+## Example
+
+After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done with the following request body:
+```json
+{
+	"blocks": [
+		"sand",
+		"sandstone",
+		"gravel",
+		"dirt",
+		"grass_block",
+		"clay"
+	],
+	"includeLiquids": true
+}
+```
+results in the following response:
+```json
+[
+  [ 56, 56, 56, 56, 56, 57, 59, 59, 59, 59, 60 ],
+  [ 56, 56, 56, 56, 57, 57, 59, 59, 59, 59, 58 ],
+  [ 54, 56, 57, 59, 59, 59, 59, 59, 59, 60, 60 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58 ]
+]
+```
+
 # Read Minecraft version `GET /version`
 
 Get the current version of Minecraft.
