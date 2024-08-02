@@ -9,12 +9,13 @@
 		"blocks": {
 		  "type": "array",
 		  "items": {
-			"type": "string"
+			"type": "string",
+			"description": "List of valid block IDs (https://minecraft.wiki/w/Java_Edition_data_values#Blocks)."
 		  }
 		},
 		"transparentLiquids": {
 		  "type": "boolean",
-		  "default": false
+		  "description": "If true liquids (water, lava) will be considered as transparent to the heightmap."
 		}
 	  },
 	  "required": [],
