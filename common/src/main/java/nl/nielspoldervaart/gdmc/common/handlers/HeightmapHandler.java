@@ -80,13 +80,18 @@ public class HeightmapHandler extends HandlerBase {
             transparentLiquids = customHeightMap.getAsJsonPrimitive("transparentLiquids").getAsBoolean();
         }
 
+        int fromY = Integer.MAX_VALUE;
+        if (customHeightMap.has("fromY") && customHeightMap.getAsJsonPrimitive("fromY").isNumber()) {
+            fromY = customHeightMap.getAsJsonPrimitive("fromY").getAsInt();
+        }
+
         CommandSourceStack commandSourceStack = createCommandSource(
             "GDMC-HeightmapHandler",
             dimension,
             BuildArea.getBuildArea().box.getCenter().getCenter()
         );
 
-        return getHeightmap(getServerLevel(dimension), commandSourceStack, blockList, transparentLiquids);
+        return getHeightmap(getServerLevel(dimension), commandSourceStack, blockList, transparentLiquids, fromY);
     }
 
     private static int[][] initHeightmapData() {
@@ -158,7 +163,7 @@ public class HeightmapHandler extends HandlerBase {
         return heightmap;
     }
 
-    private static int[][] getHeightmap(ServerLevel serverlevel, CommandSourceStack commandSourceStack, JsonArray blockList, boolean transparentLiquids) {
+    private static int[][] getHeightmap(ServerLevel serverlevel, CommandSourceStack commandSourceStack, JsonArray blockList, boolean transparentLiquids, int fromY) {
         if (blockList == null || blockList.isEmpty()) {
             throw new HttpException("list of transparent blocks is undefined or empty.", 400);
         }
@@ -182,7 +187,7 @@ public class HeightmapHandler extends HandlerBase {
 
         getChunkPosList().parallelStream().forEach(chunkPos -> {
             LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
-            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, transparentLiquids);
+            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, transparentLiquids, fromY);
             getFirstAvailableHeightAt(heightmap, chunkPos, null, customChunkHeightmap);
         });
 

@@ -38,19 +38,12 @@ public class CustomHeightmap {
 		return primeHeightmaps(chunk, customHeightmap);
 	}
 
-	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, boolean transparentLiquids) {
-		Predicate<BlockState> isOpaque = blockState -> {
-			if (transparentLiquids && !blockState.getFluidState().isEmpty()) {
-				return false;
-			}
-			return !blockList.contains(blockState);
-		};
-		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque);
-		return primeHeightmaps(chunk, customHeightmap);
+	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
+		return primeHeightmaps(chunk, customHeightmap, Integer.MAX_VALUE);
 	}
 
-	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
-		int j = chunk.getHighestSectionPosition() + 16;
+	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap, int fromY) {
+		int j = fromY == Integer.MAX_VALUE ? chunk.getHighestSectionPosition() + 16 : fromY;
 		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 		for(int k = 0; k < 16; ++k) {
 			for(int l = 0; l < 16; ++l) {
@@ -67,6 +60,17 @@ public class CustomHeightmap {
 			}
 		}
 		return customHeightmap;
+	}
+
+	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, boolean transparentLiquids, int fromY) {
+		Predicate<BlockState> isOpaque = blockState -> {
+			if (transparentLiquids && !blockState.getFluidState().isEmpty()) {
+				return false;
+			}
+			return !blockList.contains(blockState);
+		};
+		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque);
+		return primeHeightmaps(chunk, customHeightmap, fromY);
 	}
 
 	private void setHeight(int x, int z, int y) {

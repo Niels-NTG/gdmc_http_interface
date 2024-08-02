@@ -16,6 +16,10 @@
 		"transparentLiquids": {
 		  "type": "boolean",
 		  "description": "If true liquids (water, lava) will be considered as transparent to the heightmap."
+		},
+		"fromY": {
+		  "type": "integer",
+		  "description": "If set the heightmap is calculated from this y position. Usefull for caves and The Nether dimension."
 		}
 	  },
 	  "required": [],

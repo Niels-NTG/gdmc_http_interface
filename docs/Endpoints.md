@@ -1069,7 +1069,7 @@ The heightmap is calculated by iterating from the top of world until it encounte
 
 ## Request body
 
-Request body should be a single JSON object following to this [schema](./schema.heightmap.post.json). This contains `"blocks"`: an array of block ID strings for blocks that are considered "transparent" when calculating the heightmap. Additionally you can set `"transparentLiquids": true` to make liquids (water and lava) transparent for the heightmap as well.
+Request body should be a single JSON object following to this [schema](./schema.heightmap.post.json). This contains `"blocks"`: an array of block ID strings for blocks that are considered "transparent" when calculating the heightmap. Additionally you can set `"transparentLiquids": true` to make liquids (water and lava) transparent for the heightmap as well. If `fromY` has an integer value heightmap will be calculated starting from this Y position instead of the top of the world, which can be useful for caves and The Nether dimension.
 
 If no options are provided in the request body the heightmap data in the response will be equal to the built-in heightmap type `WORLD_SURFACE`.
 
