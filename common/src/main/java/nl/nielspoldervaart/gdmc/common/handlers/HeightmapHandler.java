@@ -72,8 +72,8 @@ public class HeightmapHandler extends HandlerBase {
 
         ServerLevel serverLevel = getServerLevel(dimension);
 
-        JsonArray blockList = null;
-        if (customHeightMap.has("blocks") && !customHeightMap.getAsJsonArray("blocks").isEmpty()) {
+        JsonArray blockList = new JsonArray();
+        if (customHeightMap.has("blocks") && customHeightMap.getAsJsonArray("blocks").isJsonArray()) {
             blockList = customHeightMap.getAsJsonArray("blocks");
         }
 
@@ -173,10 +173,6 @@ public class HeightmapHandler extends HandlerBase {
     }
 
     private static int[][] getHeightmap(ServerLevel serverlevel, CommandSourceStack commandSourceStack, JsonArray blockList, boolean transparentLiquids, int fromY) {
-        if (blockList == null || blockList.isEmpty()) {
-            throw new HttpException("list of transparent blocks is undefined or empty.", 400);
-        }
-
         ArrayList<BlockState> blockStateList = new ArrayList<>();
         for (JsonElement jsonElement : blockList.asList()) {
 	        try {

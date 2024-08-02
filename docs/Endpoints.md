@@ -1073,6 +1073,8 @@ Request body should be a single JSON object following to this [schema](./schema.
 
 If no options are provided in the request body the heightmap data in the response will be equal to the built-in heightmap type `WORLD_SURFACE`.
 
+If `"transparentLiquids": true` is the only option provided the resulting heightmap is equal to the built-in heightmap type `OCEAN_FLOOR`.
+
 ## Response headers
 
 [Default](#Response-headers)
