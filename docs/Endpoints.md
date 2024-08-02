@@ -1085,6 +1085,8 @@ A `404` error is returned if no build area has been set.
 
 A `400` is returned if one or more of the block ID strings are invalid.
 
+A `400` is returned if a value given from `fromY` is not an int or is outside the build limits of the level.
+
 ## Example
 
 After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done with the following request body:

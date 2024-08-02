@@ -70,6 +70,8 @@ public class HeightmapHandler extends HandlerBase {
     private int[][] postHeightmapHandler(InputStream requestBody) {
         JsonObject customHeightMap = parseJsonObject(requestBody);
 
+        ServerLevel serverLevel = getServerLevel(dimension);
+
         JsonArray blockList = null;
         if (customHeightMap.has("blocks") && !customHeightMap.getAsJsonArray("blocks").isEmpty()) {
             blockList = customHeightMap.getAsJsonArray("blocks");
@@ -82,7 +84,14 @@ public class HeightmapHandler extends HandlerBase {
 
         int fromY = Integer.MAX_VALUE;
         if (customHeightMap.has("fromY") && customHeightMap.getAsJsonPrimitive("fromY").isNumber()) {
-            fromY = customHeightMap.getAsJsonPrimitive("fromY").getAsInt();
+            try {
+                fromY = customHeightMap.getAsJsonPrimitive("fromY").getAsInt();
+            } catch (NumberFormatException e) {
+                throw new HttpException("Value of fromY is not a valid integer.", 400);
+            }
+            if (fromY > serverLevel.getMaxBuildHeight() || fromY < serverLevel.getMinBuildHeight()) {
+                throw new HttpException("Value of fromY is outside of the boundaries of the level.", 400);
+            }
         }
 
         CommandSourceStack commandSourceStack = createCommandSource(
@@ -91,7 +100,7 @@ public class HeightmapHandler extends HandlerBase {
             BuildArea.getBuildArea().box.getCenter().getCenter()
         );
 
-        return getHeightmap(getServerLevel(dimension), commandSourceStack, blockList, transparentLiquids, fromY);
+        return getHeightmap(serverLevel, commandSourceStack, blockList, transparentLiquids, fromY);
     }
 
     private static int[][] initHeightmapData() {
