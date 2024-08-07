@@ -107,6 +107,20 @@ public class HeightmapHandler extends HandlerBase {
         return new int[xSize][zSize];
     }
 
+    public static String formatBlockTagKeyLocation(String inputBlockTagKey) {
+        if (inputBlockTagKey.startsWith("#")) {
+            inputBlockTagKey = inputBlockTagKey.replaceFirst("^#", "");
+        }
+        if (!inputBlockTagKey.contains(":")) {
+            return "minecraft:" + inputBlockTagKey;
+        }
+        return inputBlockTagKey;
+    }
+
+    public static boolean isExistingBlockTagKey(String blockTagKeyString, CommandSourceStack commandSourceStack) {
+        return BlocksHandler.getBlockRegisteryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> existingTag.key().location().toString().equals(blockTagKeyString));
+    }
+
     private static ArrayList<ChunkPos> getChunkPosList() {
         BuildArea.BuildAreaInstance buildArea = BuildArea.getBuildArea();
         ArrayList<ChunkPos> chunkPosList = new ArrayList<>();
@@ -169,9 +183,18 @@ public class HeightmapHandler extends HandlerBase {
 
     private static int[][] getHeightmap(ServerLevel serverlevel, CommandSourceStack commandSourceStack, JsonArray blockList, int fromY) {
         ArrayList<BlockState> blockStateList = new ArrayList<>();
+        ArrayList<String> blockTagKeyList = new ArrayList<>();
         for (JsonElement jsonElement : blockList.asList()) {
 	        try {
                 String blockString = jsonElement.getAsString();
+                if (blockString.startsWith("#")) {
+                    blockString = formatBlockTagKeyLocation(blockString);
+                    if (!isExistingBlockTagKey(blockString, commandSourceStack)) {
+                        throw new HttpException("Invalid block tag key: " + blockString, 400);
+                    }
+                    blockTagKeyList.add(blockString);
+                    continue;
+                }
 	            BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(
 	                BlocksHandler.getBlockRegisteryLookup(commandSourceStack),
 	                new StringReader(blockString),
@@ -179,7 +202,7 @@ public class HeightmapHandler extends HandlerBase {
 	            );
 	            blockStateList.add(blockResult.blockState());
 	        } catch (UnsupportedOperationException | IllegalStateException | CommandSyntaxException e) {
-                throw new HttpException("Missing or malformed block ID " + jsonElement + " (" + e.getMessage() + ")", 400);
+                throw new HttpException("Missing or malformed block ID: " + jsonElement + " (" + e.getMessage() + ")", 400);
 	        }
         }
 
@@ -187,7 +210,7 @@ public class HeightmapHandler extends HandlerBase {
 
         getChunkPosList().parallelStream().forEach(chunkPos -> {
             LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
-            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, fromY);
+            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, blockTagKeyList, fromY);
             getFirstAvailableHeightAt(heightmap, chunkPos, null, customChunkHeightmap);
         });
 

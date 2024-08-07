@@ -1071,7 +1071,7 @@ The heightmap is calculated by iterating from the top of world until it encounte
 
 Request body should be a single JSON object following to this [schema](./schema.heightmap.post.json). 
 
-This contains `"blocks"`: an array of block ID strings for blocks that are considered "transparent" when calculating the heightmap. Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block.
+This contains `"blocks"`: an array of block ID or [block tag key](https://minecraft.wiki/w/Tag#Block_tags_2) (when prefixed with a "#") strings for blocks that are considered "transparent" when calculating the heightmap. Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block.
 
 Please note that air blocks (`minecraft:air`) are not included by default.
 

@@ -60,8 +60,8 @@ public class CustomHeightmap {
 		return customHeightmap;
 	}
 
-	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, int fromY) {
-		Predicate<BlockState> isOpaque = blockState -> !blockList.contains(blockState);
+	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, ArrayList<String> blockTagLocationKeyList, int fromY) {
+		Predicate<BlockState> isOpaque = blockState -> !blockList.contains(blockState) && !hasBlockTagKey(blockState, blockTagLocationKeyList);
 		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque);
 		return primeHeightmaps(chunk, customHeightmap, fromY);
 	}
@@ -80,6 +80,13 @@ public class CustomHeightmap {
 
 	private static int getIndex(int x, int z) {
 		return x + z * 16;
+	}
+
+	public static boolean hasBlockTagKey(BlockState blockState, ArrayList<String> inputBlockTagLocationKeyList) {
+		if (inputBlockTagLocationKeyList.isEmpty()) {
+			return false;
+		}
+		return inputBlockTagLocationKeyList.stream().anyMatch(inputBlockTagLocationKey -> blockState.getTags().anyMatch(blockTagKey -> blockTagKey.location().toString().equals(inputBlockTagLocationKey)));
 	}
 
 	private static final Predicate<BlockState> NO_PLANTS = blockState ->
