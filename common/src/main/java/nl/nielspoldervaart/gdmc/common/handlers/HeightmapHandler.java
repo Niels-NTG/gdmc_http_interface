@@ -77,11 +77,6 @@ public class HeightmapHandler extends HandlerBase {
             blockList = customHeightMap.getAsJsonArray("blocks");
         }
 
-        boolean transparentLiquids = false;
-        if (customHeightMap.has("transparentLiquids") && customHeightMap.getAsJsonPrimitive("transparentLiquids").isBoolean()) {
-            transparentLiquids = customHeightMap.getAsJsonPrimitive("transparentLiquids").getAsBoolean();
-        }
-
         int fromY = Integer.MAX_VALUE;
         if (customHeightMap.has("fromY") && customHeightMap.getAsJsonPrimitive("fromY").isNumber()) {
             try {
@@ -100,7 +95,7 @@ public class HeightmapHandler extends HandlerBase {
             BuildArea.getBuildArea().box.getCenter().getCenter()
         );
 
-        return getHeightmap(serverLevel, commandSourceStack, blockList, transparentLiquids, fromY);
+        return getHeightmap(serverLevel, commandSourceStack, blockList, fromY);
     }
 
     private static int[][] initHeightmapData() {
@@ -172,7 +167,7 @@ public class HeightmapHandler extends HandlerBase {
         return heightmap;
     }
 
-    private static int[][] getHeightmap(ServerLevel serverlevel, CommandSourceStack commandSourceStack, JsonArray blockList, boolean transparentLiquids, int fromY) {
+    private static int[][] getHeightmap(ServerLevel serverlevel, CommandSourceStack commandSourceStack, JsonArray blockList, int fromY) {
         ArrayList<BlockState> blockStateList = new ArrayList<>();
         for (JsonElement jsonElement : blockList.asList()) {
 	        try {
@@ -192,7 +187,7 @@ public class HeightmapHandler extends HandlerBase {
 
         getChunkPosList().parallelStream().forEach(chunkPos -> {
             LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
-            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, transparentLiquids, fromY);
+            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, fromY);
             getFirstAvailableHeightAt(heightmap, chunkPos, null, customChunkHeightmap);
         });
 

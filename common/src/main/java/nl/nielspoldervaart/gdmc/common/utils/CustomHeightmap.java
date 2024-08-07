@@ -62,13 +62,8 @@ public class CustomHeightmap {
 		return customHeightmap;
 	}
 
-	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, boolean transparentLiquids, int fromY) {
-		Predicate<BlockState> isOpaque = blockState -> {
-			if (transparentLiquids && !blockState.getFluidState().isEmpty()) {
-				return false;
-			}
-			return !blockList.contains(blockState);
-		};
+	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, int fromY) {
+		Predicate<BlockState> isOpaque = blockState -> !blockList.contains(blockState);
 		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque);
 		return primeHeightmaps(chunk, customHeightmap, fromY);
 	}
