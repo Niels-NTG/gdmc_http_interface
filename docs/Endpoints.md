@@ -1055,7 +1055,7 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, 
 
 Returns a custom heightmap for the current build area with a list of blocks that should be considered "transparent".
 
-The heightmap is calculated by iterating from the top of world until it encounters a block that isn't air and isn't in the list of blocks that should be considered as "transparent" for this heightmap.
+The heightmap is calculated by iterating from the top of world until it encounters a block that isn't in the list of blocks that should be considered as "transparent" for this heightmap.
 
 ## URL parameters
 
@@ -1069,9 +1069,13 @@ The heightmap is calculated by iterating from the top of world until it encounte
 
 ## Request body
 
-Request body should be a single JSON object following to this [schema](./schema.heightmap.post.json). This contains `"blocks"`: an array of block ID strings for blocks that are considered "transparent" when calculating the heightmap. If `fromY` has an integer value heightmap will be calculated starting from this Y position instead of the top of the world, which can be useful for caves and The Nether dimension.
+Request body should be a single JSON object following to this [schema](./schema.heightmap.post.json). 
 
-If no options are provided in the request body the heightmap data in the response will be equal to the built-in heightmap type `WORLD_SURFACE`.
+This contains `"blocks"`: an array of block ID strings for blocks that are considered "transparent" when calculating the heightmap. Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block.
+
+Please note that air blocks (`minecraft:air`) are not included by default.
+
+If `fromY` has an integer value heightmap will be calculated starting from this Y position instead of the top of the world, which can be useful for caves and The Nether dimension.
 
 ## Response headers
 

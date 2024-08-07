@@ -43,18 +43,16 @@ public class CustomHeightmap {
 	}
 
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap, int fromY) {
-		int j = fromY == Integer.MAX_VALUE ? chunk.getHighestSectionPosition() + 16 : fromY;
+		int j = fromY == Integer.MAX_VALUE ? chunk.getMaxBuildHeight() : fromY;
 		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
 		for(int k = 0; k < 16; ++k) {
 			for(int l = 0; l < 16; ++l) {
 				for(int i1 = j - 1; i1 >= chunk.getMinBuildHeight(); --i1) {
 					blockpos$mutableblockpos.set(k, i1, l);
 					BlockState blockstate = chunk.getBlockState(blockpos$mutableblockpos);
-					if (!blockstate.is(Blocks.AIR)) {
-						if (customHeightmap.isOpaque.test(blockstate)) {
-							customHeightmap.setHeight(k, l, i1 + 1);
-							break;
-						}
+					if (customHeightmap.isOpaque.test(blockstate)) {
+						customHeightmap.setHeight(k, l, i1 + 1);
+						break;
 					}
 				}
 			}
@@ -103,16 +101,19 @@ public class CustomHeightmap {
 			"MOTION_BLOCKING_NO_PLANTS",
 			(blockState) ->
 				(
+					!blockState.is(Blocks.AIR) &&
 					#if (MC_VER == MC_1_19_2)
 					blockState.getMaterial().blocksMotion()
 					#else
 					blockState.blocksMotion()
 					#endif
-					|| !blockState.getFluidState().isEmpty()) && NO_PLANTS.test(blockState)
+					|| !blockState.getFluidState().isEmpty()
+				) && NO_PLANTS.test(blockState)
 		),
 		@SuppressWarnings("unused") OCEAN_FLOOR_NO_PLANTS(
 			"OCEAN_FLOOR_NO_PLANTS",
 			(blockState) ->
+				!blockState.is(Blocks.AIR) &&
 				#if (MC_VER == MC_1_19_2)
 				blockState.getMaterial().blocksMotion()
 				#else
