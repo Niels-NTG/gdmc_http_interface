@@ -975,30 +975,50 @@ Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build are
 
 ## URL parameters
 
-| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                            |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.wiki/w/Heightmap) wiki page for more information. A `400` status code is returned if heightmap type is not recognised.     |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
+| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                   |
+|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| blocks    | comma-separated list of block IDs or block tag keys                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) of blocks that should be considered transparent when calculating the heightmap. |
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                             |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                        |
 
-In addition to the build-in height map types of `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING` and `MOTION_BLOCKING_NO_LEAVES`, this mod also includes the following custom height maps:
+### Custom block list
+
+When provided with a comma-separated list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) (these can be combined), a heightmap is calculated where the blocks listed are considered as transparent. Please note that air blocks (`minecraft:air`) are not included by default.
+
+Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block.
+
+### Heightmap preset types
+
+This endpoint supports 4 of [Minecraft's built-in height map types](https://minecraft.wiki/w/Heightmap) built-in to Minecraft:
+
+- `WORLD_SURFACE`
+  - Height of surface ignoring air blocks.
+- `OCEAN_FLOOR`
+  - Height surface ignoring air, water and lava.
+- `MOTION_BLOCKING`
+  - Height of surface ignoring blocks that have no movement collision (air, flowers, ferns, etc.) except for water and lava.
+- `MOTION_BLOCKING_NO_LEAVES`
+  - Same as `MOTION_BLOCKING` but also ignores [leaves](https://minecraft.wiki/w/Leaves).
+
+Additionally this mod provides 2 extra heightmap types
+
 - `MOTION_BLOCKING_NO_PLANTS`
-  - Same as `MOTION_BLOCKING`, except it also excludes the following blocks
-    - Logs
-    - Leaves
-    - Bee nests
-    - Mangrove roots
-    - Giant mushroom blocks
-    - Pumpkin blocks
-    - Melon blocks
-    - Moss blocks
-    - Nether wart blocks
-    - Cactus blocks
-    - Farmland
-    - Coral blocks
-    - Sponges
-    - Bamboo plants
-    - Cobwebs
-    - Sculk
+  - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
+    - [Logs](https://minecraft.wiki/w/Log)
+    - [Bee nests](https://minecraft.wiki/w/Bee_Nest)
+    - [Mangrove roots](https://minecraft.wiki/w/Mangrove_Roots) + [Muddy mangrove roots](https://minecraft.wiki/w/Muddy_Mangrove_Roots)
+    - [Giant mushroom blocks](https://minecraft.wiki/w/Mushroom_Block)
+    - [Pumpkin blocks](https://minecraft.wiki/w/Pumpkin) + [Carved pumpkin blocks](https://minecraft.wiki/w/Carved_Pumpkin) 
+    - [Melon blocks](https://minecraft.wiki/w/Melon)
+    - [Moss blocks](https://minecraft.wiki/w/Moss_Block)
+    - [Nether wart blocks](https://minecraft.wiki/w/Nether_Wart_Block)
+    - [Cactus blocks](https://minecraft.wiki/w/Cactus)
+    - [Farmland](https://minecraft.wiki/w/Farmland)
+    - [Coral blocks](https://minecraft.wiki/w/Coral_Block)
+    - [Sponges](https://minecraft.wiki/w/Sponge)
+    - [Bamboo plants](https://minecraft.wiki/w/Bamboo)
+    - [Cobwebs](https://minecraft.wiki/w/Cobweb)
+    - [Sculk](https://minecraft.wiki/w/Sculk)
 - `OCEAN_FLOOR_NO_PLANTS`
   - Same as `OCEAN_FLOOR`, except it also excludes the following blocks:
     - Everything listed for `MOTION_BLOCKING_NO_PLANTS`
@@ -1021,7 +1041,33 @@ A 2D array with integer values representing the heightmap of the x-z dimensions 
 
 A `404` error is returned if no build area has been set.
 
+A `400` is returned if one of the block IDs or block tag keys provided in the `blocks` parameter are invalid.
+
+A `400` status code is returned if heightmap preset type is not recognised.
+
 ## Example
+
+### Custom block list example
+
+After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=sand,gravel,dirt,clay,grass_block`, resulting in the following response:
+
+```json
+[
+  [ 56, 56, 56, 56, 56, 57, 59, 59, 59, 59, 60 ],
+  [ 56, 56, 56, 56, 57, 57, 59, 59, 59, 59, 58 ],
+  [ 54, 56, 57, 59, 59, 59, 59, 59, 59, 60, 60 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58 ]
+]
+```
+
+### Heightmap preset type example
 
 After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, requesting the heightmap of that ignores water with `GET /heightmap?type=OCEAN_FLOOR` could return:
 
@@ -1048,79 +1094,6 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, 
   [66,67,67,66,66,65,65,64,64,63,63,64,64,64,64,64,65,65,65,64,64],
   [66,67,67,66,72,72,72,65,64,64,64,64,65,65,65,65,66,66,66,66,66],
   [66,67,67,72,72,75,72,72,65,65,65,65,65,66,66,66,67,67,67,67,67]
-]
-```
-
-# Query custom heightmap `POST /heightmap`
-
-Returns a custom heightmap for the current build area with a list of blocks that should be considered "transparent".
-
-The heightmap is calculated by iterating from the top of world until it encounters a block that isn't in the list of blocks that should be considered as "transparent" for this heightmap.
-
-## URL parameters
-
-| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                            |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
-
-## Request headers
-
-[Default](#Request-headers)
-
-## Request body
-
-Request body should be a single JSON object following to this [schema](./schema.heightmap.post.json). 
-
-This contains `"blocks"`: an array of block ID or [block tag key](https://minecraft.wiki/w/Tag#Block_tags_2) (when prefixed with a "#") strings for blocks that are considered "transparent" when calculating the heightmap. Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block.
-
-Please note that air blocks (`minecraft:air`) are not included by default.
-
-If `fromY` has an integer value heightmap will be calculated starting from this Y position instead of the top of the world, which can be useful for caves and The Nether dimension.
-
-## Response headers
-
-[Default](#Response-headers)
-
-## Response body
-
-A 2D array with integer values representing the heightmap of the x-z dimensions of the build area.
-
-A `404` error is returned if no build area has been set.
-
-A `400` is returned if one or more of the block ID strings are invalid.
-
-A `400` is returned if a value given from `fromY` is not an int or is outside the build limits of the level.
-
-## Example
-
-After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done with the following request body:
-```json
-{
-	"blocks": [
-		"sand",
-		"sandstone",
-		"gravel",
-		"dirt",
-		"grass_block",
-		"clay"
-	],
-	"includeLiquids": true
-}
-```
-results in the following response:
-```json
-[
-  [ 56, 56, 56, 56, 56, 57, 59, 59, 59, 59, 60 ],
-  [ 56, 56, 56, 56, 57, 57, 59, 59, 59, 59, 58 ],
-  [ 54, 56, 57, 59, 59, 59, 59, 59, 59, 60, 60 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58 ]
 ]
 ```
 
