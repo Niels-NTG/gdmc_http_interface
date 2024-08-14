@@ -3,6 +3,7 @@
 - NEW: GDMC-HTTP is now compatible with both the Forge and Fabric modding platform!
 - NEW: Add `keepLiquids` flag to `POST /structure` endpoint. When set to `false` it removes all water sources present at the placement locations of the to be placed structure.
 - FIX: Actually implement behaviour to prevent spawning drops when placing structures for the `spawnDrops` flag of the `POST /structure` endpoint.
+- FIX: `/commands` now returns a 405 is any other HTTP method besides `POST` is used.
 
 # GDMC-HTTP 1.4.6 (Minecraft 1.19.2 + 1.20.2)
 
