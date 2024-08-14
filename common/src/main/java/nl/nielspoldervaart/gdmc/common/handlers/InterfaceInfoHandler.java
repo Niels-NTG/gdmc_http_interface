@@ -16,9 +16,8 @@ public class InterfaceInfoHandler extends HandlerBase {
 
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
-		String method = httpExchange.getRequestMethod().toLowerCase();
 
-		if (!method.equals("options")) {
+		if (!httpExchange.getRequestMethod().equalsIgnoreCase("options")) {
 			throw new HttpException("Method not allowed. Only OPTIONS requests are supported.", 405);
 		}
 

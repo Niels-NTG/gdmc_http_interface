@@ -15,8 +15,8 @@ public class BuildAreaHandler extends HandlerBase {
 
     @Override
     public void internalHandle(HttpExchange httpExchange) throws IOException {
-        String method = httpExchange.getRequestMethod().toLowerCase();
-        if (!method.equals("get")) {
+
+        if (!httpExchange.getRequestMethod().equalsIgnoreCase("get")) {
             throw new HttpException("Method not allowed. Use GET method to request the build area.", 405);
         }
 
@@ -24,5 +24,6 @@ public class BuildAreaHandler extends HandlerBase {
         setDefaultResponseHeaders(responseHeaders);
 
         resolveRequest(httpExchange, BuildArea.toJSONString());
+
     }
 }

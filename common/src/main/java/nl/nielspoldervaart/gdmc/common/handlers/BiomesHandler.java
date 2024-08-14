@@ -28,6 +28,11 @@ public class BiomesHandler extends HandlerBase {
 
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
+
+		if (!httpExchange.getRequestMethod().equalsIgnoreCase("get")) {
+			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
+		}
+
 		// query parameters
 		Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
 
@@ -60,12 +65,6 @@ public class BiomesHandler extends HandlerBase {
 			dimension = queryParams.getOrDefault("dimension", null);
 		} catch (NumberFormatException e) {
 			throw new HttpException("Could not parse query parameter: " + e.getMessage(), 400);
-		}
-
-		String method = httpExchange.getRequestMethod().toLowerCase();
-
-		if (!method.equals("get")) {
-			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);
 		}
 
 		// Response headers
