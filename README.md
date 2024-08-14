@@ -55,23 +55,23 @@ When you want to build your own settlement generator or some other application, 
 
 When the HTTP interface is active, you have access to the following HTTP endpoints:
 
-| HTTP method | URL          | Description                                    | Docs                                                                                                                                   |
-|-------------|--------------|------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------|
-| `POST`      | `/commands`  | Send Minecraft console commands                | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Send-Commands-POST-commands)              |
-| `GET`       | `/blocks`    | Get information on blocks in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-blocks-GET-blocks)                   |
-| `PUT`       | `/blocks`    | Place blocks                                   | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Place-blocks-PUT-blocks)                  |
-| `GET`       | `/biomes`    | Get information on biomes in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-biomes-GET-biomes)                   |
-| `GET`       | `/chunks`    | Get raw chunk data in a given area             | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-chunk-data-get-chunks)               |
-| `GET`       | `/structure` | Create an NBT structure file from a given area | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Create-NBT-structure-file-get-structure)  |
-| `POST`      | `/structure` | Place an NBT structure file into the world     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Place-NBT-structure-file-POST-structure)  |
-| `GET`       | `/entities`  | Get information on entities in a given area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-entities-GET-entities)               |
-| `PUT`       | `/entities`  | Summon entities into the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Create-entities-PUT-entities)             |
-| `PATCH`     | `/entities`  | Edit entities that already exist in the world  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Edit-entities-PATCH-entities)             |
-| `DELETE`    | `/entities`  | Remove entities from the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Remove-entities-DELETE-entities)          |
-| `GET`       | `/players`   | Get information on players in a given area     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-players-GET-players)                 |
-| `GET`       | `/buildarea` | Get information on the current build area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-build-area-GET-buildarea)             |
-| `GET`       | `/heightmap` | Get heightmap information of the build area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-heightmap-GET-heightmap)              |
-| `OPTIONS`   | `/`          | Get current Minecraft and mod version          | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-HTTP-interface-information-OPTIONS-) |
+| HTTP method | URL          | Description                                      | Docs                                                         |
+| ----------- | ------------ | ------------------------------------------------ | ------------------------------------------------------------ |
+| `POST`      | `/commands`  | ⚙️ Send Minecraft console commands                | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Send-Commands-POST-commands) |
+| `GET`       | `/blocks`    | 🧱 Get information on blocks in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-blocks-GET-blocks) |
+| `PUT`       | `/blocks`    | 🧱 Place blocks                                   | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Place-blocks-PUT-blocks) |
+| `GET`       | `/biomes`    | 🏜️ Get information on biomes in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-biomes-GET-biomes) |
+| `GET`       | `/chunks`    | 📦 Get raw chunk data in a given area             | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-chunk-data-get-chunks) |
+| `GET`       | `/structure` | 🏗️ Create an NBT structure file from a given area | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Create-NBT-structure-file-get-structure) |
+| `POST`      | `/structure` | 🏗️ Place an NBT structure file into the world     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Place-NBT-structure-file-POST-structure) |
+| `GET`       | `/entities`  | 🐷 Get information on entities in a given area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-entities-GET-entities) |
+| `PUT`       | `/entities`  | 🐷 Summon entities into the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Create-entities-PUT-entities) |
+| `PATCH`     | `/entities`  | 🐷 Edit entities that already exist in the world  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Edit-entities-PATCH-entities) |
+| `DELETE`    | `/entities`  | 🐷 Remove entities from the world                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Remove-entities-DELETE-entities) |
+| `GET`       | `/players`   | 👷 Get information on players in a given area     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-players-GET-players) |
+| `GET`       | `/buildarea` | 📐 Get information on the current build area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-build-area-GET-buildarea) |
+| `GET`       | `/heightmap` | 🗺️ Get heightmap information of the build area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Get-heightmap-GET-heightmap) |
+| `OPTIONS`   | `/`          | 🪪 Get current Minecraft and mod version          | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.5.0/docs/Endpoints.md#Read-HTTP-interface-information-OPTIONS-) |
 
 Detailed documentation of the endpoints can be found at [docs/Endpoints](./docs/Endpoints.md).
 
