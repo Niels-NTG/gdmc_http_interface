@@ -975,18 +975,24 @@ Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build are
 
 ## URL parameters
 
-| key       | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                   |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) of blocks that should be considered transparent when calculating the heightmap. |
-| yBounds   | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                               |
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                             |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                        |
+| key       | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                                                                                       |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) of blocks that should be considered transparent when calculating the heightmap. |
+| yBounds   | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                                                                                                   |
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                                                                                                 |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                                                                                            |
 
 ### Custom block list
 
-When provided with a comma-separated list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) (these can be combined), a heightmap is calculated where the blocks listed are considered as transparent. Please note that air blocks (`minecraft:air`) are not included by default.
+When provided with a comma-separated list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) (these can be combined), a heightmap is calculated where the blocks listed are considered as transparent.
 
-Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block.
+Block tag keys describe a category of block. `#logs` for instance describe all types of [log blocks](https://minecraft.wiki/w/Log) and [stripped log blocks](https://minecraft.wiki/w/Stripped_Log).
+
+Please note that air blocks (`minecraft:air`) are not included by default.
+
+Please note that for fluids it's best to use the fluid tag keys `#water` and/or `#lava`, since the block ID `minecraft:water`/`minecraft:lava` only includes non-flowing liquids.
+
+Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block ID.
 
 ### Heightmap preset types
 
@@ -1070,7 +1076,7 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, 
 
 ### yBounds example
 
-The `yBounds` can be useful to take measurements of the surface of underground caves or The Nether dimension. For example: `GET /heightmap?dimension=nether&blocks=air,lava,magma_block&yBounds=..100`, resulting in this response:
+The `yBounds` can be useful to take measurements of the surface of underground caves or The Nether dimension. For example: `GET /heightmap?dimension=nether&blocks=air,#lava,magma_block&yBounds=..100`. This starts measurements at Y=100, below the typical upper ceiling of The Nether dimension. This results in this response:
 
 ```json
 [

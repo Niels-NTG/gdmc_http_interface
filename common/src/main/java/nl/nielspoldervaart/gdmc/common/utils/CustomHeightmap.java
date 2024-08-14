@@ -3,16 +3,20 @@ package nl.nielspoldervaart.gdmc.common.utils;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.util.BitStorage;
 import net.minecraft.util.Mth;
 import net.minecraft.util.SimpleBitStorage;
 import net.minecraft.util.StringRepresentable;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.material.Fluid;
 
 import java.util.ArrayList;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class CustomHeightmap {
 
@@ -21,7 +25,7 @@ public class CustomHeightmap {
 	private final ChunkAccess chunk;
 	private final MinMaxBounds.Ints yBounds;
 
-	public CustomHeightmap(ChunkAccess chunk, Types heightmapType, MinMaxBounds.Ints yBounds) {
+	private CustomHeightmap(ChunkAccess chunk, Types heightmapType, MinMaxBounds.Ints yBounds) {
 		this.isOpaque = heightmapType.isOpaque();
 		this.chunk = chunk;
 		int i = Mth.ceillog2(chunk.getHeight() + 1);
@@ -29,7 +33,7 @@ public class CustomHeightmap {
 		this.yBounds = yBounds;
 	}
 
-	public CustomHeightmap(ChunkAccess chunk, Predicate<BlockState> isOpaque, MinMaxBounds.Ints yBounds) {
+	private CustomHeightmap(ChunkAccess chunk, Predicate<BlockState> isOpaque, MinMaxBounds.Ints yBounds) {
 		this.isOpaque = isOpaque;
 		this.chunk = chunk;
 		int i = Mth.ceillog2(chunk.getHeight() + 1);
@@ -51,12 +55,12 @@ public class CustomHeightmap {
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
 		int yMax = customHeightmap.yBounds.max().orElse(chunk.getMaxBuildHeight());
 		int yMin = customHeightmap.yBounds.min().orElse(chunk.getMinBuildHeight());
-		BlockPos.MutableBlockPos blockpos$mutableblockpos = new BlockPos.MutableBlockPos();
-		for (int x = 0; x < 16; ++x) {
-			for (int z = 0; z < 16; ++z) {
-				for (int y = yMax - 1; y >= yMin; --y) {
-					blockpos$mutableblockpos.set(x, y, z);
-					BlockState blockstate = chunk.getBlockState(blockpos$mutableblockpos);
+		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				for (int y = yMax - 1; y >= yMin; y--) {
+					blockPos.set(x, y, z);
+					BlockState blockstate = chunk.getBlockState(blockPos);
 					customHeightmap.setHeight(x, z, y + 1);
 					if (customHeightmap.isOpaque.test(blockstate)) {
 						break;
@@ -83,11 +87,22 @@ public class CustomHeightmap {
 		return x + z * 16;
 	}
 
-	public static boolean hasBlockTagKey(BlockState blockState, ArrayList<String> inputBlockTagLocationKeyList) {
+	private static boolean hasBlockTagKey(BlockState blockState, ArrayList<String> inputBlockTagLocationKeyList) {
 		if (inputBlockTagLocationKeyList.isEmpty()) {
 			return false;
 		}
-		return inputBlockTagLocationKeyList.stream().anyMatch(inputBlockTagLocationKey -> blockState.getTags().anyMatch(blockTagKey -> blockTagKey.location().toString().equals(inputBlockTagLocationKey)));
+		return inputBlockTagLocationKeyList.stream().anyMatch(inputBlockTagLocationKey -> {
+			Stream<TagKey<Fluid>> fluidStateTagKeys = blockState.getFluidState().getTags();
+			Stream<TagKey<Block>> blockTagKeys = blockState.getTags();
+			if (fluidStateTagKeys.anyMatch(fluidTagKey -> isSameTagLocationName(fluidTagKey, inputBlockTagLocationKey))) {
+				return true;
+			}
+			return blockTagKeys.anyMatch(blockTagKey -> isSameTagLocationName(blockTagKey, inputBlockTagLocationKey));
+		});
+	}
+
+	private static boolean isSameTagLocationName(TagKey<?> tagKey, String inputTagLocationKey) {
+		return tagKey.location().toString().equals(inputTagLocationKey);
 	}
 
 	private static final Predicate<BlockState> NO_PLANTS = blockState ->

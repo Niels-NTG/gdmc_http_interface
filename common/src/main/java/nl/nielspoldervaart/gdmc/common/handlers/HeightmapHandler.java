@@ -42,7 +42,10 @@ public class HeightmapHandler extends HandlerBase {
         // Get query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
 
-        // Get comma-separated list of block IDs or block tag keys to use for custom heightmap definition.
+        // Get comma-separated list of block IDs, block tag keys or fluid tag keys to use for custom heightmap definition.
+        // https://minecraft.wiki/w/Java_Edition_data_values#Blocks
+        // https://minecraft.wiki/w/Tag#Block_tags_2
+        // https://minecraft.wiki/w/Tag#Fluid_tags
         String customTransparentBlocksString = queryParams.getOrDefault("blocks", "");
         Stream<String> customTransparentBlocksList = customTransparentBlocksString.isBlank() ? null : Arrays.stream(customTransparentBlocksString.split(","));
 
@@ -79,7 +82,6 @@ public class HeightmapHandler extends HandlerBase {
     }
 
     private int[][] getHeightmap(ServerLevel serverlevel, String dimension, MinMaxBounds.Ints yBounds, Stream<String> blockList) {
-
         CommandSourceStack commandSourceStack = createCommandSource(
             "GDMC-HeightmapHandler",
             dimension,
@@ -156,7 +158,7 @@ public class HeightmapHandler extends HandlerBase {
         return new int[xSize][zSize];
     }
 
-    public static String formatBlockTagKeyLocation(String inputBlockTagKey) {
+    private static String formatBlockTagKeyLocation(String inputBlockTagKey) {
         if (inputBlockTagKey.startsWith("#")) {
             inputBlockTagKey = inputBlockTagKey.replaceFirst("^#", "");
         }
@@ -166,7 +168,13 @@ public class HeightmapHandler extends HandlerBase {
         return inputBlockTagKey;
     }
 
-    public static boolean isExistingBlockTagKey(String blockTagKeyString, CommandSourceStack commandSourceStack) {
+    private static boolean isExistingBlockTagKey(String blockTagKeyString, CommandSourceStack commandSourceStack) {
+        // Since fluid tag keys are not included in any public list (that I know of), check for these manually.
+        // https://minecraft.wiki/w/Tag#Fluid_tags
+        if (blockTagKeyString.equals("minecraft:water") || blockTagKeyString.equals("minecraft:lava")) {
+            return true;
+        }
+        // Check if block tag key exists https://minecraft.wiki/w/Tag#Block_tags_2
         return BlocksHandler.getBlockRegisteryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> existingTag.key().location().toString().equals(blockTagKeyString));
     }
 
