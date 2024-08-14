@@ -903,7 +903,7 @@ Endpoint for reading all [players](https://minecraft.wiki/w/Player) from the wor
 |-------------|-------------------------------------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.wiki/w/Player.dat_format#NBT_structure) in response                                                                                              |
 | selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.wiki/w/Target_selectors) string for players. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.    |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.    |
 
 ## Request headers
 
