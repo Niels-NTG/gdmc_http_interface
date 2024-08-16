@@ -37,7 +37,7 @@ public class GdmcHttpConfig {
 			bufferedWriter.write(json.toString());
 			bufferedWriter.close();
 		} catch (IOException e) {
-			GdmcHttpMod.LOGGER.error("Failed to save config file", e.getMessage());
+			GdmcHttpMod.LOGGER.error("Failed to save config file: {}", e.getMessage());
 		}
 	}
 
