@@ -29,7 +29,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 	public static String MOD_VERSION;
 
 	// Directly reference a log4j logger.
-	private static final Logger LOGGER = LogManager.getLogger(MODID);
+	public static final Logger LOGGER = LogManager.getLogger(MODID);
 	private static String configFilePath;
 
 	@Override

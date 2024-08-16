@@ -11,6 +11,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
+import nl.nielspoldervaart.gdmc.fabric.GdmcHttpMod;
 
 public class GdmcHttpConfig {
 
@@ -36,7 +37,7 @@ public class GdmcHttpConfig {
 			bufferedWriter.write(json.toString());
 			bufferedWriter.close();
 		} catch (IOException e) {
-			e.printStackTrace();
+			GdmcHttpMod.LOGGER.error("Failed to save config file", e.getMessage());
 		}
 	}
 
