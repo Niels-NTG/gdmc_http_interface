@@ -73,7 +73,7 @@ The responses for all endpoints return with the following headers, unless stated
 | Content-Disposition         | `inline`                          |             |
 | Content-Type                | `application/json; charset=UTF-8` |             |
 
-# Send Commands `POST /commands`
+# ⚙️ Send Commands `POST /commands`
 
 Send one or more Minecraft console commands to the server. For the full list of all commands consult the [Minecraft commands documentation](https://minecraft.wiki/w/Commands#List_and_summary_of_commands).
 
@@ -175,7 +175,7 @@ each command will be executed line by line in the context of the overworld dimen
 ]
 ```
 
-# Read blocks `GET /blocks`
+# 🧱 Read blocks `GET /blocks`
 
 Get information for one or more blocks in a given area.
 
@@ -316,7 +316,7 @@ To get information such as the contents of a chest, use `includeData=true` as pa
 ```
 Note that that block data such as the contents of a chest are formatted as an [SNBT string](https://minecraft.wiki/w/NBT_format#SNBT_format).
 
-# Place blocks `PUT /blocks`
+# 🧱 Place blocks `PUT /blocks`
 
 Place one or more blocks into the world.
 
@@ -426,7 +426,7 @@ This returns:
 
 Where each entry corresponds to a placement instruction, where `"status": 1` indicates a success, `"status": 0` that a block of that type is already there. This zero status may also appear when something else went wrong, such as when an invalid block ID was given. In such cases there also be a `"message"` attribute with an error message.
 
-# Read biomes `GET /biomes`
+# 🏜️ Read biomes `GET /biomes`
 
 Get [biome](https://minecraft.wiki/w/Biome#List_of_biomes) information in a given area.
 
@@ -504,7 +504,7 @@ For getting the biomes of a row of blocks, request `GET /biomes?x=2350&y=64&z=-7
 ]
 ```
 
-# Read chunk data `GET /chunks`
+# 📦 Read chunk data `GET /chunks`
 
 Read [chunks](https://minecraft.wiki/w/Chunk) within a given range and return it as [chunk data](https://minecraft.wiki/w/Chunk_format).
 
@@ -569,7 +569,7 @@ Get a single chunk at position x=0, z=8 in the Nether with the request `GET /chu
 {ChunkDX:1,ChunkDZ:1,ChunkX:0,ChunkZ:8,Chunks:[{DataVersion:3578,Heightmaps:{MOTION_BLOCKING:[L;2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L, ...
 ```
 
-# Create NBT structure file `GET /structure`
+# 🏗️ Create NBT structure file `GET /structure`
 
 Create an [NBT](https://minecraft.wiki/w/NBT_format) structure file from an area of the world.
 
@@ -632,7 +632,7 @@ Note that the response returns a 403 error code if the `withinBuilArea` flag is 
 
 The request `GET /structure?x=87&y=178&z=247&dx=10&dy=10&dz=10&dimension=nether` gets us a 10x10x10 area from The Nether. Entities such as mobs in that cube-shaped area are not included, since the request does not have the `entities=true` parameter. Leaving the request headers to its defaults this yields a gzip-compressed binary-encoded NBT data that we can save to a file, manipulate using an external tool, and place back into the world using the [Structure Block](https://minecraft.wiki/w/Structure_Block) or the `POST /structure` endpoint.
 
-# Place NBT structure file `POST /structure`
+# 🏗️ Place NBT structure file `POST /structure`
 
 Place an [NBT](https://minecraft.wiki/w/NBT_format) structure file into the world. These files can be created by the [Structure Block](https://minecraft.wiki/w/Structure_Block), the `GET /structure` endpoint, as well as other means.
 
@@ -686,7 +686,7 @@ Using the [Structure Block](https://minecraft.wiki/w/Structure_Block), [save](ht
 
 Now in Minecraft load the Minecraft world you want to place this structure in, pick a location and place it there using this endpoint. To place the it at location x=102, y=67, z=-21 with entities, include the file as the request body to request `POST /structure?x=102&y=67&z=-21&entities=true`.
 
-# Read entities `GET /entities`
+# 🐷 Read entities `GET /entities`
 
 Endpoint for reading all [entities](https://minecraft.wiki/w/Entity) from within a certain area of the world.
 
@@ -751,7 +751,7 @@ For a pen of various different farm animals of the size of 10 blocks wide and 10
 ]
 ```
 
-# Create entities `PUT /entities`
+# 🐷 Create entities `PUT /entities`
 
 Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity) into the world such as [mobs](https://minecraft.wiki/w/Mob), [items](https://minecraft.wiki/w/Item_(entity)), [item frames](https://minecraft.wiki/w/Item_Frame), [painting](https://minecraft.wiki/w/Painting) and [projectiles](https://minecraft.wiki/w/Snowball). This endpoint has feature-parity with the [/summon command](https://minecraft.wiki/w/Commands/summon), meaning it takes the same options and has the same constraints.
 
@@ -811,7 +811,7 @@ For placing a red cat that's invulnerable and permanently on fire, reproduction 
 ]
 ```
 
-# Edit entities `PATCH /entities`
+# 🐷 Edit entities `PATCH /entities`
 
 Endpoint for changing the properties of [entities](https://minecraft.wiki/w/Entity) that are already present in the world.
 
@@ -855,7 +855,7 @@ When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (ob
 ]
 ```
 
-# Remove entities `DELETE /entities`
+# 🐷 Remove entities `DELETE /entities`
 
 Endpoint for remove one or more [entities](https://minecraft.wiki/w/Entity) from the world.
 
@@ -892,7 +892,7 @@ To remove a cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained usi
 ]
 ```
 
-# Read players `GET /players`
+# 👷 Read players `GET /players`
 
 Endpoint for reading all [players](https://minecraft.wiki/w/Player) from the world.
 
@@ -935,7 +935,7 @@ Given a world with 1 player named "Dev" in it, request `GET /players?includeData
 ]
 ```
 
-# Get build area `GET /buildarea`
+# 📐 Get build area `GET /buildarea`
 
 This returns the current specified build area. The build area can be set inside Minecraft using the `setbuildarea` command. This is just a convenience command to specify the area, it has no implications to where blocks can be placed or read on the map.
 
@@ -969,7 +969,7 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~200 ~200 ~200
 { "xFrom": 2353, "yFrom": 63, "zFrom": -78, "xTo": 2553, "yTo": 263, "zTo": 122 }
 ```
 
-# Get heightmap `GET /heightmap`
+# 🗺️ Get heightmap `GET /heightmap`
 
 Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build area of a given type.
 
@@ -1124,7 +1124,7 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, 
 ]
 ```
 
-# Read Minecraft version `GET /version`
+# 🪪 Read Minecraft version `GET /version`
 
 Get the current version of Minecraft.
 
@@ -1157,7 +1157,7 @@ Plain-text response with the Minecraft version number.
 1.20.2
 ```
 
-# Read HTTP interface information `OPTIONS /`
+# 🪪 Read HTTP interface information `OPTIONS /`
 
 Get the information about your instance of GDMC-HTTP and Minecraft.
 
