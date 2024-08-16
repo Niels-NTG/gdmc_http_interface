@@ -2,10 +2,16 @@ package nl.nielspoldervaart.gdmc.common.utils;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.util.zip.GZIPOutputStream;
 
 public class TagUtils {
 
@@ -94,5 +100,25 @@ public class TagUtils {
 			tag.putString("id", entityId);
 		}
 		return entity.saveWithoutId(tag);
+	}
+
+	public static byte[] NBTToBytes(CompoundTag tag, boolean returnCompressed) throws IOException {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		if (returnCompressed) {
+			GZIPOutputStream dos = new GZIPOutputStream(baos);
+			NbtIo.writeCompressed(tag, dos);
+			dos.flush();
+			return baos.toByteArray();
+		}
+		DataOutputStream dos = new DataOutputStream(baos);
+		NbtIo.write(tag, dos);
+		dos.flush();
+		return baos.toByteArray();
+	}
+
+	public enum StructureEncoding {
+		NBT_UNCOMPRESSED,
+		NBT_COMPRESSED,
+		SNBT
 	}
 }

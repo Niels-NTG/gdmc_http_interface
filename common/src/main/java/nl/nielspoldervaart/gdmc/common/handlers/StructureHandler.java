@@ -6,10 +6,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Vec3i;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
@@ -21,17 +18,16 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
+import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-import java.util.zip.GZIPOutputStream;
 
 public class StructureHandler extends HandlerBase {
 
@@ -119,7 +115,7 @@ public class StructureHandler extends HandlerBase {
 
 		Headers requestHeaders = httpExchange.getRequestHeaders();
 
-		StructureEncoding encoding = StructureEncoding.NBT_UNCOMPRESSED;
+		TagUtils.StructureEncoding encoding = TagUtils.StructureEncoding.NBT_UNCOMPRESSED;
 
 		switch (httpExchange.getRequestMethod().toLowerCase()) {
 			case "post" -> {
@@ -131,8 +127,8 @@ public class StructureHandler extends HandlerBase {
 				// SNBT format (https://minecraft.wiki/w/NBT_format#SNBT_format).
 				String contentEncodingHeader = getHeader(requestHeaders, "Content-Encoding", "*");
 				switch (contentEncodingHeader) {
-					case "gzip" -> encoding = StructureEncoding.NBT_COMPRESSED;
-					case "text/plain" -> encoding = StructureEncoding.SNBT;
+					case "gzip" -> encoding = TagUtils.StructureEncoding.NBT_COMPRESSED;
+					case "text/plain" -> encoding = TagUtils.StructureEncoding.SNBT;
 				}
 				postStructureHandler(httpExchange, encoding);
 			}
@@ -140,13 +136,13 @@ public class StructureHandler extends HandlerBase {
 				// If accept header has "text/plain", return structure file as an SNBT string.
 				String acceptHeader = getHeader(requestHeaders, "Accept", "application/octet-stream");
 				if (acceptHeader.equals("text/plain")) {
-					encoding = StructureEncoding.SNBT;
+					encoding = TagUtils.StructureEncoding.SNBT;
 				} else {
 					// If not, assume the file is in binary format. If "Accept-Encoding" header is set to "gzip"
 					// (both default) compress the result using GZIP before sending out the response.
 					String acceptEncodingHeader = getHeader(requestHeaders, "Accept-Encoding", "gzip");
 					if (acceptEncodingHeader.contains("gzip")) {
-						encoding = StructureEncoding.NBT_COMPRESSED;
+						encoding = TagUtils.StructureEncoding.NBT_COMPRESSED;
 					}
 				}
 				getStructureHandler(httpExchange, encoding);
@@ -155,7 +151,7 @@ public class StructureHandler extends HandlerBase {
 		}
 	}
 
-	private void postStructureHandler(HttpExchange httpExchange, StructureEncoding encoding) throws IOException {
+	private void postStructureHandler(HttpExchange httpExchange, TagUtils.StructureEncoding encoding) throws IOException {
 		JsonObject responseValue;
 
 		CompoundTag structureCompound;
@@ -168,14 +164,14 @@ public class StructureHandler extends HandlerBase {
 		} catch (IOException e1) {
 			throw new HttpException("Could not process request body: " + e1.getMessage(), 400);
 		}
-		if (encoding == StructureEncoding.NBT_COMPRESSED || encoding == StructureEncoding.NBT_UNCOMPRESSED) {
+		if (encoding == TagUtils.StructureEncoding.NBT_COMPRESSED || encoding == TagUtils.StructureEncoding.NBT_UNCOMPRESSED) {
 			try {
 				// Read request body into NBT data compound that can be placed in the world.
 				structureCompound = NbtIo.readCompressed(new ByteArrayInputStream(outputStream.toByteArray()));
 			} catch (IOException e2) {
 				// If header states the content should be compressed but isn't, throw an error. Otherwise, try
 				// reading the content again, assuming it is not compressed.
-				if (encoding == StructureEncoding.NBT_COMPRESSED) {
+				if (encoding == TagUtils.StructureEncoding.NBT_COMPRESSED) {
 					throw new HttpException("Could not process request body: " + e2.getMessage(), 400);
 				}
 				try {
@@ -274,7 +270,7 @@ public class StructureHandler extends HandlerBase {
 		resolveRequest(httpExchange, responseValue.toString());
 	}
 
-	private void getStructureHandler(HttpExchange httpExchange, StructureEncoding encoding) throws IOException {
+	private void getStructureHandler(HttpExchange httpExchange, TagUtils.StructureEncoding encoding) throws IOException {
 
 		ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -303,7 +299,7 @@ public class StructureHandler extends HandlerBase {
 		setDefaultResponseHeaders(responseHeaders);
 
 		// Serialize CompoundTag to SNBT format.
-		if (encoding == StructureEncoding.SNBT) {
+		if (encoding == TagUtils.StructureEncoding.SNBT) {
 			String responseString = newStructureCompoundTag.toString();
 
 			setResponseHeadersContentTypePlain(responseHeaders);
@@ -311,31 +307,11 @@ public class StructureHandler extends HandlerBase {
 			return;
 		}
 
-		// Create gzipped version of the binary NBT data.
-		boolean returnCompressed = encoding == StructureEncoding.NBT_COMPRESSED;
+		boolean returnCompressed = encoding == TagUtils.StructureEncoding.NBT_COMPRESSED;
 		setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
 
-		ByteArrayOutputStream boas = new ByteArrayOutputStream();
-		if (returnCompressed) {
-			GZIPOutputStream dos = new GZIPOutputStream(boas);
-			NbtIo.writeCompressed(newStructureCompoundTag, dos);
-			dos.flush();
-			byte[] responseBytes = boas.toByteArray();
-
-			resolveRequest(httpExchange, responseBytes);
-			return;
-		}
-		DataOutputStream dos = new DataOutputStream(boas);
-		NbtIo.write(newStructureCompoundTag, dos);
-		dos.flush();
-		byte[] responseBytes = boas.toByteArray();
-
-		resolveRequest(httpExchange, responseBytes);
+		// Create gzipped version of the binary NBT data.
+		resolveRequest(httpExchange, TagUtils.NBTToBytes(newStructureCompoundTag, returnCompressed));
 	}
 
-	private enum StructureEncoding {
-		NBT_UNCOMPRESSED,
-		NBT_COMPRESSED,
-		SNBT
-	}
 }

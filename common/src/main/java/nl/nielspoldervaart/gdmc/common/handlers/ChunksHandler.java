@@ -4,7 +4,6 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
@@ -12,13 +11,11 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
+import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.zip.GZIPOutputStream;
 
 public class ChunksHandler extends HandlerBase {
 
@@ -140,21 +137,6 @@ public class ChunksHandler extends HandlerBase {
 
         setResponseHeadersContentTypeBinary(responseHeaders, returnCompressed);
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        if (returnCompressed) {
-            GZIPOutputStream dos = new GZIPOutputStream(baos);
-            NbtIo.writeCompressed(bodyNBT, dos);
-            dos.flush();
-            byte[] responseBytes = baos.toByteArray();
-
-            resolveRequest(httpExchange, responseBytes);
-            return;
-        }
-        DataOutputStream dos = new DataOutputStream(baos);
-        NbtIo.write(bodyNBT, dos);
-        dos.flush();
-        byte[] responseBytes = baos.toByteArray();
-
-        resolveRequest(httpExchange, responseBytes);
+        resolveRequest(httpExchange, TagUtils.NBTToBytes(bodyNBT, returnCompressed));
     }
 }
