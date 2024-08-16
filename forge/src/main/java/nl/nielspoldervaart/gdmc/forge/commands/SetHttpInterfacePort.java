@@ -23,7 +23,7 @@ public final class SetHttpInterfacePort {
 	public static int unsetInterfacePort(CommandContext<CommandSourceStack> commandSourceStack) {
 		int defaultPort = GdmcHttpConfig.HTTP_INTERFACE_PORT.getDefault();
 		GdmcHttpConfig.HTTP_INTERFACE_PORT.set(defaultPort);
-		Feedback.sendSucces(
+		Feedback.sendSuccess(
 			commandSourceStack,
 			Feedback.chatMessage("Port changed back to default value of ").append(Feedback.copyOnClickText(String.valueOf(defaultPort))).append(". Reload the world for it to take effect.")
 		);
@@ -33,7 +33,7 @@ public final class SetHttpInterfacePort {
 	public static int setInterfacePort(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
 		try {
 			GdmcHttpConfig.HTTP_INTERFACE_PORT.set(newPortNumber);
-			Feedback.sendSucces(
+			Feedback.sendSuccess(
 				commandSourceContext,
 				Feedback.chatMessage("Port changed to ").append(Feedback.copyOnClickText(String.valueOf(newPortNumber))).append(". Reload the world for it to take effect.")
 			);

@@ -11,7 +11,7 @@ public class GdmcHttpServer {
     private static HttpServer httpServer;
     public static MinecraftServer mcServer;
 
-    public static boolean hasHtppServerStarted = false;
+    public static boolean hasHttpServerStarted = false;
 
     public static int getCurrentHttpPort() {
         return httpServer.getAddress().getPort();
@@ -23,14 +23,14 @@ public class GdmcHttpServer {
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();
-        hasHtppServerStarted = true;
+        hasHttpServerStarted = true;
     }
 
     public static void stopServer() {
         if (httpServer != null) {
             httpServer.stop(5);
         }
-        hasHtppServerStarted = false;
+        hasHttpServerStarted = false;
     }
 
     private static void createContexts() {

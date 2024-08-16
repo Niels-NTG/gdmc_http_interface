@@ -40,8 +40,7 @@ public class ChatComponentDataExtractor {
 
 		private static void extractValues(JsonObject targetJson, MutableComponent component) {
 			ComponentContents componentContents = component.getContents();
-			if (componentContents != ComponentContents.EMPTY && componentContents instanceof TranslatableContents) {
-				TranslatableContents translatableContents = (TranslatableContents) componentContents;
+			if (componentContents != ComponentContents.EMPTY && componentContents instanceof TranslatableContents translatableContents) {
 				if (translatableContents.getArgs().length > 0) {
 					JsonArray jsonArgsArray = new JsonArray();
 					for (Object object : translatableContents.getArgs()) {

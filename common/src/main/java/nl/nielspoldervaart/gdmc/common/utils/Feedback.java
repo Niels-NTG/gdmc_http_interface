@@ -23,7 +23,7 @@ public class Feedback {
 		return Component.literal(str).withStyle((style) -> style.withUnderlined(true).withClickEvent(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, clipboardContent)).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.copy.click"))).withInsertion(str));
 	}
 
-	public static void sendSucces(CommandContext<CommandSourceStack> commandSourceContext, MutableComponent message) {
+	public static void sendSuccess(CommandContext<CommandSourceStack> commandSourceContext, MutableComponent message) {
 		CommandSourceStack source = commandSourceContext.getSource();
 		#if (MC_VER == MC_1_19_2)
 			source.sendSuccess(message, true);

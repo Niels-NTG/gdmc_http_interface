@@ -30,7 +30,7 @@ public final class SetBuildAreaCommand {
 
     private static int unsetBuildArea(CommandContext<CommandSourceStack> commandSourceStackCommandContext) {
         BuildArea.unsetBuildArea();
-        Feedback.sendSucces(
+        Feedback.sendSuccess(
             commandSourceStackCommandContext,
             Feedback.chatMessage("Build area unset")
         );
@@ -39,7 +39,7 @@ public final class SetBuildAreaCommand {
 
     private static int setBuildArea(CommandContext<CommandSourceStack> commandSourceContext, BlockPos from, BlockPos to) {
         BuildArea.BuildAreaInstance newBuildArea = BuildArea.setBuildArea(from, to);
-        Feedback.sendSucces(
+        Feedback.sendSuccess(
             commandSourceContext,
             Feedback.chatMessage("Build area set ").append(
                 Feedback.copyOnClickText(

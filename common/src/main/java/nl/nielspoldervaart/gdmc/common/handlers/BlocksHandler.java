@@ -125,12 +125,8 @@ public class BlocksHandler extends HandlerBase {
         JsonArray responseObject;
 
         switch (httpExchange.getRequestMethod().toLowerCase()) {
-            case "put" -> {
-                responseObject = putBlocksHandler(httpExchange.getRequestBody());
-            }
-            case "get" -> {
-                responseObject = getBlocksHandler();
-            }
+            case "put" -> responseObject = putBlocksHandler(httpExchange.getRequestBody());
+            case "get" -> responseObject = getBlocksHandler();
             default -> throw new HttpException("Method not allowed. Only PUT and GET requests are supported.", 405);
         }
 
@@ -165,14 +161,14 @@ public class BlocksHandler extends HandlerBase {
         // due to there being multiple entries for the same block position.
         ConcurrentHashMap<Integer, PlacementInstructionFuturesRecord> placementInstructionsFuturesMap = new ConcurrentHashMap<>(inputList.size());
         // Map to hold parsed placement instructions, one indexed by the order it was submitted in so placement can be resolved in the right order if needed,
-        // the other indexed by BlockPos to enable quick lookup of adjecent block positions for updating the block's shape.
+        // the other indexed by BlockPos to enable quick lookup of adjacent block positions for updating the block's shape.
         ConcurrentHashMap<Integer, PlacementInstructionRecord> parsedPlacementInstructionsIndexMap = new ConcurrentHashMap<>(inputList.size());
         ConcurrentHashMap<BlockPos, PlacementInstructionRecord> parsedPlacementInstructionsBlockPosMap = new ConcurrentHashMap<>(inputList.size());
 
         // Map for storing the resulting parsing error, placement failure or placement success of each placement instruction from the input.
         ConcurrentHashMap<Integer, JsonObject> placementResult = new ConcurrentHashMap<>(inputList.size());
 
-        // Fill a map of records, each containing futures for parsing the BlockPos, BlockState and NBT CompoundTag data of a placement instruction.
+        // Fill a map with records, each containing futures for parsing the BlockPos, BlockState and NBT CompoundTag data of a placement instruction.
         // Submit all of these futures to the cached thread pool, which will resolve these in an undetermined yet efficient way.
         // https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/util/concurrent/Executors.html#newCachedThreadPool()
         ExecutorService executorService = Executors.newCachedThreadPool();
@@ -193,7 +189,7 @@ public class BlocksHandler extends HandlerBase {
         }
 
         // Go through all parsed placement instructions in parallel. First validate the placement instruction.
-        // For each invalid instruction a invalid status is generated on that index.
+        // For each invalid instruction an invalid status is generated on that index.
         ConcurrentHashMap<ChunkPos, LevelChunk> chunkPosMap = new ConcurrentHashMap<>();
         IntStream.range(0, inputList.size()).parallel().forEach(index -> {
 
@@ -245,7 +241,7 @@ public class BlocksHandler extends HandlerBase {
         });
 
         // Place blocks into world, including NBT data when present.
-        // Allow for parallisation if blocks do not need to be updated, speeding up placement significantly.
+        // Allow for parallelization if blocks do not need to be updated, speeding up placement significantly.
         IntStream iterator = canPlaceInParallel ? IntStream.range(0, inputList.size()).parallel() : IntStream.range(0, inputList.size());
         iterator.forEach(index -> {
             PlacementInstructionRecord placementInstruction = parsedPlacementInstructionsIndexMap.get(index);
@@ -418,16 +414,16 @@ public class BlocksHandler extends HandlerBase {
             }
         }
 
-        // If data field is present in JsonObject serialize to to a string so it can be parsed to a CompoundTag to set as NBT block entity data
+        // If data field is present in JsonObject serialize to a string so it can be parsed to a CompoundTag to set as NBT block entity data
         // for this block placement.
         String blockNBTString = "";
         if (json.has("data") && json.get("data").isJsonPrimitive()) {
             blockNBTString = json.get("data").getAsString();
         }
 
-        // Pass block Id and block state string into a Stringreader with the the block state parser.
+        // Pass block Id and block state string into a StringReader with the block state parser.
 	    return BlockStateParser.parseForBlock(
-            getBlockRegisteryLookup(commandSourceStack),
+            getBlockRegistryLookup(commandSourceStack),
             new StringReader(blockId + blockStateString + blockNBTString),
             true
         );
@@ -494,7 +490,7 @@ public class BlocksHandler extends HandlerBase {
         #endif
     }
 
-    public static HolderLookup<Block> getBlockRegisteryLookup(CommandSourceStack commandSourceStack) {
+    public static HolderLookup<Block> getBlockRegistryLookup(CommandSourceStack commandSourceStack) {
         #if (MC_VER == MC_1_19_2)
         return new CommandBuildContext(commandSourceStack.registryAccess()).holderLookup(Registry.BLOCK_REGISTRY);
         #else
@@ -514,10 +510,10 @@ public class BlocksHandler extends HandlerBase {
      * Actually places the block in the level.
      *
      * @param blockPos                  Target position of the to-be-placed block.
-     * @param blockState                {@link BlockState} of the to-be-placed block. This also contains the block ID (eg. {@code minecraft:stone} {@code minecraft:gold_block}).
+     * @param blockState                {@link BlockState} of the to-be-placed block. This also contains the block ID (e.g. {@code minecraft:stone} {@code minecraft:gold_block}).
      * @param level                     Level in which the block will be placed.
      * @param flags                     Block update flags (see {@link #getBlockFlags}).
-     * @return                          False if block at target position has the same {@link BlockState} as the input, if the target positions was outside of the world bounds or if it couldn't be placed for some other reason.
+     * @return                          False if block at target position has the same {@link BlockState} as the input, if the target positions was outside the world bounds or if it couldn't be placed for some other reason.
      */
     private boolean setBlock(BlockPos blockPos, BlockState blockState, ServerLevel level, LivingEntity blockPlaceEntity, int flags) throws ExecutionException, InterruptedException {
         // Submit setBlock function call to the Minecraft server thread, allowing Minecraft to schedule this call, preventing interruptions of the
@@ -525,7 +521,7 @@ public class BlocksHandler extends HandlerBase {
         CompletableFuture<Boolean> isBlockSetFuture = mcServer.submit(() -> {
 
             // If placement should not spawn drops, make sure any entities at that location are cleared to prevent items
-            // (eg. contents of a chest) from dropping.
+            // (e.g. contents of a chest) from dropping.
             if ((flags & Block.UPDATE_SUPPRESS_DROPS) != 0) {
                 BlockEntity blockEntityToClear = getExistingBlockEntity(blockPos, level);
                 Clearable.tryClear(blockEntityToClear);
@@ -618,7 +614,7 @@ public class BlocksHandler extends HandlerBase {
      * that has a stone block east from it will be updated to have the property {@code east=true}, making the fence
      * join up with the stone block.
      * <p>
-     * Shape of the block will remain unchanged if it has no adjecent blocks that influence its shape,
+     * Shape of the block will remain unchanged if it has no adjacent blocks that influence its shape,
      * if the final shape resolves to air, or if the block placement flags ({@link #getBlockFlags(boolean, boolean)}
      * do not allow for changing the block's shape.
      *
@@ -636,7 +632,7 @@ public class BlocksHandler extends HandlerBase {
         }
         // If block placement flags allow for updating the block based on neighbouring blocks, do so in the north, west,
         // south, east, up, down directions. Use block states from other placement instruction items to ensure the shape
-        // comforms when the placement instructions are resolved. If no placement instruction is present get the
+        // conforms when the placement instructions are resolved. If no placement instruction is present get the
         // neighbouring BlockState from any preloaded chunks. If null, load the block state from the level.
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockState newBlockState = inputBlockState;
@@ -706,7 +702,7 @@ public class BlocksHandler extends HandlerBase {
                 }
             }
 
-            private <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
+            private static <T extends Comparable<T>> String valueToName(Property<T> property, Comparable<?> propertyValue) {
                 return property.getName((T) propertyValue);
             }
         };

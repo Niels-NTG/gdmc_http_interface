@@ -173,7 +173,7 @@ public class StructureHandler extends HandlerBase {
 				// Read request body into NBT data compound that can be placed in the world.
 				structureCompound = NbtIo.readCompressed(new ByteArrayInputStream(outputStream.toByteArray()));
 			} catch (IOException e2) {
-				// If header states the content should be compressed but it isn't, throw an error. Otherwise, try
+				// If header states the content should be compressed but isn't, throw an error. Otherwise, try
 				// reading the content again, assuming it is not compressed.
 				if (encoding == StructureEncoding.NBT_COMPRESSED) {
 					throw new HttpException("Could not process request body: " + e2.getMessage(), 400);
@@ -222,7 +222,7 @@ public class StructureHandler extends HandlerBase {
 			int blockPlacementFlags = customFlags >= 0 ? customFlags : BlocksHandler.getBlockFlags(doBlockUpdates, spawnDrops);
 
 			// If placement should not spawn drops, make sure any entities at that location are cleared to prevent items
-			// (eg. contents of a chest) from dropping.
+			// (e.g. contents of a chest) from dropping.
 			ArrayList<BlockPos> positionsToClear = new ArrayList<>();
 			if ((blockPlacementFlags & Block.UPDATE_SUPPRESS_DROPS) != 0) {
 				structureCompound.getList("blocks", CompoundTag.TAG_COMPOUND).forEach(entry -> {

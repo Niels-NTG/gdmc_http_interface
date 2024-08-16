@@ -74,7 +74,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 	public void onPlayReady(ServerGamePacketListenerImpl handler, PacketSender sender, MinecraftServer server) {
 		ServerPlayer player = handler.getPlayer();
 		player.sendSystemMessage(
-			FabricGdmcHttpServer.hasHtppServerStarted ? successMessage() : failureMessage()
+			FabricGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage()
 		);
 	}
 

@@ -62,7 +62,7 @@ public final class GdmcHttpMod
     @SubscribeEvent
     public void onPlayerLogIn(PlayerLoggedInEvent event) {
         if (event.getEntity() != null) {
-            event.getEntity().sendSystemMessage(ForgeGdmcHttpServer.hasHtppServerStarted ? successMessage() : failureMessage());
+            event.getEntity().sendSystemMessage(ForgeGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage());
         }
     }
 

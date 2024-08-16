@@ -128,7 +128,7 @@ public abstract class HandlerBase implements HttpHandler {
     /**
      * Method that an endpoint handler class can use for executing a function.
      *
-     * @param httpExchange  HTTP request exhanger
+     * @param httpExchange  HTTP request exchanger
      * @throws IOException  Any errors caught should be dealt with in {@link #handle(HttpExchange)}.
      */
     protected abstract void internalHandle(HttpExchange httpExchange) throws IOException;
@@ -199,7 +199,7 @@ public abstract class HandlerBase implements HttpHandler {
     /**
      * Parse URL query string from {@code httpExchange.getRequestURI().getRawQuery()} into a convenient Map.
      *
-     * @param qs    Any string, preferably the query section from an URL.
+     * @param qs    Any string, preferably the query section from a URL.
      * @return      Map of String-String pairs.
      */
     protected static Map<String, String> parseQueryString(String qs) {

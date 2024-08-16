@@ -84,21 +84,11 @@ public class EntitiesHandler extends HandlerBase {
 		JsonArray response;
 
 		switch (method) {
-			case "put" -> {
-				response = putEntitiesHandler(httpExchange.getRequestBody());
-			}
-			case "get" -> {
-				response = getEntitiesHandler();
-			}
-			case "delete" -> {
-				response = deleteEntitiesHandler(httpExchange.getRequestBody());
-			}
-			case "patch" -> {
-				response = patchEntitiesHandler(httpExchange.getRequestBody());
-			}
-			default -> {
-				throw new HttpException("Method not allowed. Only PUT, GET, DELETE and PATCH requests are supported.", 405);
-			}
+			case "put" -> response = putEntitiesHandler(httpExchange.getRequestBody());
+			case "get" -> response = getEntitiesHandler();
+			case "delete" -> response = deleteEntitiesHandler(httpExchange.getRequestBody());
+			case "patch" -> response = patchEntitiesHandler(httpExchange.getRequestBody());
+			default -> throw new HttpException("Method not allowed. Only PUT, GET, DELETE and PATCH requests are supported.", 405);
 		}
 
 		// Response headers

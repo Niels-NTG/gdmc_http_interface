@@ -36,7 +36,7 @@ public class TagUtils {
 	 * does not exist at the source.
 	 *
 	 * @param targetCompound existing compound tag to merge into
-	 * @param patchCompound existing compoundtag to merge from
+	 * @param patchCompound existing compound tag to merge from
 	 * @return targetComponent
 	 */
 	public static CompoundTag mergeTags(CompoundTag targetCompound, CompoundTag patchCompound) {

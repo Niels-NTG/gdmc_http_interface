@@ -100,7 +100,7 @@ public class HeightmapHandler extends HandlerBase {
                     blockTagKeyList.add(blockString);
                 } else {
                     BlockStateParser.BlockResult blockResult = BlockStateParser.parseForBlock(
-                        BlocksHandler.getBlockRegisteryLookup(commandSourceStack),
+                        BlocksHandler.getBlockRegistryLookup(commandSourceStack),
                         new StringReader(blockString),
                         true
                     );
@@ -175,7 +175,7 @@ public class HeightmapHandler extends HandlerBase {
             return true;
         }
         // Check if block tag key exists https://minecraft.wiki/w/Tag#Block_tags_2
-        return BlocksHandler.getBlockRegisteryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> existingTag.key().location().toString().equals(blockTagKeyString));
+        return BlocksHandler.getBlockRegistryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> existingTag.key().location().toString().equals(blockTagKeyString));
     }
 
     private static ArrayList<ChunkPos> getChunkPosList() {
