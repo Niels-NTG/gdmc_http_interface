@@ -225,7 +225,7 @@ To get a the block at position x=28, y=67 and z=-73, request `GET /blocks?x=5525
 ]
 ```
 
-To get all block within a 2x2x2 area, request `GET /blocks?x=5525&y=62&z=4381&dx=2&dy=2&dz=2`, which returns a list with each block on a seperate line:
+To get all block within a 2x2x2 area, request `GET /blocks?x=5525&y=62&z=4381&dx=2&dy=2&dz=2`, which returns a list with each block on a separate line:
 
 ```json
 [
