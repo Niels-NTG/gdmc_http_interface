@@ -24,10 +24,6 @@ public class GdmcHttpServer {
         createContexts();
         httpServer.start();
         hasHtppServerStarted = true;
-        // TODO create Queue on the HTTP server level when mcServer is busy so GDMC-HTTP
-//          can keep receiving responses while mcServer is busy.
-//          See what com.sun.net.httpserver.HttpServer can do for me here.
-//          https://www.geeksforgeeks.org/queue-interface-java/
     }
 
     public static void stopServer() {

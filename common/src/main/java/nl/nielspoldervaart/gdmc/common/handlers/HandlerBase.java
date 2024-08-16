@@ -51,8 +51,8 @@ public abstract class HandlerBase implements HttpHandler {
 
     protected static final Logger LOGGER = LogManager.getLogger();
 
-    public final MinecraftServer mcServer;
-    public HandlerBase(MinecraftServer mcServer) {
+    protected final MinecraftServer mcServer;
+    protected HandlerBase(MinecraftServer mcServer) {
         this.mcServer = mcServer;
     }
 
@@ -110,7 +110,7 @@ public abstract class HandlerBase implements HttpHandler {
      *                      given name is {@code null}, return the overworld.
      * @return              A level on {@link #mcServer}
      */
-    public ServerLevel getServerLevel(String levelName) {
+    protected ServerLevel getServerLevel(String levelName) {
         if (levelName != null) {
             levelName = levelName.toLowerCase();
             if (levelName.equals("nether") || levelName.equals("end")) {

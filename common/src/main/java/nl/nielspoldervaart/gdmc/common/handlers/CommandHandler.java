@@ -28,7 +28,7 @@ public class CommandHandler extends HandlerBase {
     }
 
     @Override
-    public void internalHandle(HttpExchange httpExchange) throws IOException {
+    protected void internalHandle(HttpExchange httpExchange) throws IOException {
 
 		if (!httpExchange.getRequestMethod().equalsIgnoreCase("post")) {
 			throw new HttpException("Method not allowed. Only POST requests are supported.", 405);

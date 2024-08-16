@@ -91,7 +91,7 @@ public class BlocksHandler extends HandlerBase {
     }
 
     @Override
-    public void internalHandle(HttpExchange httpExchange) throws IOException {
+    protected void internalHandle(HttpExchange httpExchange) throws IOException {
 
         // query parameters
         Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());

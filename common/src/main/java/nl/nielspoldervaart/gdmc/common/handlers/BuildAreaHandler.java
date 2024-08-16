@@ -14,7 +14,7 @@ public class BuildAreaHandler extends HandlerBase {
     }
 
     @Override
-    public void internalHandle(HttpExchange httpExchange) throws IOException {
+    protected void internalHandle(HttpExchange httpExchange) throws IOException {
 
         if (!httpExchange.getRequestMethod().equalsIgnoreCase("get")) {
             throw new HttpException("Method not allowed. Use GET method to request the build area.", 405);
