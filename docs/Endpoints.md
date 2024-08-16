@@ -216,12 +216,12 @@ To get a the block at position x=28, y=67 and z=-73, request `GET /blocks?x=5525
 
 ```json
 [
-  {
-	"id": "minecraft:grass_block",
-	"x": 5525,
-	"y": 62,
-	"z": 4381
-  }
+	{
+		"id": "minecraft:grass_block",
+		"x": 5525,
+		"y": 62,
+		"z": 4381
+	}
 ]
 ```
 
@@ -300,18 +300,18 @@ To get information such as the contents of a chest, use `includeData=true` as pa
 
 ```json
 [
-  {
-	"id": "minecraft:chest",
-	"x": -300,
-	"y": 66,
-	"z": 26,
-	"state": {
-	  "facing": "west",
-	  "type": "single",
-	  "waterlogged": "false"
-	},
-	"data": "{Items:[{Count:1b,Slot:0b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}},{Count:3b,Slot:2b,id:\"minecraft:lantern\"},{Count:7b,Slot:4b,id:\"minecraft:dandelion\"}]}"
-  }
+	{
+		"id": "minecraft:chest",
+		"x": -300,
+		"y": 66,
+		"z": 26,
+		"state": {
+			"facing": "west",
+			"type": "single",
+			"waterlogged": "false"
+		},
+		"data": "{Items:[{Count:1b,Slot:0b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}},{Count:3b,Slot:2b,id:\"minecraft:lantern\"},{Count:7b,Slot:4b,id:\"minecraft:dandelion\"}]}"
+	}
 ]
 ```
 Note that that block data such as the contents of a chest are formatted as an [SNBT string](https://minecraft.wiki/w/NBT_format#SNBT_format).
@@ -390,24 +390,24 @@ We can place a chest containing a few items and a quartz block next to it by sen
 
 ```json
 [
-  {
-	"id": "minecraft:chest",
-	"x": -55,
-	"y": "~2",
-	"z": 77,
-	"state": {
-	  "facing": "east",
-	  "type": "single",
-	  "waterlogged": "false"
+	{
+		"id": "minecraft:chest",
+		"x": -55,
+		"y": "~2",
+		"z": 77,
+		"state": {
+			"facing": "east",
+			"type": "single",
+			"waterlogged": "false"
+		},
+		"data": "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
 	},
-	"data": "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
-  },
-  {
-	"id": "minecraft:quartz_block",
-	"x": -56,
-	"y": "~2",
-	"z": 77
-  }
+	{
+		"id": "minecraft:quartz_block",
+		"x": -56,
+		"y": "~2",
+		"z": 77
+	}
 ]
 ```
 
@@ -415,12 +415,12 @@ This returns:
 
 ```json
 [
-  {
-	"status": 1
-  },
-  {
-	"status": 1
-  }
+	{
+		"status": 1
+	},
+	{
+		"status": 1
+	}
 ]
 ```
 
@@ -725,14 +725,14 @@ The response follows this [schema](./schema.entities.get.json).
 Given a pit with 3 cats in it, the request `GET /entities?x=305&y=65&z=26&dx=10&dy=10&dz=10&includeData=true` may return:
 ```json
 [
-  {
-	"uuid": "26a2bf9a-9dbf-492a-910b-516f4322f3f2",
-	"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:40.0d,Modifiers:[{Amount:-0.0076567387992512986d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;868537497,-1023129007,-1268290039,-433935503]}],Name:\"minecraft:generic.follow_range\"},{Base:25.0d,Name:\"minecraft:generic.max_health\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.17499999701976776d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},Bred:0b,CanPickUpLoot:0b,CanUpdate:1b,ChestedHorse:0b,DeathTime:0s,DespawnDelay:39171,EatingHaystack:0b,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:25.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-296.3192426279384d,67.0d,35.572736569528644d],Rotation:[91.85614f,0.0f],Strength:5,Tame:0b,Temper:0,UUID:[I;648200090,-1648408278,-1861529233,1126364146],Variant:2,id:\"minecraft:trader_llama\"}"
-  },
-  {
-	"uuid": "58c392b0-9eee-4174-a807-3b975a2369f4",
-	"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:16.0d,Modifiers:[{Amount:0.026007290323946414d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;110803122,-1164752996,-1083557595,-449135232]}],Name:\"minecraft:generic.follow_range\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.699999988079071d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,DeathTime:0s,DespawnDelay:39172,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[],Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],Offers:{Recipes:[{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:small_dripleaf\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:birch_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:jungle_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:12,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:red_tulip\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:moss_block\"},specialPrice:0,uses:0,xp:1},{buy:{Count:6b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:6,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:blue_ice\"},specialPrice:0,uses:0,xp:1}]},OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-302.76158910022104d,66.0d,35.324351502361225d],Rotation:[124.32312f,0.0f],UUID:[I;1489212080,-1628552844,-1475921001,1512270324],id:\"minecraft:wandering_trader\"}"
-  }
+	{
+		"uuid": "26a2bf9a-9dbf-492a-910b-516f4322f3f2",
+		"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:40.0d,Modifiers:[{Amount:-0.0076567387992512986d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;868537497,-1023129007,-1268290039,-433935503]}],Name:\"minecraft:generic.follow_range\"},{Base:25.0d,Name:\"minecraft:generic.max_health\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.17499999701976776d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},Bred:0b,CanPickUpLoot:0b,CanUpdate:1b,ChestedHorse:0b,DeathTime:0s,DespawnDelay:39171,EatingHaystack:0b,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:25.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-296.3192426279384d,67.0d,35.572736569528644d],Rotation:[91.85614f,0.0f],Strength:5,Tame:0b,Temper:0,UUID:[I;648200090,-1648408278,-1861529233,1126364146],Variant:2,id:\"minecraft:trader_llama\"}"
+	},
+	{
+		"uuid": "58c392b0-9eee-4174-a807-3b975a2369f4",
+		"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:16.0d,Modifiers:[{Amount:0.026007290323946414d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;110803122,-1164752996,-1083557595,-449135232]}],Name:\"minecraft:generic.follow_range\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.699999988079071d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,DeathTime:0s,DespawnDelay:39172,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[],Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],Offers:{Recipes:[{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:small_dripleaf\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:birch_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:jungle_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:12,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:red_tulip\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:moss_block\"},specialPrice:0,uses:0,xp:1},{buy:{Count:6b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:6,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:blue_ice\"},specialPrice:0,uses:0,xp:1}]},OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-302.76158910022104d,66.0d,35.324351502361225d],Rotation:[124.32312f,0.0f],UUID:[I;1489212080,-1628552844,-1475921001,1512270324],id:\"minecraft:wandering_trader\"}"
+	}
 ]
 ```
 This area happens to contain a wandering trader and their trusty lama.
@@ -845,7 +845,7 @@ For each patch instruction in the request, it returns a list with a `{ "status":
 
 ## Example
 
-When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#read-entities-get-entities) endpoint) into a red cat: `PATCH /entities` with the request body:
+When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#-read-entities-get-entities) endpoint) into a red cat: `PATCH /entities` with the request body:
 ```json
 [
 	{
@@ -885,7 +885,7 @@ For each patch instruction in the request, it returns a list with a `{ "status":
 
 ## Example
 
-To remove a cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#read-entities-get-entities) endpoint): `DELETE /entities` with the request body:
+To remove a cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#-read-entities-get-entities) endpoint): `DELETE /entities` with the request body:
 ```json
 [
     "475fb218-68f1-4464-8ac5-e559afd8e00d"
@@ -927,11 +927,11 @@ Given a world with 1 player named "Dev" in it, request `GET /players?includeData
 
 ```json
 [
-  {
-    "name": "Dev",
-	"uuid": "380df991-f603-344c-a090-369bad2a924a",
-    "data": "{AbsorptionAmount:0.0f,Air:300s,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.10000000149011612d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"}],Brain:{memories:{}},CanUpdate:1b,DataVersion:3120,DeathTime:0s,Dimension:\"minecraft:overworld\",EnderItems:[],FallDistance:0.0f,FallFlying:0b,Fire:-20s,Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[{Count:1b,Slot:0b,id:\"minecraft:obsidian\"},{Count:1b,Slot:1b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}}],Invulnerable:0b,Motion:[0.0d,0.0d,0.0d],OnGround:0b,PortalCooldown:0,Pos:[-3.483559135420974d,-58.74889429576954d,-16.579720966624766d],Rotation:[1.6493444f,24.599985f],Score:0,SelectedItemSlot:1,SleepTimer:0s,UUID:[I;940439953,-167562164,-1601161573,-1389718966],XpLevel:0,XpP:0.0f,XpSeed:-275312302,XpTotal:0,abilities:{flySpeed:0.05f,flying:1b,instabuild:1b,invulnerable:1b,mayBuild:1b,mayfly:1b,walkSpeed:0.1f},foodExhaustionLevel:0.0f,foodLevel:20,foodSaturationLevel:5.0f,foodTickTimer:0,playerGameType:1,recipeBook:{isBlastingFurnaceFilteringCraftable:0b,isBlastingFurnaceGuiOpen:0b,isFilteringCraftable:0b,isFurnaceFilteringCraftable:0b,isFurnaceGuiOpen:0b,isGuiOpen:0b,isSmokerFilteringCraftable:0b,isSmokerGuiOpen:0b,recipes:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"],toBeDisplayed:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"]},seenCredits:0b,warden_spawn_tracker:{cooldown_ticks:0,ticks_since_last_warning:8788,warning_level:0}}"
-  }
+	{
+		"name": "Dev",
+		"uuid": "380df991-f603-344c-a090-369bad2a924a",
+		"data": "{AbsorptionAmount:0.0f,Air:300s,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.10000000149011612d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"}],Brain:{memories:{}},CanUpdate:1b,DataVersion:3120,DeathTime:0s,Dimension:\"minecraft:overworld\",EnderItems:[],FallDistance:0.0f,FallFlying:0b,Fire:-20s,Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[{Count:1b,Slot:0b,id:\"minecraft:obsidian\"},{Count:1b,Slot:1b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}}],Invulnerable:0b,Motion:[0.0d,0.0d,0.0d],OnGround:0b,PortalCooldown:0,Pos:[-3.483559135420974d,-58.74889429576954d,-16.579720966624766d],Rotation:[1.6493444f,24.599985f],Score:0,SelectedItemSlot:1,SleepTimer:0s,UUID:[I;940439953,-167562164,-1601161573,-1389718966],XpLevel:0,XpP:0.0f,XpSeed:-275312302,XpTotal:0,abilities:{flySpeed:0.05f,flying:1b,instabuild:1b,invulnerable:1b,mayBuild:1b,mayfly:1b,walkSpeed:0.1f},foodExhaustionLevel:0.0f,foodLevel:20,foodSaturationLevel:5.0f,foodTickTimer:0,playerGameType:1,recipeBook:{isBlastingFurnaceFilteringCraftable:0b,isBlastingFurnaceGuiOpen:0b,isFilteringCraftable:0b,isFurnaceFilteringCraftable:0b,isFurnaceGuiOpen:0b,isGuiOpen:0b,isSmokerFilteringCraftable:0b,isSmokerGuiOpen:0b,recipes:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"],toBeDisplayed:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"]},seenCredits:0b,warden_spawn_tracker:{cooldown_ticks:0,ticks_since_last_warning:8788,warning_level:0}}"
+	}
 ]
 ```
 
@@ -966,7 +966,14 @@ A JSON response following this [schema](./schema.buildarea.get.json):
 After having set the build area in game with `/setbuildarea ~ ~ ~ ~200 ~200 ~200`, requesting the build area via `GET /getbuildarea` returns:
 
 ```json
-{ "xFrom": 2353, "yFrom": 63, "zFrom": -78, "xTo": 2553, "yTo": 263, "zTo": 122 }
+{
+	"xFrom": 2353,
+	"yFrom": 63,
+	"zFrom": -78,
+	"xTo": 2553,
+	"yTo": 263,
+	"zTo": 122
+}
 ```
 
 # 🗺️ Get heightmap `GET /heightmap`
@@ -992,7 +999,7 @@ Please note that air blocks (`minecraft:air`) are not included by default.
 
 Please note that for fluids it's best to use the fluid tag keys `#water` and/or `#lava`, since the block ID `minecraft:water`/`minecraft:lava` only includes non-flowing liquids.
 
-Just as with [`PUT /blocks`](#place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block ID.
+Just as with [`PUT /blocks`](#-place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block ID.
 
 ### Heightmap preset types
 
@@ -1060,17 +1067,17 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, 
 
 ```json
 [
-  [ 56, 56, 56, 56, 56, 57, 59, 59, 59, 59, 60 ],
-  [ 56, 56, 56, 56, 57, 57, 59, 59, 59, 59, 58 ],
-  [ 54, 56, 57, 59, 59, 59, 59, 59, 59, 60, 60 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
-  [ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58 ]
+	[ 56, 56, 56, 56, 56, 57, 59, 59, 59, 59, 60 ],
+	[ 56, 56, 56, 56, 57, 57, 59, 59, 59, 59, 58 ],
+	[ 54, 56, 57, 59, 59, 59, 59, 59, 59, 60, 60 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ], 
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58 ]
 ]
 ```
 
@@ -1080,17 +1087,17 @@ The `yBounds` can be useful to take measurements of the surface of underground c
 
 ```json
 [
-  [ 86, 79, 79, 81, 81, 82, 81, 83, 84, 98, 95 ],
-  [ 81, 75, 74, 81, 80, 81, 82, 83, 83, 84, 93 ],
-  [ 82, 80, 70, 81, 82, 81, 82, 81, 83, 82, 84 ],
-  [ 85, 70, 78, 82, 83, 82, 82, 81, 81, 83, 84 ],
-  [ 83, 76, 77, 82, 82, 83, 82, 81, 81, 83, 84 ],
-  [ 84, 78, 78, 82, 83, 82, 82, 81, 81, 83, 84 ],
-  [ 77, 77, 81, 82, 82, 83, 82, 81, 81, 83, 84 ],
-  [ 80, 79, 78, 81, 83, 81, 81, 82, 81, 83, 84 ],
-  [ 78, 78, 78, 82, 82, 80, 81, 82, 81, 83, 84 ],
-  [ 78, 78, 78, 81, 79, 81, 80, 82, 81, 83, 84 ],
-  [ 78, 78, 78, 80, 79, 81, 80, 82, 81, 83, 84 ]
+	[ 86, 79, 79, 81, 81, 82, 81, 83, 84, 98, 95 ],
+	[ 81, 75, 74, 81, 80, 81, 82, 83, 83, 84, 93 ],
+	[ 82, 80, 70, 81, 82, 81, 82, 81, 83, 82, 84 ],
+	[ 85, 70, 78, 82, 83, 82, 82, 81, 81, 83, 84 ],
+	[ 83, 76, 77, 82, 82, 83, 82, 81, 81, 83, 84 ],
+	[ 84, 78, 78, 82, 83, 82, 82, 81, 81, 83, 84 ],
+	[ 77, 77, 81, 82, 82, 83, 82, 81, 81, 83, 84 ],
+	[ 80, 79, 78, 81, 83, 81, 81, 82, 81, 83, 84 ],
+	[ 78, 78, 78, 82, 82, 80, 81, 82, 81, 83, 84 ],
+	[ 78, 78, 78, 81, 79, 81, 80, 82, 81, 83, 84 ],
+	[ 78, 78, 78, 80, 79, 81, 80, 82, 81, 83, 84 ]
 ]
 ```
 
@@ -1100,27 +1107,27 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, 
 
 ```json
 [
-  [68,68,66,65,65,65,72,72,72,74,74,74,71,65,65,65,65,65,68,71,71],
-  [67,68,66,65,65,72,72,73,72,72,74,71,71,64,64,64,64,64,68,68,71],
-  [66,67,67,65,65,72,73,74,73,72,71,71,63,63,63,63,63,63,63,68,68],
-  [66,66,66,66,65,72,72,73,72,72,63,63,63,63,63,63,63,63,63,63,63],
-  [65,66,65,65,65,64,72,72,72,63,63,63,63,63,63,63,63,63,63,63,63],
-  [64,64,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [64,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [65,65,65,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,67,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,67,66,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,67,67,66,66,65,65,64,64,63,63,64,64,64,64,64,65,65,65,64,64],
-  [66,67,67,66,72,72,72,65,64,64,64,64,65,65,65,65,66,66,66,66,66],
-  [66,67,67,72,72,75,72,72,65,65,65,65,65,66,66,66,67,67,67,67,67]
+	[ 68, 68, 66, 65, 65, 65, 72, 72, 72, 74, 74, 74, 71, 65, 65, 65, 65, 65, 68, 71, 71 ],
+	[ 67, 68, 66, 65, 65, 72, 72, 73, 72, 72, 74, 71, 71, 64, 64, 64, 64, 64, 68, 68, 71 ],
+	[ 66, 67, 67, 65, 65, 72, 73, 74, 73, 72, 71, 71, 63, 63, 63, 63, 63, 63, 63, 68, 68 ],
+	[ 66, 66, 66, 66, 65, 72, 72, 73, 72, 72, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 65, 66, 65, 65, 65, 64, 72, 72, 72, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 64, 64, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ], 
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 64, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 65, 65, 65, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 66, 66, 66, 65, 65, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 66, 67, 66, 66, 65, 65, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 66, 67, 66, 66, 66, 65, 65, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ], 
+	[ 66, 67, 67, 66, 66, 65, 65, 64, 64, 63, 63, 64, 64, 64, 64, 64, 65, 65, 65, 64, 64 ], 
+	[ 66, 67, 67, 66, 72, 72, 72, 65, 64, 64, 64, 64, 65, 65, 65, 65, 66, 66, 66, 66, 66 ],
+	[ 66, 67, 67, 72, 72, 75, 72, 72, 65, 65, 65, 65, 65, 66, 66, 66, 67, 67, 67, 67, 67 ]
 ]
 ```
 
@@ -1188,8 +1195,8 @@ JSON object containing the following:
 
 ```json
 {
-  "minecraftVersion": "1.20.2",
-  "DataVersion": 3578,
-  "interfaceVersion": "1.5.0-1.20.2"
+	"minecraftVersion": "1.20.2",
+	"DataVersion": 3578,
+	"interfaceVersion": "1.5.0-1.20.2"
 }
 ```
