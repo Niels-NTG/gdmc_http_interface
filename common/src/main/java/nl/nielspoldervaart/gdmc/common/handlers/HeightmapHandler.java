@@ -57,12 +57,20 @@ public class HeightmapHandler extends HandlerBase {
 
         ServerLevel level = getServerLevel(dimension);
 
-        MinMaxBounds.Ints yBounds = new MinMaxBounds.Ints(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+        Optional<Integer> yMin = Optional.empty();
+        Optional<Integer> yMax = Optional.empty();
         String yBoundsInput = queryParams.getOrDefault("yBounds", "");
         if (!yBoundsInput.isBlank() && customTransparentBlocksList != null) {
 	        try {
-                yBounds = RangeArgument.intRange().parse(new StringReader(yBoundsInput));
-                if (yBounds.min().isPresent() && yBounds.max().isPresent() && yBounds.min().get() - yBounds.max().get() == 0) {
+                MinMaxBounds.Ints yBounds = RangeArgument.intRange().parse(new StringReader(yBoundsInput));
+                #if (MC_VER == MC_1_19_2)
+                    yMin = Optional.ofNullable(yBounds.getMin());
+                    yMax = Optional.ofNullable(yBounds.getMax());
+                #else
+                    yMin = yBounds.min();
+                    yMax = yBounds.max();
+                #endif
+                if (yMin.isPresent() && yMax.isPresent() && yMin.get() - yMax.get() == 0) {
                     throw new HttpException("yBounds should span more than 0", 400);
                 }
             } catch (CommandSyntaxException e) {
@@ -72,8 +80,8 @@ public class HeightmapHandler extends HandlerBase {
 
         // Preset heightmap type parameter is ignored if custom block list is not empty.
         int[][] heightmap = customTransparentBlocksList != null ?
-            getHeightmap(level, dimension, yBounds, customTransparentBlocksList) :
-            getHeightmap(level, yBounds, heightmapType);
+            getHeightmap(level, dimension, yMin, yMax, customTransparentBlocksList) :
+            getHeightmap(level, yMin, yMax, heightmapType);
 
         // Respond with that array as a string
         Headers responseHeaders = httpExchange.getResponseHeaders();
@@ -81,11 +89,10 @@ public class HeightmapHandler extends HandlerBase {
         resolveRequest(httpExchange, new Gson().toJson(heightmap));
     }
 
-    private int[][] getHeightmap(ServerLevel serverlevel, String dimension, MinMaxBounds.Ints yBounds, Stream<String> blockList) {
+    private int[][] getHeightmap(ServerLevel serverlevel, String dimension, Optional<Integer> yMin, Optional<Integer> yMax, Stream<String> blockList) {
         CommandSourceStack commandSourceStack = createCommandSource(
             "GDMC-HeightmapHandler",
-            dimension,
-            BuildArea.getBuildArea().box.getCenter().getCenter()
+            dimension
         );
 
         ArrayList<BlockState> blockStateList = new ArrayList<>();
@@ -115,14 +122,14 @@ public class HeightmapHandler extends HandlerBase {
 
         getChunkPosList().parallelStream().forEach(chunkPos -> {
             LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
-            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, blockTagKeyList, yBounds);
+            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, blockTagKeyList, yMin, yMax);
             getFirstAvailableHeightAt(heightmap, chunkPos, null, customChunkHeightmap);
         });
 
         return heightmap;
     }
 
-    private static int[][] getHeightmap(ServerLevel serverlevel, MinMaxBounds.Ints yBounds, String heightmapTypeString) {
+    private static int[][] getHeightmap(ServerLevel serverlevel, Optional<Integer> yMin, Optional<Integer> yMax, String heightmapTypeString) {
         int[][] heightmap = initHeightmapData();
 
         // Check if the type is a valid heightmap type
@@ -140,7 +147,7 @@ public class HeightmapHandler extends HandlerBase {
             if (defaultHeightmapType != null) {
                 defaultChunkHeightmap = chunk.getOrCreateHeightmapUnprimed(defaultHeightmapType);
             } else {
-                customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, customHeightmapType, yBounds);
+                customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, customHeightmapType, yMin, yMax);
             }
             getFirstAvailableHeightAt(heightmap, chunkPos, defaultChunkHeightmap, customChunkHeightmap);
         });
@@ -175,7 +182,13 @@ public class HeightmapHandler extends HandlerBase {
             return true;
         }
         // Check if block tag key exists https://minecraft.wiki/w/Tag#Block_tags_2
-        return BlocksHandler.getBlockRegistryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> existingTag.key().location().toString().equals(blockTagKeyString));
+        return BlocksHandler.getBlockRegistryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> {
+            #if (MC_VER == MC_1_19_2)
+            return existingTag.location().toString().equals(blockTagKeyString);
+            #else
+	        return existingTag.key().location().toString().equals(blockTagKeyString);
+            #endif
+        });
     }
 
     private static ArrayList<ChunkPos> getChunkPosList() {

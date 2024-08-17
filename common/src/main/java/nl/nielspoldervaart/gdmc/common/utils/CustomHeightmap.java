@@ -1,6 +1,5 @@
 package nl.nielspoldervaart.gdmc.common.utils;
 
-import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -15,6 +14,7 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.material.Fluid;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -23,38 +23,41 @@ public class CustomHeightmap {
 	private final BitStorage data;
 	private final Predicate<BlockState> isOpaque;
 	private final ChunkAccess chunk;
-	private final MinMaxBounds.Ints yBounds;
+	private final Optional<Integer> yMinBound;
+	private final Optional<Integer> yMaxBound;
 
-	private CustomHeightmap(ChunkAccess chunk, Types heightmapType, MinMaxBounds.Ints yBounds) {
+	private CustomHeightmap(ChunkAccess chunk, Types heightmapType, Optional<Integer> yMinBound, Optional<Integer> yMaxBound) {
 		this.isOpaque = heightmapType.isOpaque();
 		this.chunk = chunk;
 		int i = Mth.ceillog2(chunk.getHeight() + 1);
 		this.data = new SimpleBitStorage(i, 256);
-		this.yBounds = yBounds;
+		this.yMinBound = yMinBound;
+		this.yMaxBound = yMaxBound;
 	}
 
-	private CustomHeightmap(ChunkAccess chunk, Predicate<BlockState> isOpaque, MinMaxBounds.Ints yBounds) {
+	private CustomHeightmap(ChunkAccess chunk, Predicate<BlockState> isOpaque, Optional<Integer> yMinBound, Optional<Integer> yMaxBound) {
 		this.isOpaque = isOpaque;
 		this.chunk = chunk;
 		int i = Mth.ceillog2(chunk.getHeight() + 1);
 		this.data = new SimpleBitStorage(i, 256);
-		this.yBounds = yBounds;
+		this.yMinBound = yMinBound;
+		this.yMaxBound = yMaxBound;
 	}
 
-	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, ArrayList<String> blockTagLocationKeyList, MinMaxBounds.Ints yBounds) {
+	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, ArrayList<String> blockTagLocationKeyList, Optional<Integer> yMinBound, Optional<Integer> yMaxBound) {
 		Predicate<BlockState> isOpaque = blockState -> !blockList.contains(blockState) && !hasBlockTagKey(blockState, blockTagLocationKeyList);
-		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque, yBounds);
+		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque, yMinBound, yMaxBound);
 		return primeHeightmaps(chunk, customHeightmap);
 	}
 
-	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap.Types heightmapType, MinMaxBounds.Ints yBounds) {
-		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, heightmapType, yBounds);
+	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap.Types heightmapType, Optional<Integer> yMinBound, Optional<Integer> yMaxBound) {
+		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, heightmapType, yMinBound, yMaxBound);
 		return primeHeightmaps(chunk, customHeightmap);
 	}
 
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
-		int yMax = customHeightmap.yBounds.max().orElse(chunk.getMaxBuildHeight());
-		int yMin = customHeightmap.yBounds.min().orElse(chunk.getMinBuildHeight());
+		int yMax = customHeightmap.yMaxBound.orElse(chunk.getMaxBuildHeight());
+		int yMin = customHeightmap.yMinBound.orElse(chunk.getMinBuildHeight());
 		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
