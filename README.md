@@ -90,4 +90,4 @@ This mod adds the following custom console commands to the game:
 
 ## Acknowledgements
 
-GDMC-HTTP has been actively developed with the help of the GDMC community. Of special note here is Niki Gawlik, who created the [original version](https://github.com/nilsgawlik/gdmc_http_interface) of this mod for Minecraft 1.16.5. This repo is a continuation of their work.
+GDMC-HTTP has been actively developed with the help of the GDMC community. Of special note here is [Niki Gawlik](https://github.com/nikigawlik), who created the [original version](https://github.com/nilsgawlik/gdmc_http_interface) of this mod for Minecraft 1.16.5. This repo is a continuation of their work. Support for the Fabric modding framework was inspired by the work of [Simon Pribylski](https://github.com/Persson-dev), who created their own port of [GDMC-HTTP for Fabric](https://github.com/Persson-dev/gdmc_http_fabric).
