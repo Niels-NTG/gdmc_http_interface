@@ -2,7 +2,7 @@
 
 ![logo](common/src/main/resources/logo.png)
 
-Forge Mod for Minecraft (Java Edition) that implements an HTTP interface for reading and writing blocks (and more).
+Mod for Minecraft (Java Edition) that implements an HTTP interface for reading and writing blocks (and more).
 
 With this interface you can use other applications and scripts running on the same machine to read and modify a Minecraft world.
 
@@ -10,7 +10,7 @@ This is designed as a tool for the [Generative Design in Minecraft Competition (
 
 | Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                          | GDMC competition year                                                                                                                                                    |
 |-------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1.20.2            | 📦 [GDMC-HTTP 1.5.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.5.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.5.0/docs/Endpoints.md) | [2024](https://gendesignmc.wikidot.com/wiki:2024-settlement-generation-competition)                                                                                      |
+| 1.20.2            | 📦 [GDMC-HTTP 1.5.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.5.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.5.0/docs/Endpoints.md) | [2024](https://gendesignmc.wikidot.com/wiki:2024-settlement-generation-competition), 2025                                                                                |
 | 1.19.2            | 📦 [GDMC-HTTP 1.5.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.5.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.5.0/docs/Endpoints.md) | [2023](https://gendesignmc.wikidot.com/wiki:2023-settlement-generation-competition)                                                                                      |
 | 1.16.5            | 📦 [GDMC-HTTP 0.4.2](https://github.com/nikigawlik/gdmc_http_interface/releases/tag/v0.4.2) | 📒 [API Docs](https://github.com/nikigawlik/gdmc_http_interface/wiki)                         | [2021](https://gendesignmc.wikidot.com/wiki:2021-settlement-generation-competition), [2022](https://gendesignmc.wikidot.com/wiki:2022-settlement-generation-competition) |
 
@@ -30,6 +30,28 @@ The following instructions are for the Modrinth App, but other custom launchers 
 4. After the app has finished preparing the instance, you can click "Play" to launch your modded version of Minecraft.
 
 ## Manual installation
+
+Since GDMC-HTTP 1.5.0 this mod supports both the Fabric and Forge mod loaders within the same `.jar` file.
+
+### Fabric
+
+Installation instructions for when using the Fabric mod loader.
+
+1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
+2. Get the [Fabric Mod Installer](https://fabricmc.net/use/installer/). Just click on "Download Installer" to download.
+3. Open the downloaded file to install this version of Fabric.
+   - Here are some troubleshooting resources If you have trouble opening this jar file:
+      - [macOS](https://discussions.apple.com/thread/252960079)
+      - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
+4. Download this mod's jar file from [here](https://github.com/Persson-dev/gdmc_http_fabric/releases/latest) and move it in the mod folder:
+   - On Windows: `%APPDATA%/.minecraft/mods`.
+   - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
+   - On Linux desktop: `~/.minecraft/mods`
+5. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Fabric installation in the list.
+
+### Forge
+
+Installation instructions for when using the Forge mod loader.
 
 1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
 2. Get the [Forge Mod Installer](https://files.minecraftforge.net/net/minecraftforge/forge/) and navigate to your version of Minecraft that is supported by this mod (1.20.2, 1.19.2 or 1.16.5) and click "Installer" under the "Download Recommended" section to download.
