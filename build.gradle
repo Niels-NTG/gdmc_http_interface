@@ -63,6 +63,7 @@ forgix {
 	}
 
 	// TODO removeDuplicates causes a ClassNotFoundException with Forge.
+	//		forge can't seem to find the common package when this is enabled.
 	//		it would be good if we could use it since it downsizes the output .jar file quite a bit.
 	// removeDuplicate 'nl.nielspoldervaart.gdmc'
 }
@@ -240,6 +241,3 @@ task cleanMergedJars() {
 }
 // add cleanMergedJars to the end of the "clean" task
 tasks['clean'].finalizedBy(cleanMergedJars)
-
-// TODO https://gitlab.com/jeseibel/distant-horizons/-/blob/main/build.gradle?ref_type=heads
-// TODO https://gitlab.com/jeseibel/distant-horizons/-/blob/main/forge/build.gradle?ref_type=heads
