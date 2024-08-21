@@ -24,12 +24,12 @@ run
 mcmodsrepo
 buildAllJars
 
+# test resources
+testResources
+
 logo-design
 
 # profiler
 *.jfr
 *.prof
 profiler
-
-# Files from Forge MDK
-forge*changelog.txt
