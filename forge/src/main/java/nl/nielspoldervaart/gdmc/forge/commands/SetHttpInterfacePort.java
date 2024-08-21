@@ -20,7 +20,7 @@ public final class SetHttpInterfacePort {
 			));
 	}
 
-	public static int unsetInterfacePort(CommandContext<CommandSourceStack> commandSourceStack) {
+	private static int unsetInterfacePort(CommandContext<CommandSourceStack> commandSourceStack) {
 		int defaultPort = GdmcHttpConfig.HTTP_INTERFACE_PORT.getDefault();
 		GdmcHttpConfig.HTTP_INTERFACE_PORT.set(defaultPort);
 		Feedback.sendSuccess(
@@ -30,7 +30,7 @@ public final class SetHttpInterfacePort {
 		return defaultPort;
 	}
 
-	public static int setInterfacePort(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
+	private static int setInterfacePort(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
 		try {
 			GdmcHttpConfig.HTTP_INTERFACE_PORT.set(newPortNumber);
 			Feedback.sendSuccess(

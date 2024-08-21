@@ -12,7 +12,7 @@ import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 
 public final class SetBuildAreaCommand {
 
-    private static final String COMMAND_NAME = "setbuildarea";
+    static final String COMMAND_NAME = "setbuildarea";
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(COMMAND_NAME)

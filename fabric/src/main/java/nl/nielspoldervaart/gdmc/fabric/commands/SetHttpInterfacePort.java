@@ -9,6 +9,7 @@ import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import nl.nielspoldervaart.gdmc.fabric.config.GdmcHttpConfig;
 
 public final class SetHttpInterfacePort {
+
 	static final String COMMAND_NAME = "sethttpport";
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -19,7 +20,7 @@ public final class SetHttpInterfacePort {
 			));
 	}
 
-	public static int unsetInterfacePort(CommandContext<CommandSourceStack> commandSourceStack) {
+	private static int unsetInterfacePort(CommandContext<CommandSourceStack> commandSourceStack) {
 		int defaultPort = GdmcHttpConfig.DEFAULT_HTTP_INTERFACE_PORT;
 		GdmcHttpConfig.HTTP_INTERFACE_PORT = defaultPort;
 		Feedback.sendSuccess(
@@ -29,7 +30,7 @@ public final class SetHttpInterfacePort {
 		return defaultPort;
 	}
 
-	public static int setInterfacePort(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
+	private static int setInterfacePort(CommandContext<CommandSourceStack> commandSourceContext, int newPortNumber) {
 		try {
 			GdmcHttpConfig.HTTP_INTERFACE_PORT = newPortNumber;
 			Feedback.sendSuccess(

@@ -9,7 +9,7 @@ import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 
 public final class GetHttpInterfacePort {
 
-	private static final String COMMAND_NAME = "gethttpport";
+	static final String COMMAND_NAME = "gethttpport";
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(
