@@ -15,7 +15,7 @@ authors:
 repository-code: 'https://github.com/Niels-NTG/gdmc_http_interface/'
 url: 'http://gdmc.nielspoldervaart.nl'
 abstract: >-
-  Minecraft Forge Mod that implements an HTTP interface for
+  Minecraft Mod that implements an HTTP interface for
   reading and writing blocks (and more) with an external
   program or script. Intended for use in the GDMC
   competition.
@@ -28,6 +28,6 @@ keywords:
   - game-design
   - level-editor
 license: MIT
-commit: 5b62105aa8642f5035cec06efc4140a95f08f9e3
-version: 1.4.6
-date-released: '2024-03-30'
+commit: 9c564a90d445028fd5ff5b4aa3e28480e22b5f2e
+version: 1.5.0
+date-released: '2024-08-21'
