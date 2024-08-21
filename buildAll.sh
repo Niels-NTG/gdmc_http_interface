@@ -15,6 +15,8 @@ for d in versionProperties/*; do
   echo "====================Building $version ===================="
   sh gradlew build -PtargetMinecraftVersion=$version --no-daemon || true
   echo "====================Publishing $version ===================="
-  sh gradlew publish -PtargetMinecraftVersion=$version --no-daemon || true
+  sh gradlew mergeJars -PtargetMinecraftVersion=$version --no-daemon || true
+
+  mv Merged/*.jar ./buildAllJars/ || true
   # The "| true" at the end of those are just to make sure the script continues even if a build fails
 done

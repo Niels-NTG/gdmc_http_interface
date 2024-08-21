@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.4.6 (Minecraft 1.19.2 + 1.20.2)
+# Endpoints GDMC-HTTP 1.5.0 (Minecraft 1.19.2 + 1.20.2)
 
 [TOC]
 
@@ -73,7 +73,7 @@ The responses for all endpoints return with the following headers, unless stated
 | Content-Disposition         | `inline`                          |             |
 | Content-Type                | `application/json; charset=UTF-8` |             |
 
-# Send Commands `POST /commands`
+# ⚙️ Send Commands `POST /commands`
 
 Send one or more Minecraft console commands to the server. For the full list of all commands consult the [Minecraft commands documentation](https://minecraft.wiki/w/Commands#List_and_summary_of_commands).
 
@@ -175,7 +175,7 @@ each command will be executed line by line in the context of the overworld dimen
 ]
 ```
 
-# Read blocks `GET /blocks`
+# 🧱 Read blocks `GET /blocks`
 
 Get information for one or more blocks in a given area.
 
@@ -216,16 +216,16 @@ To get a the block at position x=28, y=67 and z=-73, request `GET /blocks?x=5525
 
 ```json
 [
-  {
-	"id": "minecraft:grass_block",
-	"x": 5525,
-	"y": 62,
-	"z": 4381
-  }
+	{
+		"id": "minecraft:grass_block",
+		"x": 5525,
+		"y": 62,
+		"z": 4381
+	}
 ]
 ```
 
-To get all block within a 2x2x2 area, request `GET /blocks?x=5525&y=62&z=4381&dx=2&dy=2&dz=2`, which returns a list with each block on a seperate line:
+To get all block within a 2x2x2 area, request `GET /blocks?x=5525&y=62&z=4381&dx=2&dy=2&dz=2`, which returns a list with each block on a separate line:
 
 ```json
 [
@@ -300,23 +300,23 @@ To get information such as the contents of a chest, use `includeData=true` as pa
 
 ```json
 [
-  {
-	"id": "minecraft:chest",
-	"x": -300,
-	"y": 66,
-	"z": 26,
-	"state": {
-	  "facing": "west",
-	  "type": "single",
-	  "waterlogged": "false"
-	},
-	"data": "{Items:[{Count:1b,Slot:0b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}},{Count:3b,Slot:2b,id:\"minecraft:lantern\"},{Count:7b,Slot:4b,id:\"minecraft:dandelion\"}]}"
-  }
+	{
+		"id": "minecraft:chest",
+		"x": -300,
+		"y": 66,
+		"z": 26,
+		"state": {
+			"facing": "west",
+			"type": "single",
+			"waterlogged": "false"
+		},
+		"data": "{Items:[{Count:1b,Slot:0b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}},{Count:3b,Slot:2b,id:\"minecraft:lantern\"},{Count:7b,Slot:4b,id:\"minecraft:dandelion\"}]}"
+	}
 ]
 ```
 Note that that block data such as the contents of a chest are formatted as an [SNBT string](https://minecraft.wiki/w/NBT_format#SNBT_format).
 
-# Place blocks `PUT /blocks`
+# 🧱 Place blocks `PUT /blocks`
 
 Place one or more blocks into the world.
 
@@ -390,24 +390,24 @@ We can place a chest containing a few items and a quartz block next to it by sen
 
 ```json
 [
-  {
-	"id": "minecraft:chest",
-	"x": -55,
-	"y": "~2",
-	"z": 77,
-	"state": {
-	  "facing": "east",
-	  "type": "single",
-	  "waterlogged": "false"
+	{
+		"id": "minecraft:chest",
+		"x": -55,
+		"y": "~2",
+		"z": 77,
+		"state": {
+			"facing": "east",
+			"type": "single",
+			"waterlogged": "false"
+		},
+		"data": "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
 	},
-	"data": "{Items:[{Count:48b,Slot:0b,id:\"minecraft:lantern\"},{Count:1b,Slot:1b,id:\"minecraft:golden_axe\",tag:{Damage:0}}]}"
-  },
-  {
-	"id": "minecraft:quartz_block",
-	"x": -56,
-	"y": "~2",
-	"z": 77
-  }
+	{
+		"id": "minecraft:quartz_block",
+		"x": -56,
+		"y": "~2",
+		"z": 77
+	}
 ]
 ```
 
@@ -415,18 +415,18 @@ This returns:
 
 ```json
 [
-  {
-	"status": 1
-  },
-  {
-	"status": 1
-  }
+	{
+		"status": 1
+	},
+	{
+		"status": 1
+	}
 ]
 ```
 
 Where each entry corresponds to a placement instruction, where `"status": 1` indicates a success, `"status": 0` that a block of that type is already there. This zero status may also appear when something else went wrong, such as when an invalid block ID was given. In such cases there also be a `"message"` attribute with an error message.
 
-# Read biomes `GET /biomes`
+# 🏜️ Read biomes `GET /biomes`
 
 Get [biome](https://minecraft.wiki/w/Biome#List_of_biomes) information in a given area.
 
@@ -504,7 +504,7 @@ For getting the biomes of a row of blocks, request `GET /biomes?x=2350&y=64&z=-7
 ]
 ```
 
-# Read chunk data `GET /chunks`
+# 📦 Read chunk data `GET /chunks`
 
 Read [chunks](https://minecraft.wiki/w/Chunk) within a given range and return it as [chunk data](https://minecraft.wiki/w/Chunk_format).
 
@@ -569,7 +569,7 @@ Get a single chunk at position x=0, z=8 in the Nether with the request `GET /chu
 {ChunkDX:1,ChunkDZ:1,ChunkX:0,ChunkZ:8,Chunks:[{DataVersion:3578,Heightmaps:{MOTION_BLOCKING:[L;2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L, ...
 ```
 
-# Create NBT structure file `GET /structure`
+# 🏗️ Create NBT structure file `GET /structure`
 
 Create an [NBT](https://minecraft.wiki/w/NBT_format) structure file from an area of the world.
 
@@ -632,7 +632,7 @@ Note that the response returns a 403 error code if the `withinBuilArea` flag is 
 
 The request `GET /structure?x=87&y=178&z=247&dx=10&dy=10&dz=10&dimension=nether` gets us a 10x10x10 area from The Nether. Entities such as mobs in that cube-shaped area are not included, since the request does not have the `entities=true` parameter. Leaving the request headers to its defaults this yields a gzip-compressed binary-encoded NBT data that we can save to a file, manipulate using an external tool, and place back into the world using the [Structure Block](https://minecraft.wiki/w/Structure_Block) or the `POST /structure` endpoint.
 
-# Place NBT structure file `POST /structure`
+# 🏗️ Place NBT structure file `POST /structure`
 
 Place an [NBT](https://minecraft.wiki/w/NBT_format) structure file into the world. These files can be created by the [Structure Block](https://minecraft.wiki/w/Structure_Block), the `GET /structure` endpoint, as well as other means.
 
@@ -648,6 +648,7 @@ Place an [NBT](https://minecraft.wiki/w/NBT_format) structure file into the worl
 | pivotX          | integer                                               | no       | `0`         | relative X coordinate to use as pivot for rotation                                                                                       |
 | pivotZ          | integer                                               | no       | `0`         | relative Z coordinate to use as pivot for rotation                                                                                       |
 | entities        | `true`, `false`                                       | no       | `false`     | `true` = also place all [entities](https://minecraft.wiki/w/Entity) (mobs, villagers, etc.) saved with the file                          |
+| keepLiquids     | `true`, `false`                                       | no       | `true`      | If `false`, remove water sources already present at placement location of structure.                                                     |
 | doBlockUpdates  | `true`, `false`                                       | no       | `true`      | See doBlockUpdates in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                  |
 | spawnDrops      | `true`, `false`                                       | no       | `false`     | See spawnBlocks in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                     |
 | customFlags     | bit string                                            | no       | `0100011`   | See customFlags in [`PUT /blocks` block placement flags](#controlling-block-update-behavior)                                             |
@@ -685,7 +686,7 @@ Using the [Structure Block](https://minecraft.wiki/w/Structure_Block), [save](ht
 
 Now in Minecraft load the Minecraft world you want to place this structure in, pick a location and place it there using this endpoint. To place the it at location x=102, y=67, z=-21 with entities, include the file as the request body to request `POST /structure?x=102&y=67&z=-21&entities=true`.
 
-# Read entities `GET /entities`
+# 🐷 Read entities `GET /entities`
 
 Endpoint for reading all [entities](https://minecraft.wiki/w/Entity) from within a certain area of the world.
 
@@ -724,14 +725,14 @@ The response follows this [schema](./schema.entities.get.json).
 Given a pit with 3 cats in it, the request `GET /entities?x=305&y=65&z=26&dx=10&dy=10&dz=10&includeData=true` may return:
 ```json
 [
-  {
-	"uuid": "26a2bf9a-9dbf-492a-910b-516f4322f3f2",
-	"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:40.0d,Modifiers:[{Amount:-0.0076567387992512986d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;868537497,-1023129007,-1268290039,-433935503]}],Name:\"minecraft:generic.follow_range\"},{Base:25.0d,Name:\"minecraft:generic.max_health\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.17499999701976776d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},Bred:0b,CanPickUpLoot:0b,CanUpdate:1b,ChestedHorse:0b,DeathTime:0s,DespawnDelay:39171,EatingHaystack:0b,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:25.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-296.3192426279384d,67.0d,35.572736569528644d],Rotation:[91.85614f,0.0f],Strength:5,Tame:0b,Temper:0,UUID:[I;648200090,-1648408278,-1861529233,1126364146],Variant:2,id:\"minecraft:trader_llama\"}"
-  },
-  {
-	"uuid": "58c392b0-9eee-4174-a807-3b975a2369f4",
-	"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:16.0d,Modifiers:[{Amount:0.026007290323946414d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;110803122,-1164752996,-1083557595,-449135232]}],Name:\"minecraft:generic.follow_range\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.699999988079071d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,DeathTime:0s,DespawnDelay:39172,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[],Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],Offers:{Recipes:[{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:small_dripleaf\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:birch_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:jungle_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:12,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:red_tulip\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:moss_block\"},specialPrice:0,uses:0,xp:1},{buy:{Count:6b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:6,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:blue_ice\"},specialPrice:0,uses:0,xp:1}]},OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-302.76158910022104d,66.0d,35.324351502361225d],Rotation:[124.32312f,0.0f],UUID:[I;1489212080,-1628552844,-1475921001,1512270324],id:\"minecraft:wandering_trader\"}"
-  }
+	{
+		"uuid": "26a2bf9a-9dbf-492a-910b-516f4322f3f2",
+		"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:40.0d,Modifiers:[{Amount:-0.0076567387992512986d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;868537497,-1023129007,-1268290039,-433935503]}],Name:\"minecraft:generic.follow_range\"},{Base:25.0d,Name:\"minecraft:generic.max_health\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.17499999701976776d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},Bred:0b,CanPickUpLoot:0b,CanUpdate:1b,ChestedHorse:0b,DeathTime:0s,DespawnDelay:39171,EatingHaystack:0b,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:25.0f,HurtByTimestamp:0,HurtTime:0s,InLove:0,Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-296.3192426279384d,67.0d,35.572736569528644d],Rotation:[91.85614f,0.0f],Strength:5,Tame:0b,Temper:0,UUID:[I;648200090,-1648408278,-1861529233,1126364146],Variant:2,id:\"minecraft:trader_llama\"}"
+	},
+	{
+		"uuid": "58c392b0-9eee-4174-a807-3b975a2369f4",
+		"data": "{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.08d,Name:\"forge:entity_gravity\"},{Base:16.0d,Modifiers:[{Amount:0.026007290323946414d,Name:\"Random spawn bonus\",Operation:1,UUID:[I;110803122,-1164752996,-1083557595,-449135232]}],Name:\"minecraft:generic.follow_range\"},{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.699999988079071d,Name:\"minecraft:generic.movement_speed\"}],Brain:{memories:{}},CanPickUpLoot:0b,CanUpdate:1b,DeathTime:0s,DespawnDelay:39172,FallDistance:0.0f,FallFlying:0b,Fire:-1s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[],Invulnerable:0b,LeftHanded:0b,Motion:[0.0d,-0.0784000015258789d,0.0d],Offers:{Recipes:[{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:small_dripleaf\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:birch_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:5b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:8,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:jungle_sapling\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:12,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:red_tulip\"},specialPrice:0,uses:0,xp:1},{buy:{Count:1b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:5,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:2b,id:\"minecraft:moss_block\"},specialPrice:0,uses:0,xp:1},{buy:{Count:6b,id:\"minecraft:emerald\"},buyB:{Count:1b,id:\"minecraft:air\"},demand:0,maxUses:6,priceMultiplier:0.05f,rewardExp:1b,sell:{Count:1b,id:\"minecraft:blue_ice\"},specialPrice:0,uses:0,xp:1}]},OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-302.76158910022104d,66.0d,35.324351502361225d],Rotation:[124.32312f,0.0f],UUID:[I;1489212080,-1628552844,-1475921001,1512270324],id:\"minecraft:wandering_trader\"}"
+	}
 ]
 ```
 This area happens to contain a wandering trader and their trusty lama.
@@ -750,7 +751,7 @@ For a pen of various different farm animals of the size of 10 blocks wide and 10
 ]
 ```
 
-# Create entities `PUT /entities`
+# 🐷 Create entities `PUT /entities`
 
 Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity) into the world such as [mobs](https://minecraft.wiki/w/Mob), [items](https://minecraft.wiki/w/Item_(entity)), [item frames](https://minecraft.wiki/w/Item_Frame), [painting](https://minecraft.wiki/w/Painting) and [projectiles](https://minecraft.wiki/w/Snowball). This endpoint has feature-parity with the [/summon command](https://minecraft.wiki/w/Commands/summon), meaning it takes the same options and has the same constraints.
 
@@ -810,7 +811,7 @@ For placing a red cat that's invulnerable and permanently on fire, reproduction 
 ]
 ```
 
-# Edit entities `PATCH /entities`
+# 🐷 Edit entities `PATCH /entities`
 
 Endpoint for changing the properties of [entities](https://minecraft.wiki/w/Entity) that are already present in the world.
 
@@ -844,7 +845,7 @@ For each patch instruction in the request, it returns a list with a `{ "status":
 
 ## Example
 
-When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#read-entities-get-entities) endpoint) into a red cat: `PATCH /entities` with the request body:
+When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#-read-entities-get-entities) endpoint) into a red cat: `PATCH /entities` with the request body:
 ```json
 [
 	{
@@ -854,7 +855,7 @@ When changing a black cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (ob
 ]
 ```
 
-# Remove entities `DELETE /entities`
+# 🐷 Remove entities `DELETE /entities`
 
 Endpoint for remove one or more [entities](https://minecraft.wiki/w/Entity) from the world.
 
@@ -884,14 +885,14 @@ For each patch instruction in the request, it returns a list with a `{ "status":
 
 ## Example
 
-To remove a cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#read-entities-get-entities) endpoint): `DELETE /entities` with the request body:
+To remove a cat with UUID `"475fb218-68f1-4464-8ac5-e559afd8e00d"` (obtained using the [`GET /entities`](#-read-entities-get-entities) endpoint): `DELETE /entities` with the request body:
 ```json
 [
     "475fb218-68f1-4464-8ac5-e559afd8e00d"
 ]
 ```
 
-# Read players `GET /players`
+# 👷 Read players `GET /players`
 
 Endpoint for reading all [players](https://minecraft.wiki/w/Player) from the world.
 
@@ -902,7 +903,7 @@ Endpoint for reading all [players](https://minecraft.wiki/w/Player) from the wor
 |-------------|-------------------------------------------------------|----------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | includeData | `true`, `false`                                       | no       | `false`     | If `true`, include [player data](https://minecraft.wiki/w/Player.dat_format#NBT_structure) in response                                                                                              |
 | selector    | target selector string                                | no       | `@a`        | [Target selector](https://minecraft.wiki/w/Target_selectors) string for players. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
-| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       |             | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.    |
+| dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Which dimension of the world get the list of players from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.    |
 
 ## Request headers
 
@@ -926,15 +927,15 @@ Given a world with 1 player named "Dev" in it, request `GET /players?includeData
 
 ```json
 [
-  {
-    "name": "Dev",
-	"uuid": "380df991-f603-344c-a090-369bad2a924a",
-    "data": "{AbsorptionAmount:0.0f,Air:300s,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.10000000149011612d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"}],Brain:{memories:{}},CanUpdate:1b,DataVersion:3120,DeathTime:0s,Dimension:\"minecraft:overworld\",EnderItems:[],FallDistance:0.0f,FallFlying:0b,Fire:-20s,Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[{Count:1b,Slot:0b,id:\"minecraft:obsidian\"},{Count:1b,Slot:1b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}}],Invulnerable:0b,Motion:[0.0d,0.0d,0.0d],OnGround:0b,PortalCooldown:0,Pos:[-3.483559135420974d,-58.74889429576954d,-16.579720966624766d],Rotation:[1.6493444f,24.599985f],Score:0,SelectedItemSlot:1,SleepTimer:0s,UUID:[I;940439953,-167562164,-1601161573,-1389718966],XpLevel:0,XpP:0.0f,XpSeed:-275312302,XpTotal:0,abilities:{flySpeed:0.05f,flying:1b,instabuild:1b,invulnerable:1b,mayBuild:1b,mayfly:1b,walkSpeed:0.1f},foodExhaustionLevel:0.0f,foodLevel:20,foodSaturationLevel:5.0f,foodTickTimer:0,playerGameType:1,recipeBook:{isBlastingFurnaceFilteringCraftable:0b,isBlastingFurnaceGuiOpen:0b,isFilteringCraftable:0b,isFurnaceFilteringCraftable:0b,isFurnaceGuiOpen:0b,isGuiOpen:0b,isSmokerFilteringCraftable:0b,isSmokerGuiOpen:0b,recipes:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"],toBeDisplayed:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"]},seenCredits:0b,warden_spawn_tracker:{cooldown_ticks:0,ticks_since_last_warning:8788,warning_level:0}}"
-  }
+	{
+		"name": "Dev",
+		"uuid": "380df991-f603-344c-a090-369bad2a924a",
+		"data": "{AbsorptionAmount:0.0f,Air:300s,Attributes:[{Base:0.0d,Name:\"forge:step_height_addition\"},{Base:0.10000000149011612d,Name:\"minecraft:generic.movement_speed\"},{Base:0.08d,Name:\"forge:entity_gravity\"}],Brain:{memories:{}},CanUpdate:1b,DataVersion:3120,DeathTime:0s,Dimension:\"minecraft:overworld\",EnderItems:[],FallDistance:0.0f,FallFlying:0b,Fire:-20s,Health:20.0f,HurtByTimestamp:0,HurtTime:0s,Inventory:[{Count:1b,Slot:0b,id:\"minecraft:obsidian\"},{Count:1b,Slot:1b,id:\"minecraft:flint_and_steel\",tag:{Damage:0}}],Invulnerable:0b,Motion:[0.0d,0.0d,0.0d],OnGround:0b,PortalCooldown:0,Pos:[-3.483559135420974d,-58.74889429576954d,-16.579720966624766d],Rotation:[1.6493444f,24.599985f],Score:0,SelectedItemSlot:1,SleepTimer:0s,UUID:[I;940439953,-167562164,-1601161573,-1389718966],XpLevel:0,XpP:0.0f,XpSeed:-275312302,XpTotal:0,abilities:{flySpeed:0.05f,flying:1b,instabuild:1b,invulnerable:1b,mayBuild:1b,mayfly:1b,walkSpeed:0.1f},foodExhaustionLevel:0.0f,foodLevel:20,foodSaturationLevel:5.0f,foodTickTimer:0,playerGameType:1,recipeBook:{isBlastingFurnaceFilteringCraftable:0b,isBlastingFurnaceGuiOpen:0b,isFilteringCraftable:0b,isFurnaceFilteringCraftable:0b,isFurnaceGuiOpen:0b,isGuiOpen:0b,isSmokerFilteringCraftable:0b,isSmokerGuiOpen:0b,recipes:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"],toBeDisplayed:[\"minecraft:flint_and_steel\",\"minecraft:enchanting_table\"]},seenCredits:0b,warden_spawn_tracker:{cooldown_ticks:0,ticks_since_last_warning:8788,warning_level:0}}"
+	}
 ]
 ```
 
-# Get build area `GET /buildarea`
+# 📐 Get build area `GET /buildarea`
 
 This returns the current specified build area. The build area can be set inside Minecraft using the `setbuildarea` command. This is just a convenience command to specify the area, it has no implications to where blocks can be placed or read on the map.
 
@@ -965,39 +966,73 @@ A JSON response following this [schema](./schema.buildarea.get.json):
 After having set the build area in game with `/setbuildarea ~ ~ ~ ~200 ~200 ~200`, requesting the build area via `GET /getbuildarea` returns:
 
 ```json
-{ "xFrom": 2353, "yFrom": 63, "zFrom": -78, "xTo": 2553, "yTo": 263, "zTo": 122 }
+{
+	"xFrom": 2353,
+	"yFrom": 63,
+	"zFrom": -78,
+	"xTo": 2553,
+	"yTo": 263,
+	"zTo": 122
+}
 ```
 
-# Get heightmap `GET /heightmap`
+# 🗺️ Get heightmap `GET /heightmap`
 
 Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build area of a given type.
 
 ## URL parameters
 
-| key       | valid values                                                                                                                         | required | defaults to     | description                                                                                                                                                                            |
-|-----------|--------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS` | no       | `WORLD_SURFACE` | Type of heightmap to get. See [Heightmap](https://minecraft.wiki/w/Heightmap) wiki page for more information. A `400` status code is returned if heightmap type is not recognised.     |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension. |
+| key       | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                                                                                       |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) of blocks that should be considered transparent when calculating the heightmap. |
+| yBounds   | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                                                                                                   |
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                                                                                                 |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                                                                                            |
 
-In addition to the build-in height map types of `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING` and `MOTION_BLOCKING_NO_LEAVES`, this mod also includes the following custom height maps:
+### Custom block list
+
+When provided with a comma-separated list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) (these can be combined), a heightmap is calculated where the blocks listed are considered as transparent.
+
+Block tag keys describe a category of block. `#logs` for instance describe all types of [log blocks](https://minecraft.wiki/w/Log) and [stripped log blocks](https://minecraft.wiki/w/Stripped_Log).
+
+Please note that air blocks (`minecraft:air`) are not included by default.
+
+Please note that for fluids it's best to use the fluid tag keys `#water` and/or `#lava`, since the block ID `minecraft:water`/`minecraft:lava` only includes non-flowing liquids.
+
+Just as with [`PUT /blocks`](#-place-blocks-put-blocks), the `"minecraft:"` namespace doesn't have to be included for every block ID.
+
+### Heightmap preset types
+
+This endpoint supports 4 of [Minecraft's built-in height map types](https://minecraft.wiki/w/Heightmap) built-in to Minecraft:
+
+- `WORLD_SURFACE`
+  - Height of surface ignoring air blocks.
+- `OCEAN_FLOOR`
+  - Height surface ignoring air, water and lava.
+- `MOTION_BLOCKING`
+  - Height of surface ignoring blocks that have no movement collision (air, flowers, ferns, etc.) except for water and lava.
+- `MOTION_BLOCKING_NO_LEAVES`
+  - Same as `MOTION_BLOCKING` but also ignores [leaves](https://minecraft.wiki/w/Leaves).
+
+Additionally this mod provides 2 extra heightmap types
+
 - `MOTION_BLOCKING_NO_PLANTS`
-  - Same as `MOTION_BLOCKING`, except it also excludes the following blocks
-    - Logs
-    - Leaves
-    - Bee nests
-    - Mangrove roots
-    - Giant mushroom blocks
-    - Pumpkin blocks
-    - Melon blocks
-    - Moss blocks
-    - Nether wart blocks
-    - Cactus blocks
-    - Farmland
-    - Coral blocks
-    - Sponges
-    - Bamboo plants
-    - Cobwebs
-    - Sculk
+  - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
+    - [Logs](https://minecraft.wiki/w/Log)
+    - [Bee nests](https://minecraft.wiki/w/Bee_Nest)
+    - [Mangrove roots](https://minecraft.wiki/w/Mangrove_Roots) + [Muddy mangrove roots](https://minecraft.wiki/w/Muddy_Mangrove_Roots)
+    - [Giant mushroom blocks](https://minecraft.wiki/w/Mushroom_Block)
+    - [Pumpkin blocks](https://minecraft.wiki/w/Pumpkin) + [Carved pumpkin blocks](https://minecraft.wiki/w/Carved_Pumpkin) 
+    - [Melon blocks](https://minecraft.wiki/w/Melon)
+    - [Moss blocks](https://minecraft.wiki/w/Moss_Block)
+    - [Nether wart blocks](https://minecraft.wiki/w/Nether_Wart_Block)
+    - [Cactus blocks](https://minecraft.wiki/w/Cactus)
+    - [Farmland](https://minecraft.wiki/w/Farmland)
+    - [Coral blocks](https://minecraft.wiki/w/Coral_Block)
+    - [Sponges](https://minecraft.wiki/w/Sponge)
+    - [Bamboo plants](https://minecraft.wiki/w/Bamboo)
+    - [Cobwebs](https://minecraft.wiki/w/Cobweb)
+    - [Sculk](https://minecraft.wiki/w/Sculk)
 - `OCEAN_FLOOR_NO_PLANTS`
   - Same as `OCEAN_FLOOR`, except it also excludes the following blocks:
     - Everything listed for `MOTION_BLOCKING_NO_PLANTS`
@@ -1020,37 +1055,83 @@ A 2D array with integer values representing the heightmap of the x-z dimensions 
 
 A `404` error is returned if no build area has been set.
 
+A `400` is returned if one of the block IDs or block tag keys provided in the `blocks` parameter are invalid.
+
+A `400` status code is returned if heightmap preset type is not recognised.
+
 ## Example
+
+### Custom block list example
+
+After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=sand,gravel,dirt,clay,grass_block`, resulting in the following response:
+
+```json
+[
+	[ 56, 56, 56, 56, 56, 57, 59, 59, 59, 59, 60 ],
+	[ 56, 56, 56, 56, 57, 57, 59, 59, 59, 59, 58 ],
+	[ 54, 56, 57, 59, 59, 59, 59, 59, 59, 60, 60 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ], 
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 59 ],
+	[ 59, 59, 59, 59, 59, 59, 59, 59, 59, 59, 58 ]
+]
+```
+
+### yBounds example
+
+The `yBounds` can be useful to take measurements of the surface of underground caves or The Nether dimension. For example: `GET /heightmap?dimension=nether&blocks=air,#lava,magma_block&yBounds=..100`. This starts measurements at Y=100, below the typical upper ceiling of The Nether dimension. This results in this response:
+
+```json
+[
+	[ 86, 79, 79, 81, 81, 82, 81, 83, 84, 98, 95 ],
+	[ 81, 75, 74, 81, 80, 81, 82, 83, 83, 84, 93 ],
+	[ 82, 80, 70, 81, 82, 81, 82, 81, 83, 82, 84 ],
+	[ 85, 70, 78, 82, 83, 82, 82, 81, 81, 83, 84 ],
+	[ 83, 76, 77, 82, 82, 83, 82, 81, 81, 83, 84 ],
+	[ 84, 78, 78, 82, 83, 82, 82, 81, 81, 83, 84 ],
+	[ 77, 77, 81, 82, 82, 83, 82, 81, 81, 83, 84 ],
+	[ 80, 79, 78, 81, 83, 81, 81, 82, 81, 83, 84 ],
+	[ 78, 78, 78, 82, 82, 80, 81, 82, 81, 83, 84 ],
+	[ 78, 78, 78, 81, 79, 81, 80, 82, 81, 83, 84 ],
+	[ 78, 78, 78, 80, 79, 81, 80, 82, 81, 83, 84 ]
+]
+```
+
+### Heightmap preset type example
 
 After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, requesting the heightmap of that ignores water with `GET /heightmap?type=OCEAN_FLOOR` could return:
 
 ```json
 [
-  [68,68,66,65,65,65,72,72,72,74,74,74,71,65,65,65,65,65,68,71,71],
-  [67,68,66,65,65,72,72,73,72,72,74,71,71,64,64,64,64,64,68,68,71],
-  [66,67,67,65,65,72,73,74,73,72,71,71,63,63,63,63,63,63,63,68,68],
-  [66,66,66,66,65,72,72,73,72,72,63,63,63,63,63,63,63,63,63,63,63],
-  [65,66,65,65,65,64,72,72,72,63,63,63,63,63,63,63,63,63,63,63,63],
-  [64,64,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [63,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [64,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [65,65,65,64,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,67,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,67,66,66,66,65,65,63,63,63,63,63,63,63,63,63,63,63,63,63,63],
-  [66,67,67,66,66,65,65,64,64,63,63,64,64,64,64,64,65,65,65,64,64],
-  [66,67,67,66,72,72,72,65,64,64,64,64,65,65,65,65,66,66,66,66,66],
-  [66,67,67,72,72,75,72,72,65,65,65,65,65,66,66,66,67,67,67,67,67]
+	[ 68, 68, 66, 65, 65, 65, 72, 72, 72, 74, 74, 74, 71, 65, 65, 65, 65, 65, 68, 71, 71 ],
+	[ 67, 68, 66, 65, 65, 72, 72, 73, 72, 72, 74, 71, 71, 64, 64, 64, 64, 64, 68, 68, 71 ],
+	[ 66, 67, 67, 65, 65, 72, 73, 74, 73, 72, 71, 71, 63, 63, 63, 63, 63, 63, 63, 68, 68 ],
+	[ 66, 66, 66, 66, 65, 72, 72, 73, 72, 72, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 65, 66, 65, 65, 65, 64, 72, 72, 72, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 64, 64, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ], 
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 63, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 64, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 65, 65, 65, 64, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 66, 66, 66, 65, 65, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 66, 67, 66, 66, 65, 65, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ],
+	[ 66, 67, 66, 66, 66, 65, 65, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63, 63 ], 
+	[ 66, 67, 67, 66, 66, 65, 65, 64, 64, 63, 63, 64, 64, 64, 64, 64, 65, 65, 65, 64, 64 ], 
+	[ 66, 67, 67, 66, 72, 72, 72, 65, 64, 64, 64, 64, 65, 65, 65, 65, 66, 66, 66, 66, 66 ],
+	[ 66, 67, 67, 72, 72, 75, 72, 72, 65, 65, 65, 65, 65, 66, 66, 66, 67, 67, 67, 67, 67 ]
 ]
 ```
 
-# Read Minecraft version `GET /version`
+# 🪪 Read Minecraft version `GET /version`
 
 Get the current version of Minecraft.
 
@@ -1083,7 +1164,7 @@ Plain-text response with the Minecraft version number.
 1.20.2
 ```
 
-# Read HTTP interface information `OPTIONS /`
+# 🪪 Read HTTP interface information `OPTIONS /`
 
 Get the information about your instance of GDMC-HTTP and Minecraft.
 
@@ -1114,8 +1195,8 @@ JSON object containing the following:
 
 ```json
 {
-  "minecraftVersion": "1.20.2",
-  "DataVersion": 3578,
-  "interfaceVersion": "1.4.6-1.20.2"
+	"minecraftVersion": "1.20.2",
+	"DataVersion": 3578,
+	"interfaceVersion": "1.5.0-1.20.2"
 }
 ```

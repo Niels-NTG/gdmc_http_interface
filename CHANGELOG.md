@@ -1,3 +1,12 @@
+# GDMC-HTTP 1.5.0 (Minecraft 1.19.2 + 1.20.2)
+
+- NEW: GDMC-HTTP is now compatible with both the Forge and Fabric modding platform!
+- NEW: `GET /heightmap` can now receive a list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks), [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) to create your own custom heightmaps!
+- NEW: `GET /heightmap` can now receive an upper and lower Y-value limit for the requested heightmap. Usefull for taking measurements of the surface of caves or The Nether dimension.
+- NEW: Add `keepLiquids` flag to `POST /structure` endpoint. When set to `false` it removes all water sources present at the placement locations of the to be placed structure.
+- FIX: Actually implement behaviour to prevent spawning drops when placing structures for the `spawnDrops` flag of the `POST /structure` endpoint.
+- FIX: `/commands` now returns a 405 is any other HTTP method besides `POST` is used.
+
 # GDMC-HTTP 1.4.6 (Minecraft 1.19.2 + 1.20.2)
 
 - NEW: To enhance backwards compatibility, all features introduced in GDMC-HTTP 1.4.0 are now also available for Minecraft 1.19.2!

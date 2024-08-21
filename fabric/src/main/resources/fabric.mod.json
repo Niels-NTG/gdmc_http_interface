@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${mod_version}",
+  "name": "${mod_name}",
+  "description": "${mod_description}",
+  "authors": [
+	"Niels NTG Poldervaart",
+	"Niki Gawlik",
+	"Persson Dev"
+  ],
+  "license": "MIT",
+  "icon": "logo.png",
+  "environment": "*",
+  "entrypoints": {
+	"main": [
+	  "nl.nielspoldervaart.gdmc.fabric.GdmcHttpMod"
+	]
+  },
+  "depends": {
+	"fabricloader": "*",
+	"fabric-api-base": "*",
+	"fabric-networking-api-v1": "*",
+	"fabric-lifecycle-events-v1": "*",
+	"minecraft": ["${minecraft_version}"],
+	"java": ">=${java_version}"
+  }
+}

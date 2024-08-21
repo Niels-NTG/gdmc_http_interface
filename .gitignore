@@ -22,6 +22,8 @@ build
 eclipse
 run
 mcmodsrepo
+buildAllJars
+
 logo-design
 
 # profiler
