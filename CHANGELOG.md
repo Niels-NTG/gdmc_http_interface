@@ -2,7 +2,7 @@
 
 - NEW: GDMC-HTTP is now compatible with both the Forge and Fabric modding platform!
 - NEW: `GET /heightmap` can now receive a list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks), [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) to create your own custom heightmaps!
-- NEW: `GET /heightmap` can now receive an upper and lower Y-value limit for the requested heightmap. Usefull for taking measurements of the surface of caves or The Nether dimension.
+- NEW: `GET /heightmap` can now receive an upper and lower Y-value limit for the requested heightmap. Useful for taking measurements of the surface of caves or The Nether dimension.
 - NEW: Add `keepLiquids` flag to `POST /structure` endpoint. When set to `false` it removes all water sources present at the placement locations of the to be placed structure.
 - FIX: Actually implement behaviour to prevent spawning drops when placing structures for the `spawnDrops` flag of the `POST /structure` endpoint.
 - FIX: `/commands` now returns a 405 is any other HTTP method besides `POST` is used.
@@ -45,19 +45,19 @@
 TL;DR:
 - ⛏ Minecraft 1.20.2 compatibility!
 - ⏱ Huge performance improvements!
-- 📜 Commands now return usefull feedback to the client!
+- 📜 Commands now return useful feedback to the client!
 - 📐 Restrict actions to the build area with the `withinBuildArea` flag!
 - 🏗 SNBT support for placing structures!
 - 😸 Lots of quality-of-life improvements!
 
-- NEW: Compatibility with Minecraft version 1.20.2. No longer compatible with older versions of Minecraft. Any GDMC client (eg. your settlement generator) that works with GDMC-HTTP 1.0.0 or later should work with GDMC-HTTP 1.4.0 without making any changes to your code.
+- NEW: Compatibility with Minecraft version 1.20.2. No longer compatible with older versions of Minecraft. Any GDMC client (e.g. your settlement generator) that works with GDMC-HTTP 1.0.0 or later should work with GDMC-HTTP 1.4.0 without making any changes to your code.
 - NEW: The value `"message"` property returned by the `POST /commands` endpoint is now equal to what you would see in the in-game chat.
 - NEW: `POST /structure` endpoint now also accepts [SNBT-encoded](https://minecraft.wiki/w/NBT_format#SNBT_format) files.
 - NEW: `GET /chunks` default to using the build area if no URL query parameters are given.
-- NEW: Add `withinBuildArea` flag to `GET /chunks`. If set to true and a build area is set, chunks outside of the build area are skipped.
-- NEW: Add `withinBuildArea` flag to `GET /biomes`. If set to true and a build area is set, it skips positions outside of the build area.
-- NEW: Add `withinBuildArea` flag to `GET /structure`. If set to true and a build area is set, it skips positions outside of the build area.
-- NEW: Add `withinBuildArea` flag to `POST /structure`. If set to true and a build area is set, structures that are (partially) outside of the build area cannot be placed.
+- NEW: Add `withinBuildArea` flag to `GET /chunks`. If set to true and a build area is set, chunks outside the build area are skipped.
+- NEW: Add `withinBuildArea` flag to `GET /biomes`. If set to true and a build area is set, it skips positions outside the build area.
+- NEW: Add `withinBuildArea` flag to `GET /structure`. If set to true and a build area is set, it skips positions outside the build area.
+- NEW: Add `withinBuildArea` flag to `POST /structure`. If set to true and a build area is set, structures that are (partially) outside the build area cannot be placed.
 - NEW: Copy JSON representation of the current build area to clipboard when clicking on the chat message after setting it with the `/setbuildarea` command.
 - NEW: Display GDMC-HTTP server status in chat message when player joins the world.
 - NEW: Revert interface port to default (`9000`) if `/sethttpport` command has no arguments.
@@ -68,7 +68,7 @@ TL;DR:
 - FIX: Requests to `GET /heightmap` are now up to 85%[^1] faster!
 - FIX: Requests to `GET /biomes` are now up to 60%[^1] faster!
 - FIX: Requests to `GET /structure` are now up to 60%[^1] faster!
-- FIX: Requests to `GET /chunks` larger than than 52x52 chunks should no longer time out[^1].
+- FIX: Requests to `GET /chunks` larger than 52x52 chunks should no longer time out[^1].
 - FIX: Parse arguments `dx`, `dy` and `dz` in `GET /entities` as ranges (correct) instead of absolute coordinates (wrong).
 - FIX: Improved error handling across all endpoints.
 - FIX: Do not ignore blank entries in requests to `DELETE /entities`.
@@ -85,17 +85,17 @@ TL;DR:
 
 - NEW: Add `GET /heightmap` to get heightmap data of a given [type](https://minecraft.wiki/w/Heightmap) of the currently set build area. Thanks to [cmoyates](https://github.com/cmoyates)!
 - NEW: Add custom heightmap types `MOTION_BLOCKING_NO_PLANTS` and `OCEAN_FLOOR_NO_PLANTS`.
-- NEW: Add `withinBuildArea` flag to `GET /blocks`. If set to true it skips over positions outside of the build area.
-- NEW: Add `withinBuildArea` flag to `PUT /blocks`. If set to true it does not place blocks outside of the build area.
+- NEW: Add `withinBuildArea` flag to `GET /blocks`. If set to true it skips over positions outside the build area.
+- NEW: Add `withinBuildArea` flag to `PUT /blocks`. If set to true it does not place blocks outside the build area.
 
 # GDMC-HTTP 1.2.3 (Minecraft 1.19.2)
 
 - FIX: With `PUT /blocks`, allow for changing the block entity (NBT) data of a block even if the target block matches the block state and block ID of the placement instruction. This makes it possible to do things such as changing the text on an existing sign or changing the items of an already placed chest.
-- FIX: Reworked the algorithm for changing the shape of a block to fit with directly adjacent blocks (eg. fences) to be more efficient.
+- FIX: Reworked the algorithm for changing the shape of a block to fit with directly adjacent blocks (e.g. fences) to be more efficient.
 
 # GDMC-HTTP 1.2.2 (Minecraft 1.19.2)
 
-- FIX: Ensure blocks placed via `POST /structure` always update on the client side to reflect its block entity data (eg. text on signs, pieces of armor on armor stands, etc.). Prior to this fix the data was correctly parsed, but only became visible in-game if the relevant chunks were reloaded.
+- FIX: Ensure blocks placed via `POST /structure` always update on the client side to reflect its block entity data (e.g. text on signs, pieces of armor on armor stands, etc.). Prior to this fix the data was correctly parsed, but only became visible in-game if the relevant chunks were reloaded.
 - FIX: Remove support for `pivotY` URL query parameter in the `POST /structure` endpoint since it wasn't implemented in the first place. Minecraft does not support it. This is not a breaking change since unknown query parameters will be ignored by GDMC-HTTP.
 - FIX: Add clarification on the transformation order of structures in the `POST /structure` endpoint to documentation.
 
@@ -136,7 +136,7 @@ TL;DR:
 
 # GDMC-HTTP 0.7.6 (Minecraft 1.19.2)
 
-- FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside of the vertical boundaries of the world.
+- FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside the vertical boundaries of the world.
 - FIX: Typo in error message `POST /structure` handler.
 
 # GDMC-HTTP 0.7.5 (Minecraft 1.19.2)
@@ -151,7 +151,7 @@ TL;DR:
 
 # GDMC-HTTP 0.7.4 (Minecraft 1.19.2)
 
-- FIX: Placement of multi-part blocks such as beds and doors.
+- FIX: Placement of multipart blocks such as beds and doors.
 
 # GDMC-HTTP 0.7.3 (Minecraft 1.19.2)
 
@@ -169,7 +169,7 @@ TL;DR:
 
 - NEW:`PUT /blocks` endpoint can now accept a JSON-formatted request body as input using the request header `"Content-Type": "application/json"`. The format is identical the response of the `GET /blocks` with the `"Accept": "application/json"` request header, with a few minor additional features:
   - For each placement instruction, `x`, `y` and `z` are optional. If omitted, it uses the coordinate set in the request's URL query as a fallback, or 0 if these aren't set.
-  - For each placement instruction, `x`, `y` and `z` can be a integer ("x": `32`) or use tilde (`"x": "~32"`) or caret (`"x": "^32"`) notation in a string.
+  - For each placement instruction, `x`, `y` and `z` can be an integer ("x": `32`) or use tilde (`"x": "~32"`) or caret (`"x": "^32"`) notation in a string.
   - Block state (`"state"`) and block entity data (`"data"`) can be an JSON object, a single string or can be omitted all together.
   - When placing blocks with `PUT /blocks`, the "shapes" of directly adjacent blocks are updated, unless the `doBlockUpdates` flag is explicitly disabled. This means that placing a fence block
     directly adjacent to an existing block changes the shape of the fence
@@ -206,7 +206,7 @@ TL;DR:
 
 # GDMC-HTTP 0.6.0 (Minecraft 1.19.2)
 
-- NEW: `PUT /blocks` can now also process block entity data (eg. chest contents, a book on a lectern, armor on an armor stand, etc.).
+- NEW: `PUT /blocks` can now also process block entity data (e.g. chest contents, a book on a lectern, armor on an armor stand, etc.).
 - NEW: `GET /blocks` can return multiple blocks within a given area.
 - NEW: Response of `GET /blocks` now always includes a block's position in front of its material.
 - BREAKING: JSON response format of `GET /blocks` is now a JSON array instead of a single object.

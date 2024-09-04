@@ -4,7 +4,7 @@
 
 # General
 
-By default all endpoints are located at `localhost:9000`. So for example a call to place blocks would have the URL `http://localhost:9000/blocks?x=-82&y=1&z=40`.
+By default, all endpoints are located at `localhost:9000`. So for example a call to place blocks would have the URL `http://localhost:9000/blocks?x=-82&y=1&z=40`.
 
 An instance of Minecraft with the GDMC-HTTP mod installed needs to be active at the given domain with a world loaded for the endpoints to be available.
 
@@ -32,15 +32,15 @@ The following error status codes are shared across multiple endpoints:
   - Error is thrown at endpoints that support the`withinBuildArea` query parameter if all the following conditions are true:
     - `withinBuildArea` is set to `true`
     - A build area is set
-    - Area in the request is completely outside of the build area
+    - Area in the request is completely outside the build area
 - `404`: "No build area is specified. Use the /setbuildarea command inside Minecraft to set a build area."
-  - Error is thrown if no build area is set when an request requires it
+  - Error is thrown if no build area is set when a request requires it
 
 - `405`: "Method not allowed"
   - Current endpoint does not support the method. See the methods listed in this documentation or the 405 error message to see what methods are supported.
 
 - `408`: "Parsing of request payload took too long"
-  - GDMC-HTTP could not parse the request body within a 10 minute time limit.
+  - GDMC-HTTP could not parse the request body within a 10-minute time limit.
 
 - `500`: "Internal server error"
   - This type of error is unintended behaviour and could be a bug in either GDMC-HTTP or Minecraft itself. Feel free to submit an [issue](https://github.com/Niels-NTG/gdmc_http_interface/issues) with steps explaining how to reproduce this error.
@@ -73,7 +73,7 @@ The responses for all endpoints return with the following headers, unless stated
 | Content-Disposition         | `inline`                          |             |
 | Content-Type                | `application/json; charset=UTF-8` |             |
 
-# ⚙️ Send Commands `POST /commands`
+# 📜 Send Commands `POST /commands`
 
 Send one or more Minecraft console commands to the server. For the full list of all commands consult the [Minecraft commands documentation](https://minecraft.wiki/w/Commands#List_and_summary_of_commands).
 
@@ -212,7 +212,7 @@ Response body follows this [schema](./schema.blocks.get.json).
 
 ## Example
 
-To get a the block at position x=28, y=67 and z=-73, request `GET /blocks?x=5525&y=62&z=4381`, which could return:
+To get the block at position x=28, y=67 and z=-73, request `GET /blocks?x=5525&y=62&z=4381`, which could return:
 
 ```json
 [
@@ -337,9 +337,9 @@ Place one or more blocks into the world.
 
 In Minecraft destroying or placing a block will cause a 'block update'. A block update tells neighboring blocks to react to the change. An example would be for water to flow in to the newly created space, a torch to pop off after the block it was on has been destroyed or a fence to connect to a newly placed fence post. If for performance or stability reasons you want to avoid block updates you can set the query parameter `doBlockUpdates` to false (`PUT /blocks?x=10&y=64&z=-87&doBlockUpdates=false`). But be warned, this can cause cosmetic issues such as fences not connecting automatically!
 
-By default blocks placed through the interface will not cause any items to be dropped. In the example of the torch, if a block is destroyed, and attached torch will be destroyed too, but not drop as an item. If for some reason you do want items to drop you can set the `spawnDrops` query parameter to true (`PUT /blocks?x=10&y=64&z=-87&spawnDrops=true`).
+By default, blocks placed through the interface will not cause any items to be dropped. In the example of the torch, if a block is destroyed, and attached torch will be destroyed too, but not drop as an item. If for some reason you do want items to drop you can set the `spawnDrops` query parameter to true (`PUT /blocks?x=10&y=64&z=-87&spawnDrops=true`).
 
-Both of these query parameters set certain 'block update flags' internally. If you know what you are doing you can also set the block update behavior manually. But be careful, because this can cause glitchy behavior! You can set the block update flags with the query parameter `customFlags`. It is a bit string consisting of 7 bits and it will override the behavior set by `doBlockUpdates` and `spawnDrops`. For example `PUT /blocks?x=10&y=64&z=-87&customFlags=0000010`.
+Both of these query parameters set certain 'block update flags' internally. If you know what you are doing you can also set the block update behavior manually. But be careful, because this can cause glitchy behavior! You can set the block update flags with the query parameter `customFlags`. It is a bit string consisting of 7 bits, and it will override the behavior set by `doBlockUpdates` and `spawnDrops`. For example `PUT /blocks?x=10&y=64&z=-87&customFlags=0000010`.
 
 The flags are as follows:
 
@@ -357,7 +357,7 @@ You can combine these flags as you wish, for example 0100011 will cause a block 
 
 Note that if `doBlockUpdates=false` or the block update flag is set to `0` some other way, GDMC-HTTP will place blocks faster than if block updates were enabled.
 
-The following list shows which block update flags `doBlockUpdates` and `spawnDrops` get evaluated to internally:
+The following list shows which block update flags `doBlockUpdates` and `spawnDrops` get evaluated internally to:
 
 ```
 doBlockUpdates=False, spawnDrops=False -> 0110010
@@ -504,7 +504,7 @@ For getting the biomes of a row of blocks, request `GET /biomes?x=2350&y=64&z=-7
 ]
 ```
 
-# 📦 Read chunk data `GET /chunks`
+# ⛏ Read chunk data `GET /chunks`
 
 Read [chunks](https://minecraft.wiki/w/Chunk) within a given range and return it as [chunk data](https://minecraft.wiki/w/Chunk_format).
 
@@ -543,7 +543,7 @@ N/A
 
 ## Response headers
 
-Table below only applies if the request header `Accept: application/octet-stream` is present. Otherwise it returns with the [Default](#Response-headers) response headers.
+Table below only applies if the request header `Accept: application/octet-stream` is present. Otherwise, it returns with the [Default](#Response-headers) response headers.
 
 | key                         | value                      | description                                                                                   |
 |-----------------------------|----------------------------|-----------------------------------------------------------------------------------------------|
@@ -553,7 +553,7 @@ Table below only applies if the request header `Accept: application/octet-stream
 
 ## Response body
 
-Response should be encoded as an [NBT](https://minecraft.wiki/w/NBT_format) or [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format) data structure depending what value has been set for `Accept` in the request header. The data always contains the following properties:
+Response should be encoded as an [NBT](https://minecraft.wiki/w/NBT_format) or [SNBT](https://minecraft.wiki/w/NBT_format#SNBT_format) data structure depending on what value has been set for `Accept` in the request header. The data always contains the following properties:
 
 - `ChunkX`: X-coordinate of the origin chunk
 - `ChunkZ`: Z-coordinate of the origin chunk
@@ -614,7 +614,7 @@ N/A
 
 ## Response headers
 
-Table below only applies if the request header `Accept: application/octet-stream` is present. Otherwise it returns with the default headers described [here](#response-headers).
+Table below only applies if the request header `Accept: application/octet-stream` is present. Otherwise, it returns with the default headers described [here](#response-headers).
 
 | key                         | value                      | description                                                                               |
 |-----------------------------|----------------------------|-------------------------------------------------------------------------------------------|
@@ -626,7 +626,7 @@ Table below only applies if the request header `Accept: application/octet-stream
 
 An [NBT file](https://minecraft.wiki/w/NBT_format) the selected area of the world.
 
-Note that the response returns a 403 error code if the `withinBuilArea` flag is `true` and the selected area is completely outside of the build area.
+Note that the response returns a 403 error code if the `withinBuilArea` flag is `true` and the selected area is completely outside the build area.
 
 ## Example
 
@@ -684,7 +684,7 @@ A `400` error status is returned instead if:
 
 Using the [Structure Block](https://minecraft.wiki/w/Structure_Block), [save](https://minecraft.wiki/w/Structure_Block#Save) an area of any Minecraft world. Give it a name such as "example:test-structure" and set the Include entities setting to "ON", then hit the "SAVE" button. You will now be able to find the file under `(minecraftFiles)/saves/(worldName)/generated/example/test-structure.nbt`.
 
-Now in Minecraft load the Minecraft world you want to place this structure in, pick a location and place it there using this endpoint. To place the it at location x=102, y=67, z=-21 with entities, include the file as the request body to request `POST /structure?x=102&y=67&z=-21&entities=true`.
+Now in Minecraft load the Minecraft world you want to place this structure in, pick a location and place it there using this endpoint. To place it at location x=102, y=67, z=-21 with entities, include the file as the request body to request `POST /structure?x=102&y=67&z=-21&entities=true`.
 
 # 🐷 Read entities `GET /entities`
 
@@ -723,6 +723,9 @@ The response follows this [schema](./schema.entities.get.json).
 ## Example
 
 Given a pit with 3 cats in it, the request `GET /entities?x=305&y=65&z=26&dx=10&dy=10&dz=10&includeData=true` may return:
+
+- [ ] Create new example data for entities endpoint
+
 ```json
 [
 	{
@@ -780,7 +783,7 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 
 ## Response body
 
-For each placement instruction in the request, it returns a list with a the entity's UUID if placement was successful or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
+For each placement instruction in the request, it returns a list with the entity's UUID if placement was successful or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
 
 ## Example
 
@@ -841,7 +844,7 @@ Refer to [the conversion from JSON table](https://minecraft.wiki/w/NBT_format#Co
 
 ## Response body
 
-For each patch instruction in the request, it returns a list with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* if the data has changed after the patch. `{ "status": 0 }` if no entity exists in the world with this UUID, if the patch has no effect on the existing data or if a invalid UUID or patch data has been submitted or if merging the data failed for some other reason.
+For each patch instruction in the request, it returns a list with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* if the data has changed after the patch. `{ "status": 0 }` if no entity exists in the world with this UUID, if the patch has no effect on the existing data or if an invalid UUID or patch data has been submitted or if merging the data failed for some other reason.
 
 ## Example
 
@@ -881,7 +884,7 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 
 ## Response body
 
-For each patch instruction in the request, it returns a list with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* and is able to be removed, `{ "status": 0 }` if no entity exists in the world with this UUID and an error message if a invalid UUID.
+For each patch instruction in the request, it returns a list with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* can be removed, `{ "status": 0 }` if no entity exists in the world with this UUID and an error message if an invalid UUID.
 
 ## Example
 
@@ -1014,7 +1017,7 @@ This endpoint supports 4 of [Minecraft's built-in height map types](https://mine
 - `MOTION_BLOCKING_NO_LEAVES`
   - Same as `MOTION_BLOCKING` but also ignores [leaves](https://minecraft.wiki/w/Leaves).
 
-Additionally this mod provides 2 extra heightmap types
+Additionally, this mod provides 2 extra heightmap types
 
 - `MOTION_BLOCKING_NO_PLANTS`
   - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
