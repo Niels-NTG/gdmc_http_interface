@@ -33,6 +33,8 @@ The following instructions are for the Modrinth App, but other custom launchers 
 
 Since GDMC-HTTP 1.5.0 this mod supports both the Fabric and Forge mod loaders within the same `.jar` file.
 
+The following installation instructions are for installing this mod in the Minecraft client, but GDMC-HTTP also works on the Minecraft server with either the Fabric or Forge mod loader installed.
+
 ### Fabric
 
 Installation instructions for when using the Fabric mod loader.
