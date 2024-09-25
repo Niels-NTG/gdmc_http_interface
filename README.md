@@ -47,7 +47,7 @@ Installation instructions for when using the Fabric mod loader.
    - On Windows: `%APPDATA%/.minecraft/mods`.
    - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
    - On Linux desktop: `~/.minecraft/mods`
-5. Get the [Fabric Api Mod](https://www.curseforge.com/minecraft/mc-mods/fabric-api). Download the same version as above and move it in the mod folder.
+5. Get the [Fabric Api Mod](https://modrinth.com/mod/fabric-api). Download the same version as above and move it in the mod folder.
 6. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Fabric installation in the list.
 
 ### Forge
