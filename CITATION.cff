@@ -10,15 +10,16 @@ type: software
 authors:
   - given-names: Niels
     family-names: Poldervaart
+    orcid: 'https://orcid.org/0009-0008-0766-7592'
   - given-names: Niki
     family-names: Gawlik
 repository-code: 'https://github.com/Niels-NTG/gdmc_http_interface/'
 url: 'http://gdmc.nielspoldervaart.nl'
 abstract: >-
-  Minecraft Mod that implements an HTTP interface for
-  reading and writing blocks (and more) with an external
+  Minecraft mod that implements an HTTP interface for
+  reading and writing blocks (and more) by an external
   program or script. Intended for use in the GDMC
-  competition.
+  competition. 
 keywords:
   - minecraft
   - procedural-content-generation
@@ -27,6 +28,7 @@ keywords:
   - architecture
   - game-design
   - level-editor
+  - game-AI
 license: MIT
 commit: 9c564a90d445028fd5ff5b4aa3e28480e22b5f2e
 version: 1.5.0
