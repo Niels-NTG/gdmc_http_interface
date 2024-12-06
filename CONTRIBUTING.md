@@ -24,7 +24,7 @@ We try to make GDMC-HTTP both backwards and forwards compatible such that client
 
 One potential way of doing this is creating a branch any time a new feature or patch has been added which backports these to older versions of the game. This can be quite time-consuming and can easily lead to missing features. Not to mention a lot of merge conflicts.
 
-Instead, we've taken inspiration from the build setup of the [Distant Horizons mod](https://gitlab.com/jeseibel/distant-horizons). Using this setup we can support multiple Minecraft versions and even multiple modding frameworks on the same branch. The "secret ingredient" here is the [Manifold Preprocessor](https://github.com/manifold-systems/manifold/tree/master/manifold-deps-parent/manifold-preprocessor), a dependency that adds conditional compilation to Java somewhat reminiscent of C. These directives can be placed anywhere in the code. The symbols are set by the `writeBuildGradlePredefine` function in `build.gradle`, which generates the `build.properties` which defines the list of symbols. Here are some examples on how it can be used in the source code:
+Instead, we've taken inspiration from the build setup of the [Distant Horizons mod](https://gitlab.com/distant-horizons-team/distant-horizons). Using this setup we can support multiple Minecraft versions and even multiple modding frameworks on the same branch. The "secret ingredient" here is the [Manifold Preprocessor](https://github.com/manifold-systems/manifold/tree/master/manifold-deps-parent/manifold-preprocessor), a dependency that adds conditional compilation to Java somewhat reminiscent of C. These directives can be placed anywhere in the code. The symbols are set by the `writeBuildGradlePredefine` function in `build.gradle`, which generates the `build.properties` which defines the list of symbols. Here are some examples on how it can be used in the source code:
 
 ```java
 #if (MC_VER == MC_1_19_2)
@@ -48,7 +48,7 @@ All Gradle tasks such as `publish` and `runClient` can only run for one Minecraf
 
 # Supporting multiple mod loaders
 
-We support multiple modding frameworks (currently Fabric and Forge) using a project setup inspired by [Distant Horizons mod](https://gitlab.com/jeseibel/distant-horizons). This includes a script `buildAll.sh` which for each Minecraft version creates a single `.jar` file which is compatible with all the mod loaders we support.  
+We support multiple modding frameworks (currently Fabric and Forge) using a project setup inspired by [Distant Horizons mod](https://gitlab.com/distant-horizons-team/distant-horizons). This includes a script `buildAll.sh` which for each Minecraft version creates a single `.jar` file which is compatible with all the mod loaders we support.
 
 For this we try to avoid using APIs specific to any mod loader as much as possible so the vast majority of code can be shared across all modding frameworks. You will find this code in the `common` namespace, while code specifically for mod loaders such as entry points and lifecycle event listeners are under the namespace of the mod loader name (`fabric`, `forge`).
 

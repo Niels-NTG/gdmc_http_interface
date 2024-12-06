@@ -16,7 +16,7 @@ plugins {
 
 /**
  * Creates a list of values of Minecraft versions for the Manifold preprocessors.
- * Source: https://gitlab.com/jeseibel/distant-horizons/-/blob/870c0f68d3faf6aa7c76a1c094d19c802f59f06b/build.gradle
+ * Source: https://gitlab.com/distant-horizons-team/distant-horizons/-/blob/870c0f68d3faf6aa7c76a1c094d19c802f59f06b/build.gradle
  *
  * @param mcVersions array of all MC versions
  * @param targetMinecraftIndex array index of the currently active MC version
