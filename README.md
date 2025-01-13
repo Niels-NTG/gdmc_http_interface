@@ -116,3 +116,13 @@ This mod adds the following custom console commands to the game:
 ## Acknowledgements
 
 GDMC-HTTP has been actively developed with the help of the GDMC community. Of special note here is [Niki Gawlik](https://github.com/nikigawlik), who created the [original version](https://github.com/nilsgawlik/gdmc_http_interface) of this mod for Minecraft 1.16.5. This repo is a continuation of their work. Fabric mod loader support was in part based on a [fork](https://github.com/Persson-dev/gdmc_http_fabric) by [Simon Pribylski](https://github.com/Persson-dev). The project structure that makes it possible to support multiple mod loaders and Minecraft versions all on the same branch has been adapted from the [Distant Horizons mod](https://gitlab.com/distant-horizons-team/distant-horizons).
+
+## GitHub star history
+
+<a href="https://star-history.com/#Niels-NTG/gdmc_http_interface&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Niels-NTG/gdmc_http_interface&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Niels-NTG/gdmc_http_interface&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Niels-NTG/gdmc_http_interface&type=Date" />
+ </picture>
+</a>
