@@ -285,14 +285,14 @@ public class StructureHandler extends HandlerBase {
 
 		// Fill the structure template with blocks in the given area of the level. Do this on the server thread such that NBT block data
 		// gets gathered correctly. When resolved, save the result to a new CompoundTag.
-		CompletableFuture<Void> placeInWorldFuture = mcServer.submit(() -> structureTemplate.fillFromWorld(
+		CompletableFuture<Void> fillFromWorldFuture = mcServer.submit(() -> structureTemplate.fillFromWorld(
 			serverLevel,
 			origin,
 			size,
 			includeEntities,
 			null
 		));
-		placeInWorldFuture.join();
+		fillFromWorldFuture.join();
 		CompoundTag newStructureCompoundTag = structureTemplate.save(new CompoundTag());
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();

@@ -84,6 +84,7 @@ public class BlocksHandler extends HandlerBase {
     // PUT/GET: If true, constrain placement/getting blocks within the current build area.
     private boolean withinBuildArea;
 
+    // PUT/GET: Dimension to place/retrieve blocks from.
     private String dimension;
 
     public BlocksHandler(MinecraftServer mcServer) {
@@ -421,7 +422,7 @@ public class BlocksHandler extends HandlerBase {
             blockNBTString = json.get("data").getAsString();
         }
 
-        // Pass block Id and block state string into a StringReader with the block state parser.
+        // Pass block ID and block state string into a StringReader with the block state parser.
 	    return BlockStateParser.parseForBlock(
             getBlockRegistryLookup(commandSourceStack),
             new StringReader(blockId + blockStateString + blockNBTString),
@@ -623,7 +624,7 @@ public class BlocksHandler extends HandlerBase {
      * @param placementInstructionsMap  Other placement instructions to find neighbouring blocks in.
      * @param chunkMap                  Cached chunks to find neighbouring blocks in.
      * @param level                     Level to find neighbouring blocks in.
-     * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}.
+     * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}).
      * @return                          The updated {@link BlockState}.
      */
     private static BlockState updateBlockShape(BlockPos inputBlockPos, BlockState inputBlockState, ConcurrentHashMap<BlockPos, PlacementInstructionRecord> placementInstructionsMap, ConcurrentHashMap<ChunkPos, LevelChunk> chunkMap, ServerLevel level, int flags) {
