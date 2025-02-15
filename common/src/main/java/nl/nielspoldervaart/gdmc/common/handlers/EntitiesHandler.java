@@ -1,6 +1,9 @@
 package nl.nielspoldervaart.gdmc.common.handlers;
 
 import net.minecraft.commands.arguments.ResourceLocationArgument;
+#if (MC_VER == MC_1_21_4)
+import net.minecraft.world.entity.EntitySpawnReason;
+#endif
 import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -287,10 +290,17 @@ public class EntitiesHandler extends HandlerBase {
 
 			entityData.putString("id", entityResourceLocation.toString());
 
+			#if (MC_VER == MC_1_21_4)
+			Entity entity = EntityType.loadEntityRecursive(entityData, level, EntitySpawnReason.COMMAND,(_entity) -> {
+				_entity.moveTo(entityPosition);
+				return _entity;
+			});
+			#else
 			Entity entity = EntityType.loadEntityRecursive(entityData, level, (_entity) -> {
 				_entity.moveTo(entityPosition);
 				return _entity;
 			});
+			#endif
 			if (entity == null) {
 				return instructionStatus(false, "Entity could not be spawned");
 			}

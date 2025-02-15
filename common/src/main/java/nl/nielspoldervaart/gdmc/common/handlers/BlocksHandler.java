@@ -22,6 +22,9 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 #endif
+#if (MC_VER == MC_1_21_4)
+import net.minecraft.data.registries.VanillaRegistries;
+#endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 #if (MC_VER == MC_1_19_2)
@@ -473,10 +476,23 @@ public class BlocksHandler extends HandlerBase {
         String str = "{}";
         BlockEntity blockEntity = getExistingBlockEntity(pos, levelChunk);
         if (blockEntity != null) {
-            CompoundTag tags = blockEntity.saveWithoutMetadata();
-            str = tags.getAsString();
+            str = getBlockDataAsCompound(blockEntity, false).getAsString();
         }
         return str;
+    }
+
+    private static CompoundTag getBlockDataAsCompound(BlockEntity blockEntity, boolean includeMetaData) {
+        #if (MC_VER == MC_1_21_4)
+        if (includeMetaData) {
+            return blockEntity.saveWithFullMetadata(VanillaRegistries.createLookup());
+        }
+        return blockEntity.saveWithoutMetadata(VanillaRegistries.createLookup());
+        #else
+        if (includeMetaData) {
+            return blockEntity.saveWithFullMetadata();
+        }
+        return blockEntity.saveWithoutMetadata();
+        #endif
     }
 
     /**
@@ -563,11 +579,15 @@ public class BlocksHandler extends HandlerBase {
         if (existingBlockEntity != null) {
             // If the NBT data on the existing block is the same as the NBT data
             // from the input, do not bother applying the input NBT data.
-            if (TagUtils.contains(existingBlockEntity.saveWithFullMetadata(), blockNBT)) {
+            if (TagUtils.contains(getBlockDataAsCompound(existingBlockEntity, true), blockNBT)) {
                 return instructionStatus(isBlockSet);
             }
             try {
+                #if (MC_VER == MC_1_21_4)
+                existingBlockEntity.loadWithComponents(blockNBT, VanillaRegistries.createLookup());
+                #else
                 existingBlockEntity.load(blockNBT);
+                #endif
             } catch (NullPointerException e) {
                 for (StackTraceElement stackTraceElement : e.getStackTrace()) {
                     // Return special error message for if input NBT data for sign was formatted incorrectly.
@@ -642,20 +662,28 @@ public class BlocksHandler extends HandlerBase {
 
             PlacementInstructionRecord otherPlacementInstruction = placementInstructionsMap.get(mutableBlockPos);
             if (otherPlacementInstruction != null) {
-                newBlockState = newBlockState.updateShape(direction, otherPlacementInstruction.blockState, level, inputBlockPos, mutableBlockPos);
+                newBlockState = applyBlockShape(newBlockState, direction, otherPlacementInstruction.blockState, level, inputBlockPos, mutableBlockPos);
                 continue;
             }
             LevelChunk chunk = chunkMap.get(new ChunkPos(mutableBlockPos));
             if (chunk != null) {
-                newBlockState = newBlockState.updateShape(direction, chunk.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
+                newBlockState = applyBlockShape(newBlockState, direction, newBlockState, level, inputBlockPos, mutableBlockPos);
                 continue;
             }
-            newBlockState = newBlockState.updateShape(direction, level.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
+            newBlockState = applyBlockShape(newBlockState, direction, level.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
         }
         if (newBlockState.isAir()) {
             return inputBlockState;
         }
         return newBlockState;
+    }
+
+    private static BlockState applyBlockShape(BlockState newBlockState, Direction direction, BlockState otherBlockState, ServerLevel level, BlockPos inputBlockPos, BlockPos.MutableBlockPos mutableBlockPos) {
+        #if (MC_VER == MC_1_21_4)
+        return newBlockState.updateShape(level, level, inputBlockPos, direction, mutableBlockPos, otherBlockState, level.getRandom());
+        #else
+        return newBlockState.updateShape(direction, otherBlockState, level, inputBlockPos, mutableBlockPos);
+        #endif
     }
 
     public static int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {
