@@ -667,7 +667,7 @@ public class BlocksHandler extends HandlerBase {
             }
             LevelChunk chunk = chunkMap.get(new ChunkPos(mutableBlockPos));
             if (chunk != null) {
-                newBlockState = applyBlockShape(newBlockState, direction, newBlockState, level, inputBlockPos, mutableBlockPos);
+                newBlockState = applyBlockShape(newBlockState, direction, chunk.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
                 continue;
             }
             newBlockState = applyBlockShape(newBlockState, direction, level.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
