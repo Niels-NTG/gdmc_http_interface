@@ -12,7 +12,7 @@
                 "id": {
                     "type": "string",
                     "title": "Biome ID",
-                    "description": "Any namespaced biome ID. This value is an empty string if requested position is outside the vertical bounds of the world.",
+                    "description": "Any namespaced biome ID (https://minecraft.wiki/w/Biome#Java_Edition). This value is an empty string if requested position is outside the vertical bounds of the world.",
                     "examples": [
                         "minecraft:plains",
                         "minecraft:wooded_badlands",

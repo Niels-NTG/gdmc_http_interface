@@ -744,7 +744,7 @@ For a pen of various different farm animals of the size of 10 blocks wide and 10
 
 # 🐷 Create entities `PUT /entities`
 
-Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity) into the world such as [mobs](https://minecraft.wiki/w/Mob), [items](https://minecraft.wiki/w/Item_(entity)), [item frames](https://minecraft.wiki/w/Item_Frame), [painting](https://minecraft.wiki/w/Painting) and [projectiles](https://minecraft.wiki/w/Snowball). This endpoint has feature-parity with the [/summon command](https://minecraft.wiki/w/Commands/summon), meaning it takes the same options and has the same constraints.
+Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity) into the world such as [mobs](https://minecraft.wiki/w/Mob), [items](https://minecraft.wiki/w/Item_(entity)), [item frames](https://minecraft.wiki/w/Item_Frame), [painting](https://minecraft.wiki/w/Painting) and [projectiles](https://minecraft.wiki/w/Category:Projectiles). This endpoint has feature-parity with the [/summon command](https://minecraft.wiki/w/Commands/summon), meaning it takes the same options and has the same constraints.
 
 ## URL parameters
 
@@ -818,7 +818,7 @@ Endpoint for changing the properties of [entities](https://minecraft.wiki/w/Enti
 
 ## Request body
 
-The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.wiki/w/Entity_format#Entity_Format) and entities of a specific type for an overview of properties and their data types.
+The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.wiki/w/Entity_format#Entity_format) and entities of a specific type for an overview of properties and their data types.
 
 The response is expected to be valid JSON. It should be a single JSON array of JSON objects according to this [schema](./schema.entities.patch.json).
 
@@ -975,7 +975,7 @@ Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build are
 
 | key       | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                                                                                       |
 |-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) of blocks that should be considered transparent when calculating the heightmap. |
+| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Block_tag_(Java_Edition)) and/or [fluid tag keys](https://minecraft.wiki/w/Fluid_tag_(Java_Edition)) of blocks that should be considered transparent when calculating the heightmap. |
 | yBounds   | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                                                                                                   |
 | type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                                                                                                 |
 | dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                                                                                            |
@@ -986,7 +986,7 @@ When provided with a comma-separated list of [block IDs](https://minecraft.wiki/
 
 Block tag keys describe a category of block. `#logs` for instance describe all types of [log blocks](https://minecraft.wiki/w/Log) and [stripped log blocks](https://minecraft.wiki/w/Stripped_Log).
 
-Please note that air blocks (`minecraft:air`) are not included by default.
+Please note that air (`minecraft:air`) is not included by default.
 
 Please note that for fluids it's best to use the fluid tag keys `#water` and/or `#lava`, since the block ID `minecraft:water`/`minecraft:lava` only includes non-flowing liquids.
 
