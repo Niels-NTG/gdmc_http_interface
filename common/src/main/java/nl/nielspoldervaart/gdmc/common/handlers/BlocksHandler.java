@@ -23,7 +23,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 #endif
 #if (MC_VER == MC_1_21_4)
-import net.minecraft.data.registries.VanillaRegistries;
 #endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
@@ -37,6 +36,7 @@ import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -476,17 +476,17 @@ public class BlocksHandler extends HandlerBase {
         String str = "{}";
         BlockEntity blockEntity = getExistingBlockEntity(pos, levelChunk);
         if (blockEntity != null) {
-            str = getBlockDataAsCompound(blockEntity, false).getAsString();
+            str = getBlockDataAsCompound(blockEntity, levelChunk.getLevel(), false).getAsString();
         }
         return str;
     }
 
-    private static CompoundTag getBlockDataAsCompound(BlockEntity blockEntity, boolean includeMetaData) {
+    private static CompoundTag getBlockDataAsCompound(BlockEntity blockEntity, Level level, boolean includeMetaData) {
         #if (MC_VER == MC_1_21_4)
         if (includeMetaData) {
-            return blockEntity.saveWithFullMetadata(VanillaRegistries.createLookup());
+            return blockEntity.saveWithFullMetadata(level.registryAccess());
         }
-        return blockEntity.saveWithoutMetadata(VanillaRegistries.createLookup());
+        return blockEntity.saveWithoutMetadata(level.registryAccess());
         #else
         if (includeMetaData) {
             return blockEntity.saveWithFullMetadata();
@@ -579,12 +579,12 @@ public class BlocksHandler extends HandlerBase {
         if (existingBlockEntity != null) {
             // If the NBT data on the existing block is the same as the NBT data
             // from the input, do not bother applying the input NBT data.
-            if (TagUtils.contains(getBlockDataAsCompound(existingBlockEntity, true), blockNBT)) {
+            if (TagUtils.contains(getBlockDataAsCompound(existingBlockEntity, chunk.getLevel(), true), blockNBT)) {
                 return instructionStatus(isBlockSet);
             }
             try {
                 #if (MC_VER == MC_1_21_4)
-                existingBlockEntity.loadWithComponents(blockNBT, VanillaRegistries.createLookup());
+                existingBlockEntity.loadWithComponents(blockNBT, chunk.getLevel().registryAccess());
                 #else
                 existingBlockEntity.load(blockNBT);
                 #endif
