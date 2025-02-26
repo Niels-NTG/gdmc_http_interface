@@ -11,7 +11,9 @@ import net.minecraft.world.entity.EntityType;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+#if (MC_VER != MC_1_21_4)
 import java.util.zip.GZIPOutputStream;
+#endif
 
 public class TagUtils {
 
@@ -105,9 +107,13 @@ public class TagUtils {
 	public static byte[] NBTToBytes(CompoundTag tag, boolean returnCompressed) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (returnCompressed) {
-			GZIPOutputStream dos = new GZIPOutputStream(baos);
+			#if (MC_VER == MC_1_21_4)
+			NbtIo.writeCompressed(tag, baos);
+            #else
+            GZIPOutputStream dos = new GZIPOutputStream(baos);
 			NbtIo.writeCompressed(tag, dos);
 			dos.flush();
+            #endif
 			return baos.toByteArray();
 		}
 		DataOutputStream dos = new DataOutputStream(baos);

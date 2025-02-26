@@ -22,6 +22,8 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 #endif
+#if (MC_VER == MC_1_21_4)
+#endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 #if (MC_VER == MC_1_19_2)
@@ -34,6 +36,7 @@ import net.minecraft.world.Clearable;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -84,6 +87,7 @@ public class BlocksHandler extends HandlerBase {
     // PUT/GET: If true, constrain placement/getting blocks within the current build area.
     private boolean withinBuildArea;
 
+    // PUT/GET: Dimension to place/retrieve blocks from.
     private String dimension;
 
     public BlocksHandler(MinecraftServer mcServer) {
@@ -421,7 +425,7 @@ public class BlocksHandler extends HandlerBase {
             blockNBTString = json.get("data").getAsString();
         }
 
-        // Pass block Id and block state string into a StringReader with the block state parser.
+        // Pass block ID and block state string into a StringReader with the block state parser.
 	    return BlockStateParser.parseForBlock(
             getBlockRegistryLookup(commandSourceStack),
             new StringReader(blockId + blockStateString + blockNBTString),
@@ -472,10 +476,23 @@ public class BlocksHandler extends HandlerBase {
         String str = "{}";
         BlockEntity blockEntity = getExistingBlockEntity(pos, levelChunk);
         if (blockEntity != null) {
-            CompoundTag tags = blockEntity.saveWithoutMetadata();
-            str = tags.getAsString();
+            str = getBlockDataAsCompound(blockEntity, levelChunk.getLevel(), false).getAsString();
         }
         return str;
+    }
+
+    private static CompoundTag getBlockDataAsCompound(BlockEntity blockEntity, Level level, boolean includeMetaData) {
+        #if (MC_VER == MC_1_21_4)
+        if (includeMetaData) {
+            return blockEntity.saveWithFullMetadata(level.registryAccess());
+        }
+        return blockEntity.saveWithoutMetadata(level.registryAccess());
+        #else
+        if (includeMetaData) {
+            return blockEntity.saveWithFullMetadata();
+        }
+        return blockEntity.saveWithoutMetadata();
+        #endif
     }
 
     /**
@@ -562,11 +579,15 @@ public class BlocksHandler extends HandlerBase {
         if (existingBlockEntity != null) {
             // If the NBT data on the existing block is the same as the NBT data
             // from the input, do not bother applying the input NBT data.
-            if (TagUtils.contains(existingBlockEntity.saveWithFullMetadata(), blockNBT)) {
+            if (TagUtils.contains(getBlockDataAsCompound(existingBlockEntity, chunk.getLevel(), true), blockNBT)) {
                 return instructionStatus(isBlockSet);
             }
             try {
+                #if (MC_VER == MC_1_21_4)
+                existingBlockEntity.loadWithComponents(blockNBT, chunk.getLevel().registryAccess());
+                #else
                 existingBlockEntity.load(blockNBT);
+                #endif
             } catch (NullPointerException e) {
                 for (StackTraceElement stackTraceElement : e.getStackTrace()) {
                     // Return special error message for if input NBT data for sign was formatted incorrectly.
@@ -623,7 +644,7 @@ public class BlocksHandler extends HandlerBase {
      * @param placementInstructionsMap  Other placement instructions to find neighbouring blocks in.
      * @param chunkMap                  Cached chunks to find neighbouring blocks in.
      * @param level                     Level to find neighbouring blocks in.
-     * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}.
+     * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}).
      * @return                          The updated {@link BlockState}.
      */
     private static BlockState updateBlockShape(BlockPos inputBlockPos, BlockState inputBlockState, ConcurrentHashMap<BlockPos, PlacementInstructionRecord> placementInstructionsMap, ConcurrentHashMap<ChunkPos, LevelChunk> chunkMap, ServerLevel level, int flags) {
@@ -641,20 +662,28 @@ public class BlocksHandler extends HandlerBase {
 
             PlacementInstructionRecord otherPlacementInstruction = placementInstructionsMap.get(mutableBlockPos);
             if (otherPlacementInstruction != null) {
-                newBlockState = newBlockState.updateShape(direction, otherPlacementInstruction.blockState, level, inputBlockPos, mutableBlockPos);
+                newBlockState = applyBlockShape(newBlockState, direction, otherPlacementInstruction.blockState, level, inputBlockPos, mutableBlockPos);
                 continue;
             }
             LevelChunk chunk = chunkMap.get(new ChunkPos(mutableBlockPos));
             if (chunk != null) {
-                newBlockState = newBlockState.updateShape(direction, chunk.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
+                newBlockState = applyBlockShape(newBlockState, direction, chunk.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
                 continue;
             }
-            newBlockState = newBlockState.updateShape(direction, level.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
+            newBlockState = applyBlockShape(newBlockState, direction, level.getBlockState(mutableBlockPos), level, inputBlockPos, mutableBlockPos);
         }
         if (newBlockState.isAir()) {
             return inputBlockState;
         }
         return newBlockState;
+    }
+
+    private static BlockState applyBlockShape(BlockState newBlockState, Direction direction, BlockState otherBlockState, ServerLevel level, BlockPos inputBlockPos, BlockPos.MutableBlockPos mutableBlockPos) {
+        #if (MC_VER == MC_1_21_4)
+        return newBlockState.updateShape(level, level, inputBlockPos, direction, mutableBlockPos, otherBlockState, level.getRandom());
+        #else
+        return newBlockState.updateShape(direction, otherBlockState, level, inputBlockPos, mutableBlockPos);
+        #endif
     }
 
     public static int getBlockFlags(boolean doBlockUpdates, boolean spawnDrops) {

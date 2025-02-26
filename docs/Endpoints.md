@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.5.0 (Minecraft 1.19.2 + 1.20.2)
+# Endpoints GDMC-HTTP 1.5.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 [TOC]
 
@@ -566,7 +566,7 @@ Response should be encoded as an [NBT](https://minecraft.wiki/w/NBT_format) or [
 Get a single chunk at position x=0, z=8 in the Nether with the request `GET /chunks?x=0&z=8&dimension=nether` with the header `Accept: text/plain` to get something that is human-readable:
 
 ```
-{ChunkDX:1,ChunkDZ:1,ChunkX:0,ChunkZ:8,Chunks:[{DataVersion:3578,Heightmaps:{MOTION_BLOCKING:[L;2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L, ...
+{ChunkDX:1,ChunkDZ:1,ChunkX:0,ChunkZ:8,Chunks:[{DataVersion:4189,Heightmaps:{MOTION_BLOCKING:[L;2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L,2310355422147575936L, …
 ```
 
 # 🏗️ Create NBT structure file `GET /structure`
@@ -574,20 +574,6 @@ Get a single chunk at position x=0, z=8 in the Nether with the request `GET /chu
 Create an [NBT](https://minecraft.wiki/w/NBT_format) structure file from an area of the world.
 
 ## URL parameters
-| key            | valid values                                          | required | defaults to | description                                                                                                                              |
-|----------------|-------------------------------------------------------|----------|-------------|------------------------------------------------------------------------------------------------------------------------------------------|
-| x              | integer                                               | yes      | `0`         | X coordinate                                                                                                                             |
-| y              | integer                                               | yes      | `0`         | Y coordinate                                                                                                                             |
-| z              | integer                                               | yes      | `0`         | Z coordinate                                                                                                                             |
-| mirror         | `x`, `y`                                              | no       | `0`         | `x` = mirror structure front to back; `y` = mirror structure left to right                                                               |
-| rotate         | `0`, `1`, `2`, `3`                                    | no       | `0`         | `0` = apply no rotation; `1` = rotate structure 90° clockwise; `2` = rotate structure 180°; `3` = rotate structure 90° counter-clockwise |
-| pivotX         | integer                                               | no       | `0`         | relative X coordinate to use as pivot for rotation                                                                                       |
-| pivotZ         | integer                                               | no       | `0`         | relative Z coordinate to use as pivot for rotation                                                                                       |
-| entities       | `true`, `false`                                       | no       | `false`     | `true` = also place all [entities](https://minecraft.fandom.com/wiki/Entity) (mobs, villagers, etc.) saved with the file                 |
-| doBlockUpdates | `true`, `false`                                       | no       | `true`      | See doBlockUpdates in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                  |
-| spawnDrops     | `true`, `false`                                       | no       | `false`     | See spawnBlocks in [`PUT /blocks` URL parameters](#url-parameters-2)                                                                     |
-| customFlags    | bit string                                            | no       | `0100011`   | See customFlags in [`PUT /blocks` block placement flags](#controlling-block-update-behavior)                                             |
-| dimension      | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld` | Sets in which dimension of the world to place the structure in                                                                           |
 
 | key             | valid values                                          | required | defaults to | description                                                                                                  |
 |-----------------|-------------------------------------------------------|----------|-------------|--------------------------------------------------------------------------------------------------------------|
@@ -701,7 +687,7 @@ Endpoint for reading all [entities](https://minecraft.wiki/w/Entity) from within
 | dy          | integer                                               | no       | `1`                              | Range of blocks to get counting from y (can be negative) (**deprecated**, use selector instead)                                                                                                      |
 | dz          | integer                                               | no       | `1`                              | Range of blocks to get counting from z (can be negative) (**deprecated**, use selector instead)                                                                                                      |
 | selector    | target selector string                                | no       | `@e[x=0,y=0,z=0,dx=1,dy=1,dz=1]` | [Target selector](https://minecraft.wiki/w/Target_selectors) string for entities. Must be URL-encoded. A `400` status code is returned if this string cannot be parsed into a valid target selector. |
-| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.wiki/w/Entity_format#Entity_Format) in response                                                                                                   |
+| includeData | `true`, `false`                                       | no       | `false`                          | If `true`, include [entity data](https://minecraft.wiki/w/Entity_format#Entity_format) in response                                                                                                   |
 | dimension   | `overworld`, `the_nether`, `the_end`, `nether`, `end` | no       | `overworld`                      | Which dimension of the world to read entities from. This is only relevant when using positional arguments as part of the target selector query. Otherwise this parameter will be ignored.            |
 
 ## Request headers
@@ -758,7 +744,7 @@ For a pen of various different farm animals of the size of 10 blocks wide and 10
 
 # 🐷 Create entities `PUT /entities`
 
-Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity) into the world such as [mobs](https://minecraft.wiki/w/Mob), [items](https://minecraft.wiki/w/Item_(entity)), [item frames](https://minecraft.wiki/w/Item_Frame), [painting](https://minecraft.wiki/w/Painting) and [projectiles](https://minecraft.wiki/w/Snowball). This endpoint has feature-parity with the [/summon command](https://minecraft.wiki/w/Commands/summon), meaning it takes the same options and has the same constraints.
+Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity) into the world such as [mobs](https://minecraft.wiki/w/Mob), [items](https://minecraft.wiki/w/Item_(entity)), [item frames](https://minecraft.wiki/w/Item_Frame), [painting](https://minecraft.wiki/w/Painting) and [projectiles](https://minecraft.wiki/w/Category:Projectiles). This endpoint has feature-parity with the [/summon command](https://minecraft.wiki/w/Commands/summon), meaning it takes the same options and has the same constraints.
 
 ## URL parameters
 
@@ -832,7 +818,7 @@ Endpoint for changing the properties of [entities](https://minecraft.wiki/w/Enti
 
 ## Request body
 
-The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.wiki/w/Entity_format#Entity_Format) and entities of a specific type for an overview of properties and their data types.
+The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.wiki/w/Entity_format#Entity_format) and entities of a specific type for an overview of properties and their data types.
 
 The response is expected to be valid JSON. It should be a single JSON array of JSON objects according to this [schema](./schema.entities.patch.json).
 
@@ -987,12 +973,12 @@ Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build are
 
 ## URL parameters
 
-| key       | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                                                                                       |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) of blocks that should be considered transparent when calculating the heightmap. |
-| yBounds   | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                                                                                                   |
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                                                                                                 |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                                                                                            |
+| key       | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                                                                                                         |
+|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Block_tag_(Java_Edition)) and/or [fluid tag keys](https://minecraft.wiki/w/Fluid_tag_(Java_Edition)) of blocks that should be considered transparent when calculating the heightmap. |
+| yBounds   | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                                                                                                                     |
+| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                                                                                                                   |
+| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                                                                                                              |
 
 ### Custom block list
 
@@ -1000,7 +986,7 @@ When provided with a comma-separated list of [block IDs](https://minecraft.wiki/
 
 Block tag keys describe a category of block. `#logs` for instance describe all types of [log blocks](https://minecraft.wiki/w/Log) and [stripped log blocks](https://minecraft.wiki/w/Stripped_Log).
 
-Please note that air blocks (`minecraft:air`) are not included by default.
+Please note that air (`minecraft:air`) is not included by default.
 
 Please note that for fluids it's best to use the fluid tag keys `#water` and/or `#lava`, since the block ID `minecraft:water`/`minecraft:lava` only includes non-flowing liquids.
 
@@ -1166,7 +1152,7 @@ Plain-text response with the Minecraft version number.
 
 `GET /version` returns:
 ```
-1.20.2
+1.21.4
 ```
 
 # 🪪 Read HTTP interface information `OPTIONS /`
@@ -1200,8 +1186,8 @@ JSON object containing the following:
 
 ```json
 {
-	"minecraftVersion": "1.20.2",
-	"DataVersion": 3578,
-	"interfaceVersion": "1.5.0-1.20.2"
+	"minecraftVersion": "1.21.4",
+	"DataVersion": 4189,
+	"interfaceVersion": "1.5.1-1.21.4"
 }
 ```

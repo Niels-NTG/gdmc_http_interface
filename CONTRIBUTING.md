@@ -70,7 +70,7 @@ Our version numbers follow the [Semantic Versioning schema](https://semver.org/)
 5. Run the `buildAll.sh` script to build `jar` files for each supported Minecraft version/modding framework.
 6. Do some final (manual) tests, preferably on all supported Minecraft/modding framework versions.
 7. Commit all relevant changes, including everything we did in the previous steps.
-8. Tag this commit with `v<newVersionNumber>` (e.g. `v1.5.0`).
+8. Tag this commit with `v<newVersionNumber>` (e.g. `v1.5.1`).
 9. Push the commit and the tag.
 10. Draft a new release on GitHub. Paste the items for this version from the changelog into the release notes section. Upload the jar files for this version for each Minecraft/modding framework we support.
 11. Inform the people on the GDMC Discord about the update.

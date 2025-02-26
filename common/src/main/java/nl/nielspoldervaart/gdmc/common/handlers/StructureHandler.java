@@ -11,10 +11,14 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Clearable;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+#if (MC_VER == MC_1_21_4)
+import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
+#endif
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
@@ -167,7 +171,12 @@ public class StructureHandler extends HandlerBase {
 		if (encoding == TagUtils.StructureEncoding.NBT_COMPRESSED || encoding == TagUtils.StructureEncoding.NBT_UNCOMPRESSED) {
 			try {
 				// Read request body into NBT data compound that can be placed in the world.
+				#if (MC_VER == MC_1_21_4)
+				NbtAccounter nbtAccounter = NbtAccounter.unlimitedHeap();
+				structureCompound = NbtIo.readCompressed(new ByteArrayInputStream(outputStream.toByteArray()), nbtAccounter);
+				#else
 				structureCompound = NbtIo.readCompressed(new ByteArrayInputStream(outputStream.toByteArray()));
+				#endif
 			} catch (IOException e2) {
 				// If header states the content should be compressed but isn't, throw an error. Otherwise, try
 				// reading the content again, assuming it is not compressed.
@@ -202,7 +211,11 @@ public class StructureHandler extends HandlerBase {
 		}
 		structurePlaceSettings.setRotationPivot(new BlockPos(pivotX, 0, pivotZ));
 		structurePlaceSettings.setIgnoreEntities(!includeEntities);
+		#if (MC_VER == MC_1_21_4)
+		structurePlaceSettings.setLiquidSettings(keepLiquids ? LiquidSettings.APPLY_WATERLOGGING : LiquidSettings.IGNORE_WATERLOGGING);
+		#else
 		structurePlaceSettings.setKeepLiquids(keepLiquids);
+		#endif
 
 		ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -285,14 +298,14 @@ public class StructureHandler extends HandlerBase {
 
 		// Fill the structure template with blocks in the given area of the level. Do this on the server thread such that NBT block data
 		// gets gathered correctly. When resolved, save the result to a new CompoundTag.
-		CompletableFuture<Void> placeInWorldFuture = mcServer.submit(() -> structureTemplate.fillFromWorld(
+		CompletableFuture<Void> fillFromWorldFuture = mcServer.submit(() -> structureTemplate.fillFromWorld(
 			serverLevel,
 			origin,
 			size,
 			includeEntities,
-			null
+			Blocks.STRUCTURE_VOID
 		));
-		placeInWorldFuture.join();
+		fillFromWorldFuture.join();
 		CompoundTag newStructureCompoundTag = structureTemplate.save(new CompoundTag());
 
 		Headers responseHeaders = httpExchange.getResponseHeaders();

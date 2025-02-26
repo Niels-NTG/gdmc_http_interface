@@ -2,9 +2,6 @@ plugins {
     id 'architectury-plugin' version '3.4.155'
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
-
 architectury {
     platformSetupLoomIde()
     forge()

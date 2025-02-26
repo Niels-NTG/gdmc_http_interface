@@ -56,8 +56,8 @@ public class CustomHeightmap {
 	}
 
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
-		int yMax = customHeightmap.yMaxBound.orElse(chunk.getMaxBuildHeight());
-		int yMin = customHeightmap.yMinBound.orElse(chunk.getMinBuildHeight());
+		int yMax = customHeightmap.yMaxBound.orElse(getMinY(chunk));
+		int yMin = customHeightmap.yMinBound.orElse(getMaxY(chunk));
 		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
@@ -75,7 +75,7 @@ public class CustomHeightmap {
 	}
 
 	private void setHeight(int x, int z, int y) {
-		this.data.set(getIndex(x, z), y - this.chunk.getMinBuildHeight());
+		this.data.set(getIndex(x, z), y - getMinY(this.chunk));
 	}
 
 	public int getFirstAvailable(int x, int z) {
@@ -83,11 +83,27 @@ public class CustomHeightmap {
 	}
 
 	private int getFirstAvailable(int index) {
-		return this.data.get(index) + this.chunk.getMinBuildHeight();
+		return this.data.get(index) + getMinY(this.chunk);
 	}
 
 	private static int getIndex(int x, int z) {
 		return x + z * 16;
+	}
+
+	private static int getMinY(ChunkAccess chunk) {
+		#if (MC_VER == MC_1_21_4)
+		return chunk.getMinY();
+		#else
+		return chunk.getMinBuildHeight();
+		#endif
+	}
+
+	private static int getMaxY(ChunkAccess chunk) {
+		#if (MC_VER == MC_1_21_4)
+		return chunk.getMaxY();
+		#else
+		return chunk.getMaxBuildHeight();
+		#endif
 	}
 
 	private static boolean hasBlockTagKey(BlockState blockState, ArrayList<String> inputBlockTagLocationKeyList) {
