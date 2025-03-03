@@ -46,11 +46,11 @@ Installation instructions for when using the Fabric mod loader.
    - Here are some troubleshooting resources If you have trouble opening this jar file:
       - [macOS](https://discussions.apple.com/thread/252960079)
       - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
-4. Download this mod's jar file from [here](https://github.com/Persson-dev/gdmc_http_fabric/releases/latest) and move it in the mod folder:
+4. Download this mod's jar file from [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and move it in the mod folder:
    - On Windows: `%APPDATA%/.minecraft/mods`.
    - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
    - On Linux desktop: `~/.minecraft/mods`
-5. Get the [Fabric Api Mod](https://modrinth.com/mod/fabric-api). Download the same version as above and move it in the mod folder.
+5. Get the [Fabric Api Mod](https://modrinth.com/mod/fabric-api). Download the version that matches your Minecraft installation move it in the mod folder.
 6. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Fabric installation in the list.
 
 ### Forge
@@ -58,7 +58,7 @@ Installation instructions for when using the Fabric mod loader.
 Installation instructions for when using the Forge mod loader.
 
 1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
-2. Get the [Forge Mod Installer](https://files.minecraftforge.net/net/minecraftforge/forge/) and navigate to your version of Minecraft that is supported by this mod (1.20.2, 1.19.2 or 1.16.5) and click "Installer" under the "Download Recommended" section to download.
+2. Get the [Forge Mod Installer](https://files.minecraftforge.net/net/minecraftforge/forge/) and navigate to your version of Minecraft that is supported by this mod and click "Installer" under the "Download Recommended" section to download.
 3. Open the downloaded file to install this version of Forge.
     - Here are some troubleshooting resources If you have trouble opening this jar file:
         - [macOS](https://discussions.apple.com/thread/252960079)
@@ -73,7 +73,7 @@ Installation instructions for when using the Forge mod loader.
 
 When you open a Minecraft world, you will see a chat message that the mod has opened an HTTP connection at the address `localhost:9000`. This means that you can now send HTTP requests from an external program to Minecraft while the world is open.
 
-For testing and experimentation we recommend an API testing tool such as [Kreya](https://kreya.app), [Yaak](https://yaak.app) or a command line tool such as `cURL` or `wget`.
+For testing and experimentation we recommend an API testing tool such as [Kreya](https://kreya.app), [Yaak](https://yaak.app), [HTTPie](https://httpie.io/download) or a command line tool such as `cURL` or `wget`.
 
 When you want to build your own settlement generator or some other application, we recommend using the [GDPC](https://github.com/avdstaaij/gdpc) Python library, which is purpose-built by the GDMC community to work with this mod. But any programming or scripting language that supports communication over HTTP (which includes most of them, be it either built-in or via an easy-to-use library) will work.
 
