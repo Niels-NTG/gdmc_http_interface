@@ -994,7 +994,7 @@ Just as with [`PUT /blocks`](#-place-blocks-put-blocks), the `"minecraft:"` name
 
 ### Heightmap preset types
 
-This endpoint supports 4 of [Minecraft's built-in height map types](https://minecraft.wiki/w/Heightmap) built-in to Minecraft:
+This endpoint supports 4 of [Minecraft's built-in height map types](https://minecraft.wiki/w/Heightmap):
 
 - `WORLD_SURFACE`
   - Height of surface ignoring air blocks.
@@ -1005,7 +1005,7 @@ This endpoint supports 4 of [Minecraft's built-in height map types](https://mine
 - `MOTION_BLOCKING_NO_LEAVES`
   - Same as `MOTION_BLOCKING` but also ignores [leaves](https://minecraft.wiki/w/Leaves).
 
-Additionally, this mod provides 2 extra heightmap types
+Additionally, this mod provides 2 extra height map types:
 
 - `MOTION_BLOCKING_NO_PLANTS`
   - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
