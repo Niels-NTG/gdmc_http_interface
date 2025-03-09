@@ -56,8 +56,8 @@ public class CustomHeightmap {
 	}
 
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
-		int yMax = customHeightmap.yMaxBound.orElse(getMinY(chunk));
-		int yMin = customHeightmap.yMinBound.orElse(getMaxY(chunk));
+		int yMax = customHeightmap.yMaxBound.orElse(getMaxY(chunk));
+		int yMin = customHeightmap.yMinBound.orElse(getMinY(chunk));
 		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
