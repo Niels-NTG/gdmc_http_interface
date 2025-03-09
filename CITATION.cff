@@ -30,6 +30,6 @@ keywords:
   - level-editor
   - game-AI
 license: MIT
-commit: 35e595dfe3684f0fca4bfef2afeac06b9fc09692
-version: 1.5.1
-date-released: '2025-02-26'
+commit: 135d08073ca7ae40ae48517d377984561976485e
+version: 1.5.2
+date-released: '2025-03-09'
