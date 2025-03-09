@@ -1,3 +1,8 @@
+# GDMC-HTTP 1.5.2 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
+
+- FIX: Critical bug in custom heightmaps due to upper and lower Y bounds being reversed.
+- FIX: Typos in documentation.
+
 # GDMC-HTTP 1.5.1 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 - NEW: GDMC-HTTP is now compatible with Minecraft 1.21.4!
