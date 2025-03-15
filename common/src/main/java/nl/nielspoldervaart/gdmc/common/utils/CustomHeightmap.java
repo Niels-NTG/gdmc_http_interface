@@ -56,15 +56,20 @@ public class CustomHeightmap {
 	}
 
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
-		int yMin = Math.clamp(
-			customHeightmap.yMinBound.orElse(getChunkMinY(chunk)),
-			getChunkMinY(chunk),
-			getChunkMaxY(chunk)
+		// Cannot use Math.clamp here, since that isn't yet supported in Java 17.
+		int yMin = Math.max(
+			Math.min(
+				customHeightmap.yMinBound.orElse(getChunkMinY(chunk)),
+				getChunkMaxY(chunk)
+			),
+			getChunkMinY(chunk)
 		);
-		int yMax = Math.clamp(
-			customHeightmap.yMaxBound.orElse(getChunkMaxY(chunk)),
-			getChunkMinY(chunk),
-			getChunkMaxY(chunk)
+		int yMax = Math.max(
+			Math.min(
+				customHeightmap.yMaxBound.orElse(getChunkMaxY(chunk)),
+				getChunkMaxY(chunk)
+			),
+			getChunkMinY(chunk)
 		);
 		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 		for (int x = 0; x < 16; x++) {
