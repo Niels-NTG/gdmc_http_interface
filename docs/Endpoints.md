@@ -1197,6 +1197,6 @@ JSON object containing the following:
 {
 	"minecraftVersion": "1.21.4",
 	"DataVersion": 4189,
-	"interfaceVersion": "1.5.2-1.21.4"
+	"interfaceVersion": "1.6.0-1.21.4"
 }
 ```
