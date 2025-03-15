@@ -459,7 +459,7 @@ N/A
 
 ## Response body
 
-The response should follow this [schema](./schema.biomes.get.json).
+The response follows this [schema](./schema.biomes.get.json). Note that when requesting the biome at a position outside the vertical limit of the world, the biome ID is an empty string.
 
 ## Example
 
