@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.material.Fluid;
-import nl.nielspoldervaart.gdmc.common.handlers.BlocksHandler;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -58,14 +57,14 @@ public class CustomHeightmap {
 
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
 		int yMin = Math.clamp(
-			customHeightmap.yMinBound.orElse(BlocksHandler.getChunkMinY(chunk)),
-			BlocksHandler.getChunkMinY(chunk),
-			BlocksHandler.getChunkMaxY(chunk)
+			customHeightmap.yMinBound.orElse(getChunkMinY(chunk)),
+			getChunkMinY(chunk),
+			getChunkMaxY(chunk)
 		);
 		int yMax = Math.clamp(
-			customHeightmap.yMaxBound.orElse(BlocksHandler.getChunkMaxY(chunk)),
-			BlocksHandler.getChunkMinY(chunk),
-			BlocksHandler.getChunkMaxY(chunk)
+			customHeightmap.yMaxBound.orElse(getChunkMaxY(chunk)),
+			getChunkMinY(chunk),
+			getChunkMaxY(chunk)
 		);
 		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 		for (int x = 0; x < 16; x++) {
@@ -84,7 +83,7 @@ public class CustomHeightmap {
 	}
 
 	private void setHeight(int x, int z, int y) {
-		this.data.set(getIndex(x, z), y - BlocksHandler.getChunkMinY(this.chunk));
+		this.data.set(getIndex(x, z), y - getChunkMinY(this.chunk));
 	}
 
 	public int getFirstAvailable(int x, int z) {
@@ -92,11 +91,39 @@ public class CustomHeightmap {
 	}
 
 	private int getFirstAvailable(int index) {
-		return this.data.get(index) + BlocksHandler.getChunkMinY(this.chunk);
+		return this.data.get(index) + getChunkMinY(this.chunk);
 	}
 
 	private static int getIndex(int x, int z) {
 		return x + z * 16;
+	}
+
+	/**
+	 * Get min Y value of vertical world limit at given chunk
+	 *
+	 * @param chunk     chunk to check minimum height of
+	 * @return          min Y value
+	 */
+	private static int getChunkMinY(ChunkAccess chunk) {
+		#if (MC_VER == MC_1_21_4)
+		return chunk.getMinY();
+		#else
+		return chunk.getMinBuildHeight();
+		#endif
+	}
+
+	/**
+	 * Get max Y value of vertical world limit at given chunk
+	 *
+	 * @param chunk     chunk to check maximum height of
+	 * @return          max Y value
+	 */
+	private static int getChunkMaxY(ChunkAccess chunk) {
+		#if (MC_VER == MC_1_21_4)
+		return chunk.getMaxY();
+		#else
+		return chunk.getMaxBuildHeight();
+		#endif
 	}
 
 	private static boolean hasBlockTagKey(BlockState blockState, ArrayList<String> inputBlockTagLocationKeyList) {

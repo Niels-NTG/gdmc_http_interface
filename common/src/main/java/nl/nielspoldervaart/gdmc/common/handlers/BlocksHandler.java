@@ -42,7 +42,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
@@ -255,10 +254,9 @@ public class BlocksHandler extends HandlerBase {
                 return;
             }
             BlockPos blockPos = placementInstruction.blockPos;
-            ChunkPos chunkPos = new ChunkPos(blockPos);
 
             // Discard instructions with a position outside the vertical world limit.
-            if (isOutsideVerticalWorldLimit(chunkPosMap.get(chunkPos), blockPos)) {
+            if (serverLevel.isOutsideBuildHeight(blockPos)) {
                 placementResult.put(index, instructionStatus(false, "Outside world limit"));
                 return;
             }
@@ -288,7 +286,7 @@ public class BlocksHandler extends HandlerBase {
                 placementResult.put(index, setBlockNBT(
                     blockPos,
                     nbt,
-                    chunkPosMap.get(chunkPos),
+                    chunkPosMap.get(new ChunkPos(blockPos)),
                     blockState,
                     blockFlags,
                     isBlockSet
@@ -358,28 +356,17 @@ public class BlocksHandler extends HandlerBase {
         return jsonArray;
     }
 
-    public static int getChunkMinY(ChunkAccess chunk) {
-		#if (MC_VER == MC_1_21_4)
-        return chunk.getMinY();
-		#else
-		return chunk.getMinBuildHeight();
-		#endif
-    }
-
-    public static int getChunkMaxY(ChunkAccess chunk) {
-		#if (MC_VER == MC_1_21_4)
-        return chunk.getMaxY();
-		#else
-		return chunk.getMaxBuildHeight();
-		#endif
-    }
-
-    public static boolean isOutsideVerticalWorldLimit(ChunkAccess chunk, BlockPos blockPos) {
-        return blockPos.getY() < getChunkMinY(chunk) || blockPos.getY() > getChunkMaxY(chunk);
-    }
-
+    /**
+     * Get block type, block state and block NBT data (all contained within {@link BlockState})
+     * at a given position within a given chunk. Returns minecraft:void_air if requested
+     * position is outside the vertical world limit.
+     *
+     * @param pos           global block position
+     * @param levelChunk    chunk to retrieve data from.
+     * @return              block state at position
+     */
     private static BlockState getBlockStateAtPosition(BlockPos pos, LevelChunk levelChunk) {
-        if (isOutsideVerticalWorldLimit(levelChunk, pos)) {
+        if (levelChunk.getLevel().isOutsideBuildHeight(pos)) {
             return Blocks.VOID_AIR.defaultBlockState();
         }
         return levelChunk.getBlockState(pos);
