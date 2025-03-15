@@ -255,6 +255,14 @@ public class BlocksHandler extends HandlerBase {
                 return;
             }
             BlockPos blockPos = placementInstruction.blockPos;
+            ChunkPos chunkPos = new ChunkPos(blockPos);
+
+            // Discard instructions with a position outside the vertical world limit.
+            if (isOutsideVerticalWorldLimit(chunkPosMap.get(chunkPos), blockPos)) {
+                placementResult.put(index, instructionStatus(false, "Outside world limit"));
+                return;
+            }
+
             // When placing blocks in parallel, skip all placement instructions for a position that has duplicate entries except for the one in
             // parsedPlacementInstructionsBlockPosMap, which is the last instruction for this position. This prevents undefined behaviour where
             // it cannot be predicted which instruction for the same position ends up being placed.
@@ -280,7 +288,7 @@ public class BlocksHandler extends HandlerBase {
                 placementResult.put(index, setBlockNBT(
                     blockPos,
                     nbt,
-                    chunkPosMap.get(new ChunkPos(blockPos)),
+                    chunkPosMap.get(chunkPos),
                     blockState,
                     blockFlags,
                     isBlockSet
@@ -366,12 +374,12 @@ public class BlocksHandler extends HandlerBase {
 		#endif
     }
 
-    public static boolean isOutsideChunkBuildRange(ChunkAccess chunk, BlockPos blockPos) {
+    public static boolean isOutsideVerticalWorldLimit(ChunkAccess chunk, BlockPos blockPos) {
         return blockPos.getY() < getChunkMinY(chunk) || blockPos.getY() > getChunkMaxY(chunk);
     }
 
     private static BlockState getBlockStateAtPosition(BlockPos pos, LevelChunk levelChunk) {
-        if (isOutsideChunkBuildRange(levelChunk, pos)) {
+        if (isOutsideVerticalWorldLimit(levelChunk, pos)) {
             return Blocks.VOID_AIR.defaultBlockState();
         }
         return levelChunk.getBlockState(pos);

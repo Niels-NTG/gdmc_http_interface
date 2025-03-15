@@ -2,6 +2,8 @@
 
 - FIX: `GET /blocks` now returns `minecraft:void_air` for positions outside the build range instead of `minecraft:air`.
 - FIX: `GET /heightmap`: `yBounds` values can no longer exceed build height of the world.
+- FIX: `PUT /blocks` discard placement instructions outside vertical world limit.
+
 # GDMC-HTTP 1.5.2 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 - FIX: Critical bug in custom heightmaps due to upper and lower Y bounds being reversed.
