@@ -56,7 +56,12 @@ public class CommandHandler extends HandlerBase {
         List<String> commands = new BufferedReader(new InputStreamReader(bodyStream)).lines().toList();
 
 		CustomCommandSource commandSource = new CustomCommandSource();
-        CommandSourceStack commandSourceStack = createCommandSource("GDMC-CommandHandler", dimension, new Vec3(x, y, z), commandSource);
+        CommandSourceStack commandSourceStack = createCommandSource(
+			"GDMC-CommandHandler",
+			getServerLevel(dimension),
+			new Vec3(x, y, z),
+			commandSource
+		);
 
         JsonArray returnValues = new JsonArray();
         for (String command: commands) {

@@ -80,7 +80,7 @@ public class HeightmapHandler extends HandlerBase {
 
         // Preset heightmap type parameter is ignored if custom block list is not empty.
         int[][] heightmap = customTransparentBlocksList != null ?
-            getHeightmap(level, dimension, yMin, yMax, customTransparentBlocksList) :
+            getHeightmap(level, yMin, yMax, customTransparentBlocksList) :
             getHeightmap(level, yMin, yMax, heightmapType);
 
         // Respond with that array as a string
@@ -89,10 +89,10 @@ public class HeightmapHandler extends HandlerBase {
         resolveRequest(httpExchange, new Gson().toJson(heightmap));
     }
 
-    private int[][] getHeightmap(ServerLevel serverlevel, String dimension, Optional<Integer> yMin, Optional<Integer> yMax, Stream<String> blockList) {
+    private int[][] getHeightmap(ServerLevel serverlevel, Optional<Integer> yMin, Optional<Integer> yMax, Stream<String> blockList) {
         CommandSourceStack commandSourceStack = createCommandSource(
             "GDMC-HeightmapHandler",
-            dimension
+            serverlevel
         );
 
         ArrayList<BlockState> blockStateList = new ArrayList<>();

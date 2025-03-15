@@ -153,11 +153,15 @@ public class BlocksHandler extends HandlerBase {
 
         JsonArray returnValues = new JsonArray();
 
-        // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
-        CommandSourceStack commandSourceStack = createCommandSource("GDMC-BlockHandler", dimension, new Vec3(x, y, z));
-        LivingEntity blockPlaceEntity = createLivingEntity(dimension);
-
         ServerLevel serverLevel = getServerLevel(dimension);
+
+        // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
+        CommandSourceStack commandSourceStack = createCommandSource(
+            "GDMC-BlockHandler",
+            serverLevel,
+            new Vec3(x, y, z)
+        );
+        LivingEntity blockPlaceEntity = createLivingEntity(serverLevel);
 
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
         boolean canPlaceInParallel = (blockFlags & Block.UPDATE_NEIGHBORS) == 0;
@@ -410,10 +414,12 @@ public class BlocksHandler extends HandlerBase {
     }
 
     /**
-     * Extract a {@link BlockStateParser.BlockResult}, containing the {@link BlockState} and NBT {@link CompoundTag} data, from the input {@link JsonObject}.
+     * Extract a {@link BlockStateParser.BlockResult}, containing the {@link BlockState} and
+     * NBT {@link CompoundTag} data, from the input {@link JsonObject}.
      *
      * @param json                      Input JSON object.
-     * @param commandSourceStack        Origin point to resolve relative coordinates from. See <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>.
+     * @param commandSourceStack        Origin point to resolve relative coordinates from. See
+     *                                  <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>.
      * @return                          The resulting {@link BlockStateParser.BlockResult}.
      * @throws CommandSyntaxException   May be thrown if {@code "state"} or {@code "data"} field contain a syntax error.
      */
@@ -468,7 +474,7 @@ public class BlocksHandler extends HandlerBase {
     /**
      * @param pos           Position of block in the world.
      * @param levelChunk    Chunk to request block state from
-     * @return      Namespaced name of the block material.
+     * @return              Namespaced name of the block material.
      */
     private static String getBlockAsStr(BlockPos pos, LevelChunk levelChunk) {
         BlockState bs = getBlockStateAtPosition(pos, levelChunk);
@@ -478,7 +484,7 @@ public class BlocksHandler extends HandlerBase {
     /**
      * @param pos           Position of block in the world.
      * @param levelChunk    Chunk to request block state from
-     * @return      {@link JsonObject} containing the block state data of the block at the given position.
+     * @return              {@link JsonObject} containing the block state data of the block at the given position.
      */
     private static JsonObject getBlockStateAsJsonObject(BlockPos pos, LevelChunk levelChunk) {
         BlockState bs = getBlockStateAtPosition(pos, levelChunk);
