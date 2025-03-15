@@ -41,6 +41,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import net.minecraft.world.phys.Vec3;
@@ -348,6 +349,21 @@ public class BlocksHandler extends HandlerBase {
         return jsonArray;
     }
 
+    public static int getChunkMinY(ChunkAccess chunk) {
+		#if (MC_VER == MC_1_21_4)
+        return chunk.getMinY();
+		#else
+		return chunk.getMinBuildHeight();
+		#endif
+    }
+
+    public static int getChunkMaxY(ChunkAccess chunk) {
+		#if (MC_VER == MC_1_21_4)
+        return chunk.getMaxY();
+		#else
+		return chunk.getMaxBuildHeight();
+		#endif
+    }
     private static BlockState getBlockStateAtPosition(BlockPos pos, LevelChunk levelChunk) {
         return levelChunk.getBlockState(pos);
     }
