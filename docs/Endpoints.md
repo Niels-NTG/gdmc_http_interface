@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.5.2 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
+# Endpoints GDMC-HTTP 1.6.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 [TOC]
 
@@ -224,6 +224,8 @@ To get the block at position x=28, y=67 and z=-73, request `GET /blocks?x=5525&y
 	}
 ]
 ```
+
+When requesting a position that's outside the vertical limits of the world, the block ID will always be `"minecraft:void_air"`.
 
 To get all block within a 2x2x2 area, request `GET /blocks?x=5525&y=62&z=4381&dx=2&dy=2&dz=2`, which returns a list with each block on a separate line:
 
