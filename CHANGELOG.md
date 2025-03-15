@@ -1,8 +1,10 @@
 # GDMC-HTTP 1.6.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
-- FIX: `GET /heightmap`: `yBounds` values can no longer exceed build height of the world.
+- NEW: `GET /heightmap` endpoint no longer requires having to set a build area. It now also accepts `x`, `z`, `dx` and `dz` parameters.
+- NEW: `GET /heightmap` endpoint also accepts a `withinBuildArea` flag to skip over positions outside the build area. 
 - FIX: `GET /blocks` now returns `minecraft:void_air` instead of `minecraft:air` for positions outside the vertical world limit.
 - FIX: `PUT /blocks` discard placement instructions outside vertical world limit.
+- FIX: `GET /heightmap` values of `yBounds` parameter are now clamped to the vertical world limit.
 - FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside vertical world limit.
 
 # GDMC-HTTP 1.5.2 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
