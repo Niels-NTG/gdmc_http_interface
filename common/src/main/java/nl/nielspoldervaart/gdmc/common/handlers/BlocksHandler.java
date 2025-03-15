@@ -38,6 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -364,7 +365,15 @@ public class BlocksHandler extends HandlerBase {
 		return chunk.getMaxBuildHeight();
 		#endif
     }
+
+    public static boolean isOutsideChunkBuildRange(ChunkAccess chunk, BlockPos blockPos) {
+        return blockPos.getY() < getChunkMinY(chunk) || blockPos.getY() > getChunkMaxY(chunk);
+    }
+
     private static BlockState getBlockStateAtPosition(BlockPos pos, LevelChunk levelChunk) {
+        if (isOutsideChunkBuildRange(levelChunk, pos)) {
+            return Blocks.VOID_AIR.defaultBlockState();
+        }
         return levelChunk.getBlockState(pos);
     }
 
