@@ -12,7 +12,7 @@
                 "id": {
                     "type": "string",
                     "title": "Block ID",
-                    "description": "Any namespaced block ID",
+                    "description": "Any namespaced block ID. When requesting a block outside of the vertical world limit, this will always return 'minecraft:void_air'",
                     "examples": [
                         "minecraft:stone",
                         "minecraft:clay",

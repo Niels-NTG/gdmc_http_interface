@@ -56,8 +56,21 @@ public class CustomHeightmap {
 	}
 
 	private static CustomHeightmap primeHeightmaps(ChunkAccess chunk, CustomHeightmap customHeightmap) {
-		int yMax = customHeightmap.yMaxBound.orElse(getMaxY(chunk));
-		int yMin = customHeightmap.yMinBound.orElse(getMinY(chunk));
+		// Cannot use Math.clamp here, since that isn't yet supported in Java 17.
+		int yMin = Math.max(
+			Math.min(
+				customHeightmap.yMinBound.orElse(getChunkMinY(chunk)),
+				getChunkMaxY(chunk)
+			),
+			getChunkMinY(chunk)
+		);
+		int yMax = Math.max(
+			Math.min(
+				customHeightmap.yMaxBound.orElse(getChunkMaxY(chunk)),
+				getChunkMaxY(chunk)
+			),
+			getChunkMinY(chunk)
+		);
 		BlockPos.MutableBlockPos blockPos = new BlockPos.MutableBlockPos();
 		for (int x = 0; x < 16; x++) {
 			for (int z = 0; z < 16; z++) {
@@ -75,7 +88,7 @@ public class CustomHeightmap {
 	}
 
 	private void setHeight(int x, int z, int y) {
-		this.data.set(getIndex(x, z), y - getMinY(this.chunk));
+		this.data.set(getIndex(x, z), y - getChunkMinY(this.chunk));
 	}
 
 	public int getFirstAvailable(int x, int z) {
@@ -83,14 +96,20 @@ public class CustomHeightmap {
 	}
 
 	private int getFirstAvailable(int index) {
-		return this.data.get(index) + getMinY(this.chunk);
+		return this.data.get(index) + getChunkMinY(this.chunk);
 	}
 
 	private static int getIndex(int x, int z) {
 		return x + z * 16;
 	}
 
-	private static int getMinY(ChunkAccess chunk) {
+	/**
+	 * Get min Y value of vertical world limit at given chunk
+	 *
+	 * @param chunk     chunk to check minimum height of
+	 * @return          min Y value
+	 */
+	private static int getChunkMinY(ChunkAccess chunk) {
 		#if (MC_VER == MC_1_21_4)
 		return chunk.getMinY();
 		#else
@@ -98,7 +117,13 @@ public class CustomHeightmap {
 		#endif
 	}
 
-	private static int getMaxY(ChunkAccess chunk) {
+	/**
+	 * Get max Y value of vertical world limit at given chunk
+	 *
+	 * @param chunk     chunk to check maximum height of
+	 * @return          max Y value
+	 */
+	private static int getChunkMaxY(ChunkAccess chunk) {
 		#if (MC_VER == MC_1_21_4)
 		return chunk.getMaxY();
 		#else

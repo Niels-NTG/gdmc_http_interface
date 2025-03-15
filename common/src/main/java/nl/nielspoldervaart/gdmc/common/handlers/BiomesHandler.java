@@ -96,14 +96,12 @@ public class BiomesHandler extends HandlerBase {
 			LevelChunk levelChunk = chunkPosMap.get(new ChunkPos(blockPos));
 			Optional<ResourceKey<Biome>> biomeResourceKey = levelChunk.getNoiseBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ()).unwrapKey();
 			if (biomeResourceKey.isPresent()) {
-				if (!serverLevel.isOutsideBuildHeight(blockPos)) {
-					JsonObject json = new JsonObject();
-					json.addProperty("id", biomeResourceKey.get().location().toString());
-					json.addProperty("x", blockPos.getX());
-					json.addProperty("y", blockPos.getY());
-					json.addProperty("z", blockPos.getZ());
-					blockPosMap.replace(blockPos, json);
-				}
+				JsonObject json = new JsonObject();
+				json.addProperty("id", serverLevel.isOutsideBuildHeight(blockPos) ? "" : biomeResourceKey.get().location().toString());
+				json.addProperty("x", blockPos.getX());
+				json.addProperty("y", blockPos.getY());
+				json.addProperty("z", blockPos.getZ());
+				blockPosMap.replace(blockPos, json);
 			}
 		});
 		// Create a JsonArray with JsonObject, each contain a key-value pair for

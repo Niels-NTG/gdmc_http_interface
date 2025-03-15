@@ -260,8 +260,8 @@ public abstract class HandlerBase implements HttpHandler {
         );
     }
 
-    protected CommandSourceStack createCommandSource(String name, String dimension) {
-        return createCommandSource(name, dimension, new Vec3(0, 0, 0));
+    protected CommandSourceStack createCommandSource(String name, ServerLevel level) {
+        return createCommandSource(name, level, new Vec3(0, 0, 0));
     }
 
     /**
@@ -270,21 +270,21 @@ public abstract class HandlerBase implements HttpHandler {
      * relative from (See {@link BlocksHandler}).
      *
      * @param name          Some unique identifier.
-     * @param dimension     The dimension (also known as level) in the world of {@code mcServer} in which the {@link CommandSourceStack} is going to be placed.
+     * @param level         level of {@code mcServer} in which the {@link CommandSourceStack} is going to be placed.
      * @param pos           World position of the command source. Relevant for using relative coordinates and the /locate command.
      * @return              An instance of {@link CommandSourceStack}.
      */
-    protected CommandSourceStack createCommandSource(String name, String dimension, Vec3 pos) {
+    protected CommandSourceStack createCommandSource(String name, ServerLevel level, Vec3 pos) {
         CustomCommandSource commandSource = new CustomCommandSource();
-        return createCommandSource(name, dimension, pos, commandSource);
+        return createCommandSource(name, level, pos, commandSource);
     }
 
-    protected CommandSourceStack createCommandSource(String name, String dimension, Vec3 pos, CustomCommandSource commandSource) {
+    protected CommandSourceStack createCommandSource(String name, ServerLevel level, Vec3 pos, CustomCommandSource commandSource) {
         return new CommandSourceStack(
             commandSource,
             pos,
             new Vec2(0, 0),
-            this.getServerLevel(dimension),
+            level,
             4,
             name,
             Component.literal(name),
@@ -298,11 +298,11 @@ public abstract class HandlerBase implements HttpHandler {
      * Such a context is required for doing operations after placing certain blocks that have an implementation of the {@code setPlacedBy} method.
      * This applies to blocks that come in multiple parts such as beds ({@link net.minecraft.world.level.block.BedBlock}) and doors ({@link net.minecraft.world.level.block.DoorBlock}).
      *
-     * @param dimension The dimension (also known as level) in the world of {@code mcServer} in which the {@link LivingEntity} is going to be placed.
+     * @param level level in the world of {@code mcServer} in which the {@link LivingEntity} is going to be placed.
      * @return An instance of {@link LivingEntity}
      */
-    protected LivingEntity createLivingEntity(String dimension) {
-        return new LivingEntity(EntityType.PLAYER, getServerLevel(dimension)) {
+    protected LivingEntity createLivingEntity(ServerLevel level) {
+        return new LivingEntity(EntityType.PLAYER, level) {
 
             @Override
             public Iterable<ItemStack> getArmorSlots() {

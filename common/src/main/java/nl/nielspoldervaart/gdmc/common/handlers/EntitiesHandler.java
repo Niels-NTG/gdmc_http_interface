@@ -106,8 +106,8 @@ public class EntitiesHandler extends HandlerBase {
 	 * @return summon results
 	 */
 	private JsonArray putEntitiesHandler(InputStream requestBody) {
-		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension, new Vec3(x, y, z));
 		ServerLevel serverLevel = getServerLevel(dimension);
+		CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", serverLevel, new Vec3(x, y, z));
 
 		JsonArray returnValues = new JsonArray();
 		JsonArray entityDescriptionList = parseJsonArray(requestBody);
@@ -139,7 +139,12 @@ public class EntitiesHandler extends HandlerBase {
 		);
 		try {
 			EntitySelector entitySelector = EntityArgument.entities().parse(entitySelectorStringReader);
-			CommandSourceStack cmdSrc = createCommandSource("GDMC-EntitiesHandler", dimension, new Vec3(x, y, z));
+			ServerLevel serverLevel = getServerLevel(dimension);
+			CommandSourceStack cmdSrc = createCommandSource(
+				"GDMC-EntitiesHandler",
+				serverLevel,
+				new Vec3(x, y, z)
+			);
 			List<? extends Entity> entityList = entitySelector.findEntities(cmdSrc);
 
 			JsonArray returnList = new JsonArray();

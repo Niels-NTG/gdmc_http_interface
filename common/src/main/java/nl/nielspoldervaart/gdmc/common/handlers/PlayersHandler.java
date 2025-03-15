@@ -58,7 +58,7 @@ public class PlayersHandler extends HandlerBase {
         StringReader playerSelectorStringReader = new StringReader(playerSelectorString);
         try {
             EntitySelector playerSelector = EntityArgument.players().parse(playerSelectorStringReader);
-            CommandSourceStack cmdSrc = createCommandSource("GDMC-PlayersHandler", dimension);
+            CommandSourceStack cmdSrc = createCommandSource("GDMC-PlayersHandler", getServerLevel(dimension));
 
             List<ServerPlayer> players = playerSelector.findPlayers(cmdSrc);
             // Add each player's name, UUID and additional data to the response list.
