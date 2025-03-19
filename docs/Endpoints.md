@@ -1005,7 +1005,7 @@ Just as with [`PUT /blocks`](#-place-blocks-put-blocks), the `"minecraft:"` name
 
 ### Heightmap preset types
 
-This endpoint supports 4 of [Minecraft's built-in height map types](https://minecraft.wiki/w/Heightmap):
+This endpoint supports 4 of [Minecraft's built-in heightmap types](https://minecraft.wiki/w/Heightmap):
 
 - `WORLD_SURFACE`
   - Height of surface ignoring air blocks.
@@ -1016,7 +1016,7 @@ This endpoint supports 4 of [Minecraft's built-in height map types](https://mine
 - `MOTION_BLOCKING_NO_LEAVES`
   - Same as `MOTION_BLOCKING` but also ignores [leaves](https://minecraft.wiki/w/Leaves).
 
-Additionally, this mod provides 2 extra height map types:
+Additionally, this mod provides 2 extra heightmap types:
 
 - `MOTION_BLOCKING_NO_PLANTS`
   - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
@@ -1065,7 +1065,7 @@ A `400` status code is returned if heightmap preset type is not recognised.
 
 ### Custom block list example
 
-After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=sand,gravel,dirt,clay,grass_block`, resulting in the following response:
+After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=#air,sand,gravel,dirt,clay,grass_block`, resulting in the following response:
 
 ```json
 [
@@ -1085,7 +1085,7 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, 
 
 ### yBounds example
 
-The `yBounds` can be useful to take measurements of the surface of underground caves or The Nether dimension. For example: `GET /heightmap?dimension=nether&blocks=air,#lava,magma_block&yBounds=..100`. This starts measurements at Y=100, below the typical upper ceiling of The Nether dimension. This results in this response:
+The `yBounds` can be useful to take measurements of the surface of underground caves or The Nether dimension. For example: `GET /heightmap?dimension=nether&blocks=#air,#lava,magma_block&yBounds=..100`. This starts measurements at Y=100, below the typical upper ceiling of The Nether dimension. This results in this response:
 
 ```json
 [
@@ -1132,6 +1132,26 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, 
 	[ 66, 67, 67, 72, 72, 75, 72, 72, 65, 65, 65, 65, 65, 66, 66, 66, 67, 67, 67, 67, 67 ]
 ]
 ```
+
+### Heightmap in custom area example
+
+Request a heightmap of specified area using the `x`, `y`, `dx` and `dy` parameters, such as `GET /heightmap?type=OCEAN_FLOOR&x-6&z=22&dx=10&dz=10`:
+
+```json
+[
+	[ 72, 72, 72, 72, 72, 77, 76, 72, 72, 72 ],
+	[ 72, 72, 72, 76, 77, 77, 76, 72, 72, 72 ],
+	[ 72, 72, 72, 76, 76, 76, 75, 75, 75, 72 ],
+	[ 70, 70, 70, 70, 75, 76, 77, 76, 75, 72 ],
+	[ 68, 68, 67, 68, 75, 77, 77, 77, 75, 77 ],
+	[ 54, 52, 50, 61, 75, 76, 77, 76, 75, 77 ],
+	[ 52, 51, 50, 55, 74, 75, 75, 75, 70, 77 ],
+	[ 52, 51, 50, 53, 58, 60, 62, 65, 68, 77 ],
+	[ 51, 51, 50, 52, 56, 58, 60, 61, 65, 67 ],
+	[ 51, 51, 50, 51, 52, 53, 56, 54, 52, 50 ]
+]
+```
+
 
 # 🪪 Read Minecraft version `GET /version`
 
