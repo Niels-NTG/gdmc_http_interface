@@ -1,5 +1,6 @@
 package nl.nielspoldervaart.gdmc.common.utils;
 
+import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
@@ -44,8 +45,8 @@ public class CustomHeightmap {
 		this.yMaxBound = yMaxBound;
 	}
 
-	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockState> blockList, ArrayList<String> blockTagLocationKeyList, Optional<Integer> yMinBound, Optional<Integer> yMaxBound) {
-		Predicate<BlockState> isOpaque = blockState -> !blockList.contains(blockState) && !hasBlockTagKey(blockState, blockTagLocationKeyList);
+	public static CustomHeightmap primeHeightmaps(ChunkAccess chunk, ArrayList<BlockStateParser.BlockResult> blockStateParserList, ArrayList<String> blockTagLocationKeyList, Optional<Integer> yMinBound, Optional<Integer> yMaxBound) {
+		Predicate<BlockState> isOpaque = blockState -> !hasBlockState(blockState, blockStateParserList) && !hasBlockTagKey(blockState, blockTagLocationKeyList);
 		CustomHeightmap customHeightmap = new CustomHeightmap(chunk, isOpaque, yMinBound, yMaxBound);
 		return primeHeightmaps(chunk, customHeightmap);
 	}
@@ -129,6 +130,18 @@ public class CustomHeightmap {
 		#else
 		return chunk.getMaxBuildHeight();
 		#endif
+	}
+
+	private static boolean hasBlockState(BlockState blockState, ArrayList<BlockStateParser.BlockResult> inputBlockStateParserList) {
+		if (inputBlockStateParserList.isEmpty()) {
+			return false;
+		}
+		return inputBlockStateParserList.stream().anyMatch(inputBlockStateParserResult -> {
+			if (inputBlockStateParserResult.properties().isEmpty()) {
+				return blockState.getBlock().defaultBlockState().equals(inputBlockStateParserResult.blockState());
+			}
+			return blockState.equals(inputBlockStateParserResult.blockState());
+		});
 	}
 
 	private static boolean hasBlockTagKey(BlockState blockState, ArrayList<String> inputBlockTagLocationKeyList) {

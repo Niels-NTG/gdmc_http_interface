@@ -8,7 +8,6 @@ import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.CustomHeightmap;
@@ -149,7 +148,7 @@ public class HeightmapHandler extends HandlerBase {
             serverlevel
         );
 
-        ArrayList<BlockState> blockStateList = new ArrayList<>();
+        ArrayList<BlockStateParser.BlockResult> blockStateParserList = new ArrayList<>();
         ArrayList<String> blockTagKeyList = new ArrayList<>();
         blockList.forEach(blockString -> {
             try {
@@ -165,7 +164,7 @@ public class HeightmapHandler extends HandlerBase {
                         new StringReader(blockString),
                         true
                     );
-                    blockStateList.add(blockResult.blockState());
+                    blockStateParserList.add(blockResult);
                 }
             } catch (CommandSyntaxException e) {
                 throw new HttpException("Missing or malformed block ID: " + blockString + " (" + e.getMessage() + ")", 400);
@@ -176,7 +175,7 @@ public class HeightmapHandler extends HandlerBase {
 
         getChunkPosList(box).parallelStream().forEach(chunkPos -> {
             LevelChunk chunk = serverlevel.getChunk(chunkPos.x, chunkPos.z);
-            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateList, blockTagKeyList, yMin, yMax);
+            CustomHeightmap customChunkHeightmap = CustomHeightmap.primeHeightmaps(chunk, blockStateParserList, blockTagKeyList, yMin, yMax);
             getFirstAvailableHeightAt(heightmap, box, chunkPos, null, customChunkHeightmap);
         });
 

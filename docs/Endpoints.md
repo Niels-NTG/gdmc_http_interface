@@ -993,6 +993,8 @@ Note that if a build area is set and the parameters `x`, `z`, `dx` or `dz` are n
 
 When provided with a comma-separated list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) (these can be combined), a heightmap is calculated where the blocks listed are considered as transparent.
 
+A block ID matches all possible states of that block. For instance, `/heightmap?blocks=air,oak_log` will match vertical and horizontal oak log blocks (`minecraft:oak_log[axis=y]`, `minecraft:oak_log[axis=x]`, `minecraft:oak_log[axis=z]`). To match specific block states, use the [square-bracket block state syntax](https://minecraft.wiki/w/Argument_types#minecraft:block_state). For example: `/heightmap?blocks=air,oak_log[axis=y]` will only match upright oak log blocks. Matching on SNBT data tags isn't supported by GDMC-HTTP.
+
 Block tag keys describe a category of block. `#logs` for instance describe all types of [log blocks](https://minecraft.wiki/w/Log) and [stripped log blocks](https://minecraft.wiki/w/Stripped_Log).
 
 Please note that air (`minecraft:air`) is not included by default.
