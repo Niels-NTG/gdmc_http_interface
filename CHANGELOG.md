@@ -4,6 +4,7 @@
 - NEW: `GET /heightmap` endpoint also accepts a `withinBuildArea` flag to skip over positions outside the build area. 
 - FIX: `GET /blocks` now returns `minecraft:void_air` instead of `minecraft:air` for positions outside the vertical world limit.
 - FIX: `PUT /blocks` discard placement instructions outside vertical world limit.
+- FIX: `GET /heightmap` Fluid tags behave more as expected in custom height map queries.
 - FIX: `GET /heightmap` values of `yBounds` parameter are now clamped to the vertical world limit.
 - FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside vertical world limit.
 

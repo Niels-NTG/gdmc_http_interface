@@ -151,8 +151,7 @@ public class HeightmapHandler extends HandlerBase {
 
         ArrayList<BlockState> blockStateList = new ArrayList<>();
         ArrayList<String> blockTagKeyList = new ArrayList<>();
-        // TODO should not be parallel for reliability reasons.
-        blockList.parallel().forEach(blockString -> {
+        blockList.forEach(blockString -> {
             try {
                 if (blockString.startsWith("#")) {
                     blockString = formatBlockTagKeyLocation(blockString);
