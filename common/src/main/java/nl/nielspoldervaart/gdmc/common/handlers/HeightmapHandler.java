@@ -261,8 +261,8 @@ public class HeightmapHandler extends HandlerBase {
         int chunkMaxZ = chunkPos.getMaxBlockZ();
         for (int x = chunkMinX; x <= chunkMaxX; x++) {
             for (int z = chunkMinZ; z <= chunkMaxZ; z++) {
-                // If the column is out of bounds skip it
-                if (!box.isInside(x, 0, z)) {
+                // If the column is out of bounds, skip it.
+                if (!(x >= box.minX() && x <= box.maxX() && z >= box.minZ() && z <= box.maxZ())) {
                     continue;
                 }
                 // Set the value in the heightmap array
