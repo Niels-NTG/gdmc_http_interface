@@ -1,3 +1,15 @@
+# GDMC-HTTP 1.6.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
+
+- NEW: `GET /heightmap` endpoint no longer requires having to set a build area using the in-game `/setbuildarea` command. It now also accepts `x`, `z`, `dx` and `dz` parameters to specify any area.
+- NEW: `GET /heightmap` endpoint also accepts a `withinBuildArea` flag to skip over positions outside the build area.
+- NEW: `GET /heightmap` endpoint can now also match specific block states when using custom heightmaps. For example: `blocks=oak_log[axis=y]` will only include upright oak tree logs, while horizontal oak logs (`minecraft:oak_log[axis=x]` and `minecraft:oak_log[axis=z]`) are excluded.
+- FIX: `GET /blocks` now returns `minecraft:void_air` instead of `minecraft:air` for positions outside the vertical world limit.
+- FIX: `PUT /blocks` discard placement instructions outside vertical world limit.
+- FIX: `GET /heightmap` fixed inconsistent responses when using custom block lists due to undefined behaviour during parsing of the `blocks` query parameter.
+- FIX: `GET /heightmap` when using custom heightmaps, match blocks on all possible block states instead of only the default ones. For example: `blocks=oak_log` now matches `minecraft:oak_log[axis=x]` and `minecraft:oak_log[axis=z]` in addition to the default `minecraft:oak_log[axis=y]`.
+- FIX: `GET /heightmap` values of `yBounds` parameter are now clamped to the vertical world limit.
+- FIX: `GET /biomes` now returns an empty string for the biome ID if the requested position is outside vertical world limit.
+
 # GDMC-HTTP 1.5.2 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 - FIX: Critical bug in custom heightmaps due to upper and lower Y bounds being reversed.

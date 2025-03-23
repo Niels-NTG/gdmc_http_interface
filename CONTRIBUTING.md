@@ -44,7 +44,9 @@ blockState.blocksMotion()
 
 You may need to install a [plugin](https://plugins.jetbrains.com/plugin/10057-manifold) for your IDE for it to apply syntax highlighting and understand how to evaluate these directives.
 
-All Gradle tasks such as `publish` and `runClient` can only run for one Minecraft version at the time. This target version is defined using the `targetMinecraftVersion` property in the `gradle.properties` file. You may change this value to your target version during development, but please revert it to the newest version supported by GDMC when you're done. The specific versions we support are listed in the `versionProperties` folder, in which you will find a file with properties specific for that version of the game and modding framework. To compile `jar` files for all these versions in a single action, run `buildAll.sh` script. You can find the output files in the `buildAllJars/` folder.
+Additionally, you should set the "language level" in the project settings of your IDE to the Java version used by the oldest version of Minecraft supported by this mod. In our case this is Java 17, which is what Minecraft 1.18.0 used until Minecraft 1.21.0, which uses Java 21. This way the IDE will warn you if you try to use features of a newer Java SDK. Meanwhile, the project's SDK should be set to a Java version equal or newer than that of the newest build target, meaning Java 21 or newer.
+
+All Gradle tasks such as `publish` and `runClient` can only run for one Minecraft version at the time. This target version is defined using the `targetMinecraftVersion` property in the `gradle.properties` file. You may change this value to your target version during development, but please revert it to the newest version supported by GDMC when you're done. The specific versions we support are listed in the `versionProperties` folder, in which you will find a file with properties specific for that version of the game and modding framework. To compile `jar` files for all these versions in a single action, run `buildAll.sh` script. You can find the output files in the `buildAllJars/` folder. Before running this script you may need to set the `JAVA_HOME` environment variable to the path of the project's Java SDK.
 
 # Supporting multiple mod loaders
 
@@ -70,7 +72,7 @@ Our version numbers follow the [Semantic Versioning schema](https://semver.org/)
 5. Run the `buildAll.sh` script to build `jar` files for each supported Minecraft version/modding framework.
 6. Do some final (manual) tests, preferably on all supported Minecraft/modding framework versions.
 7. Commit all relevant changes, including everything we did in the previous steps.
-8. Tag this commit with `v<newVersionNumber>` (e.g. `v1.5.2`).
+8. Tag this commit with `v<newVersionNumber>` (e.g. `v1.6.0`).
 9. Push the commit and the tag.
 10. Draft a new release on GitHub. Paste the items for this version from the changelog into the release notes section. Upload the jar files for this version for each Minecraft/modding framework we support.
 11. Inform the people on the GDMC Discord about the update.

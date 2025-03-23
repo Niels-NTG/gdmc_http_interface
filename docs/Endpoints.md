@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.5.2 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
+# Endpoints GDMC-HTTP 1.6.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 [TOC]
 
@@ -224,6 +224,8 @@ To get the block at position x=28, y=67 and z=-73, request `GET /blocks?x=5525&y
 	}
 ]
 ```
+
+When requesting a position that's outside the vertical limits of the world, the block ID will always be `"minecraft:void_air"`.
 
 To get all block within a 2x2x2 area, request `GET /blocks?x=5525&y=62&z=4381&dx=2&dy=2&dz=2`, which returns a list with each block on a separate line:
 
@@ -457,7 +459,7 @@ N/A
 
 ## Response body
 
-The response should follow this [schema](./schema.biomes.get.json).
+The response follows this [schema](./schema.biomes.get.json). Note that when requesting the biome at a position outside the vertical limit of the world, the biome ID is an empty string.
 
 ## Example
 
@@ -973,16 +975,25 @@ Returns the [heightmap](https://minecraft.wiki/w/Heightmap) of the set build are
 
 ## URL parameters
 
-| key       | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                                                                                                         |
-|-----------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| blocks    | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Block_tag_(Java_Edition)) and/or [fluid tag keys](https://minecraft.wiki/w/Fluid_tag_(Java_Edition)) of blocks that should be considered transparent when calculating the heightmap. |
-| yBounds   | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                                                                                                                     |
-| type      | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                                                                                                                   |
-| dimension | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                                                                                                              |
+| key             | valid values                                                                                                                                         | required | defaults to     | description                                                                                                                                                                                                                                                                                                         |
+|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------|----------|-----------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| blocks          | comma-separated list of block IDs or block tag keys                                                                                                  | no       |                 | List of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Block_tag_(Java_Edition)) and/or [fluid tag keys](https://minecraft.wiki/w/Fluid_tag_(Java_Edition)) of blocks that should be considered transparent when calculating the heightmap. |
+| yBounds         | 1 or 2 integer values separated by two dots, following the [minecraft:int_range](https://minecraft.wiki/w/Argument_types#minecraft:int_range) schema | no       |                 | Range of upper and/or lower bounds in which the heightmap is measured. Only applied if `blocks` has a valid value as well. Especially useful in The Nether dimension and caves.                                                                                                                                     |
+| type            | `WORLD_SURFACE`, `OCEAN_FLOOR`, `MOTION_BLOCKING`, `MOTION_BLOCKING_NO_LEAVES`, `MOTION_BLOCKING_NO_PLANTS`, `OCEAN_FLOOR_NO_PLANTS`                 | no       | `WORLD_SURFACE` | Heightmap preset to get. This parameter is ignored if `blocks` has a valid value.                                                                                                                                                                                                                                   |
+| x               | integer                                                                                                                                              | yes      | `0`             | X coordinate                                                                                                                                                                                                                                                                                                        |
+| z               | integer                                                                                                                                              | yes      | `0`             | Z coordinate                                                                                                                                                                                                                                                                                                        |
+| dx              | integer                                                                                                                                              | no       | `1`             | Range of blocks to get, counting from `x` (can be negative)                                                                                                                                                                                                                                                         |
+| dz              | integer                                                                                                                                              | no       | `1`             | Range of blocks to get, counting from `z` (can be negative)                                                                                                                                                                                                                                                         |
+| withinBuildArea | `true`, `false`                                                                                                                                      | no       | `false`         | If `true`, skip over positions that are outside the build area                                                                                                                                                                                                                                                      |
+| dimension       | `overworld`, `the_nether`, `the_end`, `nether`, `end`                                                                                                | no       | `overworld`     | Dimension of the world to get the heightmap for. Do note that heightmaps for The Nether will commonly return `128` for all positions due to there being no open sky in this dimension.                                                                                                                              |
+
+Note that if a build area is set and the parameters `x`, `z`, `dx` or `dz` are not, the values of these missing parameters will default to that of the build area.
 
 ### Custom block list
 
 When provided with a comma-separated list of [block IDs](https://minecraft.wiki/w/Java_Edition_data_values#Blocks) and/or [block tag keys](https://minecraft.wiki/w/Tag#Block_tags_2) and/or [fluid tag keys](https://minecraft.wiki/w/Tag#Fluid_tags) (these can be combined), a heightmap is calculated where the blocks listed are considered as transparent.
+
+A block ID matches all possible states of that block. For instance, `/heightmap?blocks=air,oak_log` will match vertical and horizontal oak log blocks (`minecraft:oak_log[axis=y]`, `minecraft:oak_log[axis=x]`, `minecraft:oak_log[axis=z]`). To match specific block states, use the [square-bracket block state syntax](https://minecraft.wiki/w/Argument_types#minecraft:block_state). For example: `/heightmap?blocks=air,oak_log[axis=y]` will only match upright oak log blocks. Matching on SNBT data tags isn't supported by GDMC-HTTP.
 
 Block tag keys describe a category of block. `#logs` for instance describe all types of [log blocks](https://minecraft.wiki/w/Log) and [stripped log blocks](https://minecraft.wiki/w/Stripped_Log).
 
@@ -994,7 +1005,7 @@ Just as with [`PUT /blocks`](#-place-blocks-put-blocks), the `"minecraft:"` name
 
 ### Heightmap preset types
 
-This endpoint supports 4 of [Minecraft's built-in height map types](https://minecraft.wiki/w/Heightmap):
+This endpoint supports 4 of [Minecraft's built-in heightmap types](https://minecraft.wiki/w/Heightmap):
 
 - `WORLD_SURFACE`
   - Height of surface ignoring air blocks.
@@ -1005,7 +1016,7 @@ This endpoint supports 4 of [Minecraft's built-in height map types](https://mine
 - `MOTION_BLOCKING_NO_LEAVES`
   - Same as `MOTION_BLOCKING` but also ignores [leaves](https://minecraft.wiki/w/Leaves).
 
-Additionally, this mod provides 2 extra height map types:
+Additionally, this mod provides 2 extra heightmap types:
 
 - `MOTION_BLOCKING_NO_PLANTS`
   - Same as `MOTION_BLOCKING_NO_LEAVES`, except it also excludes the following blocks
@@ -1054,7 +1065,7 @@ A `400` status code is returned if heightmap preset type is not recognised.
 
 ### Custom block list example
 
-After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=sand,gravel,dirt,clay,grass_block`, resulting in the following response:
+After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=#air,sand,gravel,dirt,clay,grass_block`, resulting in the following response:
 
 ```json
 [
@@ -1074,7 +1085,7 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, 
 
 ### yBounds example
 
-The `yBounds` can be useful to take measurements of the surface of underground caves or The Nether dimension. For example: `GET /heightmap?dimension=nether&blocks=air,#lava,magma_block&yBounds=..100`. This starts measurements at Y=100, below the typical upper ceiling of The Nether dimension. This results in this response:
+The `yBounds` can be useful to take measurements of the surface of underground caves or The Nether dimension. For example: `GET /heightmap?dimension=nether&blocks=#air,#lava,magma_block&yBounds=..100`. This starts measurements at Y=100, below the typical upper ceiling of The Nether dimension. This results in this response:
 
 ```json
 [
@@ -1121,6 +1132,26 @@ After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, 
 	[ 66, 67, 67, 72, 72, 75, 72, 72, 65, 65, 65, 65, 65, 66, 66, 66, 67, 67, 67, 67, 67 ]
 ]
 ```
+
+### Heightmap in custom area example
+
+Request a heightmap of specified area using the `x`, `y`, `dx` and `dy` parameters, such as `GET /heightmap?type=OCEAN_FLOOR&x-6&z=22&dx=10&dz=10`:
+
+```json
+[
+	[ 72, 72, 72, 72, 72, 77, 76, 72, 72, 72 ],
+	[ 72, 72, 72, 76, 77, 77, 76, 72, 72, 72 ],
+	[ 72, 72, 72, 76, 76, 76, 75, 75, 75, 72 ],
+	[ 70, 70, 70, 70, 75, 76, 77, 76, 75, 72 ],
+	[ 68, 68, 67, 68, 75, 77, 77, 77, 75, 77 ],
+	[ 54, 52, 50, 61, 75, 76, 77, 76, 75, 77 ],
+	[ 52, 51, 50, 55, 74, 75, 75, 75, 70, 77 ],
+	[ 52, 51, 50, 53, 58, 60, 62, 65, 68, 77 ],
+	[ 51, 51, 50, 52, 56, 58, 60, 61, 65, 67 ],
+	[ 51, 51, 50, 51, 52, 53, 56, 54, 52, 50 ]
+]
+```
+
 
 # 🪪 Read Minecraft version `GET /version`
 
@@ -1188,6 +1219,6 @@ JSON object containing the following:
 {
 	"minecraftVersion": "1.21.4",
 	"DataVersion": 4189,
-	"interfaceVersion": "1.5.2-1.21.4"
+	"interfaceVersion": "1.6.0-1.21.4"
 }
 ```

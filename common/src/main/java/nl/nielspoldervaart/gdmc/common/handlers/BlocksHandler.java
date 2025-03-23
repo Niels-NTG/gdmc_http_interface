@@ -38,6 +38,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -152,11 +153,15 @@ public class BlocksHandler extends HandlerBase {
 
         JsonArray returnValues = new JsonArray();
 
-        // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
-        CommandSourceStack commandSourceStack = createCommandSource("GDMC-BlockHandler", dimension, new Vec3(x, y, z));
-        LivingEntity blockPlaceEntity = createLivingEntity(dimension);
-
         ServerLevel serverLevel = getServerLevel(dimension);
+
+        // Create instance of CommandSourceStack to use as a point of origin for any relative positioned blocks.
+        CommandSourceStack commandSourceStack = createCommandSource(
+            "GDMC-BlockHandler",
+            serverLevel,
+            new Vec3(x, y, z)
+        );
+        LivingEntity blockPlaceEntity = createLivingEntity(serverLevel);
 
         int blockFlags = customFlags >= 0 ? customFlags : getBlockFlags(doBlockUpdates, spawnDrops);
         boolean canPlaceInParallel = (blockFlags & Block.UPDATE_NEIGHBORS) == 0;
@@ -253,6 +258,13 @@ public class BlocksHandler extends HandlerBase {
                 return;
             }
             BlockPos blockPos = placementInstruction.blockPos;
+
+            // Discard instructions with a position outside the vertical world limit.
+            if (serverLevel.isOutsideBuildHeight(blockPos)) {
+                placementResult.put(index, instructionStatus(false, "Outside world limit"));
+                return;
+            }
+
             // When placing blocks in parallel, skip all placement instructions for a position that has duplicate entries except for the one in
             // parsedPlacementInstructionsBlockPosMap, which is the last instruction for this position. This prevents undefined behaviour where
             // it cannot be predicted which instruction for the same position ends up being placed.
@@ -348,7 +360,19 @@ public class BlocksHandler extends HandlerBase {
         return jsonArray;
     }
 
+    /**
+     * Get block type, block state and block NBT data (all contained within {@link BlockState})
+     * at a given position within a given chunk. Returns minecraft:void_air if requested
+     * position is outside the vertical world limit.
+     *
+     * @param pos           global block position
+     * @param levelChunk    chunk to retrieve data from.
+     * @return              block state at position
+     */
     private static BlockState getBlockStateAtPosition(BlockPos pos, LevelChunk levelChunk) {
+        if (levelChunk.getLevel().isOutsideBuildHeight(pos)) {
+            return Blocks.VOID_AIR.defaultBlockState();
+        }
         return levelChunk.getBlockState(pos);
     }
 
@@ -390,10 +414,12 @@ public class BlocksHandler extends HandlerBase {
     }
 
     /**
-     * Extract a {@link BlockStateParser.BlockResult}, containing the {@link BlockState} and NBT {@link CompoundTag} data, from the input {@link JsonObject}.
+     * Extract a {@link BlockStateParser.BlockResult}, containing the {@link BlockState} and
+     * NBT {@link CompoundTag} data, from the input {@link JsonObject}.
      *
      * @param json                      Input JSON object.
-     * @param commandSourceStack        Origin point to resolve relative coordinates from. See <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>.
+     * @param commandSourceStack        Origin point to resolve relative coordinates from. See
+     *                                  <a href="https://minecraft.wiki/w/Coordinates#Relative_world_coordinates">Relative World Coordinates - Minecraft Wiki</a>.
      * @return                          The resulting {@link BlockStateParser.BlockResult}.
      * @throws CommandSyntaxException   May be thrown if {@code "state"} or {@code "data"} field contain a syntax error.
      */
@@ -448,7 +474,7 @@ public class BlocksHandler extends HandlerBase {
     /**
      * @param pos           Position of block in the world.
      * @param levelChunk    Chunk to request block state from
-     * @return      Namespaced name of the block material.
+     * @return              Namespaced name of the block material.
      */
     private static String getBlockAsStr(BlockPos pos, LevelChunk levelChunk) {
         BlockState bs = getBlockStateAtPosition(pos, levelChunk);
@@ -458,7 +484,7 @@ public class BlocksHandler extends HandlerBase {
     /**
      * @param pos           Position of block in the world.
      * @param levelChunk    Chunk to request block state from
-     * @return      {@link JsonObject} containing the block state data of the block at the given position.
+     * @return              {@link JsonObject} containing the block state data of the block at the given position.
      */
     private static JsonObject getBlockStateAsJsonObject(BlockPos pos, LevelChunk levelChunk) {
         BlockState bs = getBlockStateAtPosition(pos, levelChunk);
