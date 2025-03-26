@@ -1,0 +1,32 @@
+{
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/EntitySummonResult"
+	},
+	"definitions": {
+		"EntitySummonResult": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"status": {
+					"type": "integer",
+					"description": "1 if entity summoning has been successful, 0 if it failed."
+				},
+				"message": {
+					"type": "string",
+					"description": "Contains the entity's UUID if summon was successful, contains an error message if it failed.",
+					"examples": [
+						"1c8a0d9b-49fc-4835-9dd3-e1c9a4fa7253",
+						"Entity could not be spawned"
+					]
+				}
+			},
+			"required": [
+				"status",
+				"message"
+			],
+			"title": "Entity summon result"
+		}
+	}
+}

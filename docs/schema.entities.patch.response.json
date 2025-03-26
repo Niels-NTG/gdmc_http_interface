@@ -1,0 +1,27 @@
+{
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/EntityPatchResult"
+	},
+	"definitions": {
+		"EntityPatchResult": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"status": {
+					"type": "integer",
+					"description": "1 if patching the entity was successful, 0 if patching the data has failed, no entity with the given UUID was found or the UUID was invalid."
+				},
+				"message": {
+					"type": "string",
+					"description": "An error message if patching the entity failed."
+				}
+			},
+			"required": [
+				"status"
+			],
+			"title": "Entity patch result"
+		}
+	}
+}

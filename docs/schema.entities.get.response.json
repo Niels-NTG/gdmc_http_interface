@@ -1,0 +1,33 @@
+{
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/EntityInformationElement"
+	},
+	"definitions": {
+		"EntityInformationElement": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"uuid": {
+					"type": "string",
+					"format": "uuid",
+					"description": "UUID of player entity"
+				},
+				"data": {
+					"type": "string",
+					"title": "Entity Data",
+					"description": "SNBT string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing entity data (https://minecraft.wiki/w/Entity_format#Entity_format) information. This is only included if URL parameter `includeData=true` is present. Example data is truncated, real entity data is often much bigger.",
+					"examples": [
+						"{AbsorptionAmount:0.0f,Age:0,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}]}",
+						"{OnGround:1b,PersistenceRequired:0b,PortalCooldown:0,Pos:[-16.675752318023665d,1.0d,-13.779639264516527d],RestocksToday:0,Rotation:[324.41544f,0.0f]}"
+					]
+				}
+			},
+			"required": [
+				"uuid"
+			],
+			"title": "Entity Information Element"
+		}
+	}
+}

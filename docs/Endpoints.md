@@ -208,7 +208,7 @@ N/A
 
 ## Response body
 
-Response body follows this [schema](./schema.blocks.get.json).
+Response body follows this [schema](./schema.blocks.get.response.json).
 
 ## Example
 
@@ -374,7 +374,7 @@ doBlockUpdates=True,  spawnDrops=True  -> 0000011
 
 ## Request body
 
-Request body should be a single JSON array of JSON objects according to this [schema](./schema.blocks.put.json), where each JSON object is for a single to-be-placed block.
+Request body should be a single JSON array of JSON objects according to this [schema](./schema.blocks.put.request.json), where each JSON object is for a single to-be-placed block.
 
 After receiving the request, GDMC-HTTP will first to attempt to parse the whole request body into valid JSON. If this fails it will return a response with HTTP status `400`.
 
@@ -384,7 +384,7 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 
 ## Response body
 
-Returns a status for each block placement instruction given in the request body. The order of these corresponds to the order the placement instruction was listed.
+Returns a status for each block placement instruction given in the request body following this [schema](./schema.blocks.put.response.json). The order of these corresponds to the order the placement instruction was listed.
 
 ## Example
 
@@ -459,7 +459,7 @@ N/A
 
 ## Response body
 
-The response follows this [schema](./schema.biomes.get.json). Note that when requesting the biome at a position outside the vertical limit of the world, the biome ID is an empty string.
+The response follows this [schema](./schema.biomes.get.response.json). Note that when requesting the biome at a position outside the vertical limit of the world, the biome ID is an empty string.
 
 ## Example
 
@@ -706,7 +706,7 @@ N/A
 
 ## Response body
 
-The response follows this [schema](./schema.entities.get.json).
+The response follows this [schema](./schema.entities.get.response.json).
 
 ## Example
 
@@ -763,7 +763,7 @@ Endpoint for summoning any number of [entities](https://minecraft.wiki/w/Entity)
 
 ## Request body
 
-The request body should be a single JSON array of JSON objects according to this [schema](./schema.entities.put.json).
+The request body should be a single JSON array of JSON objects according to this [schema](./schema.entities.put.request.json).
 
 After receiving the request, GDMC-HTTP will first to attempt to parse the whole request body into valid JSON. If this fails it will return a response with HTTP status `400`.
 
@@ -773,7 +773,7 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 
 ## Response body
 
-For each placement instruction in the request, it returns a list with the entity's UUID if placement was successful or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
+For each placement instruction in the request, it returns a JSON array following this [schema](./schema.entities.put.response.json), with the entity's UUID if placement was successful or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
 
 ## Example
 
@@ -799,7 +799,7 @@ For placing a red cat that's invulnerable and permanently on fire, reproduction 
 		"x": "~1",
 		"y": "~",
 		"z": "~-4",
-        "data": "{CanBreakDoors:true}"
+		"data": "{CanBreakDoors:true}"
 	}
 ]
 ```
@@ -822,7 +822,7 @@ Endpoint for changing the properties of [entities](https://minecraft.wiki/w/Enti
 
 The submitted properties need to be of the same data type as the target entity. Any property with a mismatching data type will be skipped. See the documentation on the [Entity Format](https://minecraft.wiki/w/Entity_format#Entity_format) and entities of a specific type for an overview of properties and their data types.
 
-The response is expected to be valid JSON. It should be a single JSON array of JSON objects according to this [schema](./schema.entities.patch.json).
+The response is expected to be valid JSON. It should be a single JSON array of JSON objects according to this [schema](./schema.entities.patch.request.json).
 
 After receiving the request, GDMC-HTTP will first to attempt to parse the whole request body into valid JSON. If this fails it will return a response with HTTP status `400`.
 
@@ -834,7 +834,7 @@ Refer to [the conversion from JSON table](https://minecraft.wiki/w/NBT_format#Co
 
 ## Response body
 
-For each patch instruction in the request, it returns a list with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* if the data has changed after the patch. `{ "status": 0 }` if no entity exists in the world with this UUID, if the patch has no effect on the existing data or if an invalid UUID or patch data has been submitted or if merging the data failed for some other reason.
+For each patch instruction in the request, it returns a JSON array following this [schema](./schema.entities.patch.response.json), with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* if the data has changed after the patch. `{ "status": 0 }` if no entity exists in the world with this UUID, if the patch has no effect on the existing data or if an invalid UUID or patch data has been submitted or if merging the data failed for some other reason.
 
 ## Example
 
@@ -864,7 +864,7 @@ Endpoint for remove one or more [entities](https://minecraft.wiki/w/Entity) from
 
 ## Request body
 
-The request body is expected to be valid JSON. It should be a single JSON array of string-formatted UUIDs.
+The request body is expected to be valid JSON. It should be a single JSON array of string-formatted UUIDs ([schema](./schema.entities.delete.request.json)).
 
 After receiving the request, GDMC-HTTP will first to attempt to parse the whole request body into valid JSON. If this fails it will return a response with HTTP status `400`.
 
@@ -874,7 +874,7 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 
 ## Response body
 
-For each patch instruction in the request, it returns a list with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* can be removed, `{ "status": 0 }` if no entity exists in the world with this UUID and an error message if an invalid UUID.
+For each patch instruction in the request, it returns a JSON array following this [schema](./schema.entities.delete.response.json) with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* can be removed, `{ "status": 0 }` if no entity exists in the world with this UUID and an error message if an invalid UUID.
 
 ## Example
 
@@ -912,7 +912,7 @@ N/A
 
 ## Response body
 
-The response should follow this [schema](./schema.players.get.json).
+The response should follow this [schema](./schema.players.get.response.json).
 
 ## Example
 
@@ -952,7 +952,7 @@ N/A
 
 ## Response body
 
-A JSON response following this [schema](./schema.buildarea.get.json):
+A JSON response following this [schema](./schema.buildarea.get.response.json):
 
 ## Example
 

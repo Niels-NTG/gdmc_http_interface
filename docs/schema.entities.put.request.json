@@ -1,0 +1,74 @@
+{
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/EntityPlacementInstructionElement"
+	},
+	"definitions": {
+		"EntityPlacementInstructionElement": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"id": {
+					"type": "string",
+					"title": "Entity ID",
+					"description": "Any namespaced entity ID",
+					"examples": [
+						"minecraft:cat",
+						"minecraft:cow",
+						"minecraft:painting"
+					]
+				},
+				"x": {
+					"$ref": "#/definitions/PosAxis"
+				},
+				"y": {
+					"$ref": "#/definitions/PosAxis"
+				},
+				"z": {
+					"$ref": "#/definitions/PosAxis"
+				},
+				"data": {
+					"type": "string",
+					"title": "Entity Data",
+					"description": "SNBT-formatted string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing entity data (https://minecraft.wiki/w/Entity_format#Entity_format) information",
+					"examples": [
+						"{variant:\"minecraft:red\",hasVisualFire:true,Invulnerable:true}"
+					]
+				}
+			},
+			"required": [
+				"id",
+				"x",
+				"y",
+				"z"
+			],
+			"title": "Entity Placement Instruction Element"
+		},
+		"PosAxis": {
+			"anyOf": [
+				{
+					"type": "integer",
+					"description": "Any negative or positive number to represent absolute world coordinates",
+					"examples": [
+						-2,
+						781,
+						83.74
+					]
+				},
+				{
+					"type": "string",
+					"description": "Any negative or positive number to represent absolute world coordinates, a relative coordinate (https://minecraft.wiki/w/Coordinates#Relative_world_coordinates) or a local coordinate (https://minecraft.wiki/w/Coordinates#Local_coordinates)",
+					"examples": [
+						"-2",
+						"~84",
+						"^-412",
+						"~-2.22"
+					]
+				}
+			],
+			"title": "Position Axis",
+			"description": "Describe x/y/z placement position for entity. If omitted, axis value defaults to the corresponding axis in the request URL."
+		}
+	}
+}

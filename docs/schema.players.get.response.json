@@ -1,0 +1,37 @@
+{
+	"$schema": "http://json-schema.org/draft-06/schema#",
+	"type": "array",
+	"items": {
+		"$ref": "#/definitions/PlayerInformationElement"
+	},
+	"definitions": {
+		"PlayerInformationElement": {
+			"type": "object",
+			"additionalProperties": false,
+			"properties": {
+				"name": {
+					"type": "string",
+					"description": "Player name"
+				},
+				"uuid": {
+					"type": "string",
+					"format": "uuid",
+					"description": "UUID of player entity"
+				},
+				"data": {
+					"type": "string",
+					"title": "Player Data",
+					"description": "SNBT string (https://minecraft.wiki/w/NBT_format#SNBT_format) containing player data (https://minecraft.wiki/w/Player.dat_format#NBT_structure) information. This is only included if URL parameter `includeData=true` is present. Example data is truncated, real player data is often much bigger.",
+					"examples": [
+						"{AbsorptionAmount:0.0f,Air:300s,Brain:{memories:{}},CustomName:'{\"translate\":\"chat.square_brackets\",\"with\":[{\"text\":\"GDMC-HTTP\",\"color\":\"dark_aqua\"}],\"extra\":[\" \",\"Build area\"]}',CustomNameVisible:1b,DataVersion:4189,DeathTime:0s,Dimension:\"minecraft:overworld\",EnderItems:[],FallDistance:0.0f,FallFlying:0b,Fire:-20s,Glowing:1b,Health:20.0f,HurtByTimestamp:0,HurtTime:0s}"
+					]
+				}
+			},
+			"required": [
+				"name",
+				"uuid"
+			],
+			"title": "Player Information Element"
+		}
+	}
+}
