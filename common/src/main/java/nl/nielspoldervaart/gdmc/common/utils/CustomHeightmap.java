@@ -111,7 +111,7 @@ public class CustomHeightmap {
 	 * @return          min Y value
 	 */
 	private static int getChunkMinY(ChunkAccess chunk) {
-		#if (MC_VER == MC_1_21_4)
+		#if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
 		return chunk.getMinY();
 		#else
 		return chunk.getMinBuildHeight();
@@ -125,7 +125,7 @@ public class CustomHeightmap {
 	 * @return          max Y value
 	 */
 	private static int getChunkMaxY(ChunkAccess chunk) {
-		#if (MC_VER == MC_1_21_4)
+		#if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
 		return chunk.getMaxY();
 		#else
 		return chunk.getMaxBuildHeight();
@@ -213,7 +213,6 @@ public class CustomHeightmap {
 			return this.isOpaque;
 		}
 
-		@SuppressWarnings("NullableProblems")
 		@Override
 		public String getSerializedName() {
 			return this.serializationKey;

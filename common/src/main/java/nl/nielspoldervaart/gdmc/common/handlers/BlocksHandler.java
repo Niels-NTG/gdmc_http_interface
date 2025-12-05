@@ -22,8 +22,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 #endif
-#if (MC_VER == MC_1_21_4)
-#endif
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.MinecraftServer;
 #if (MC_VER == MC_1_19_2)
@@ -44,6 +42,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
+#if (MC_VER == MC_1_21_10)
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.util.ProblemReporter;
+#endif
 import net.minecraft.world.phys.Vec3;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
@@ -502,13 +505,14 @@ public class BlocksHandler extends HandlerBase {
         String str = "{}";
         BlockEntity blockEntity = getExistingBlockEntity(pos, levelChunk);
         if (blockEntity != null) {
-            str = getBlockDataAsCompound(blockEntity, levelChunk.getLevel(), false).getAsString();
+			CompoundTag blockDataCompoundTag = getBlockDataAsCompound(blockEntity, levelChunk.getLevel(), false);
+			str = TagUtils.tagAsString(blockDataCompoundTag);
         }
         return str;
     }
 
     private static CompoundTag getBlockDataAsCompound(BlockEntity blockEntity, Level level, boolean includeMetaData) {
-        #if (MC_VER == MC_1_21_4)
+        #if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
         if (includeMetaData) {
             return blockEntity.saveWithFullMetadata(level.registryAccess());
         }
@@ -566,8 +570,14 @@ public class BlocksHandler extends HandlerBase {
             // If placement should not spawn drops, make sure any entities at that location are cleared to prevent items
             // (e.g. contents of a chest) from dropping.
             if ((flags & Block.UPDATE_SUPPRESS_DROPS) != 0) {
-                BlockEntity blockEntityToClear = getExistingBlockEntity(blockPos, level);
+				BlockEntity blockEntityToClear = getExistingBlockEntity(blockPos, level);
+				#if (MC_VER == MC_1_21_10)
+				if (blockEntityToClear instanceof Clearable) {
+					((Clearable) blockEntityToClear).clearContent();
+				}
+				#else
                 Clearable.tryClear(blockEntityToClear);
+				#endif
             }
 
 	        boolean isBlockSet = level.setBlock(blockPos, blockState, flags);
@@ -603,14 +613,18 @@ public class BlocksHandler extends HandlerBase {
         // the level of this change to make the change visible in the world.
         BlockEntity existingBlockEntity = getExistingBlockEntity(blockPos, chunk);
         if (existingBlockEntity != null) {
+			Level level = chunk.getLevel();
             // If the NBT data on the existing block is the same as the NBT data
             // from the input, do not bother applying the input NBT data.
-            if (TagUtils.contains(getBlockDataAsCompound(existingBlockEntity, chunk.getLevel(), true), blockNBT)) {
+            if (TagUtils.contains(getBlockDataAsCompound(existingBlockEntity, level, true), blockNBT)) {
                 return instructionStatus(isBlockSet);
             }
             try {
-                #if (MC_VER == MC_1_21_4)
-                existingBlockEntity.loadWithComponents(blockNBT, chunk.getLevel().registryAccess());
+				#if (MC_VER == MC_1_21_10)
+				ValueInput tagValueInput = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), blockNBT);
+				existingBlockEntity.loadWithComponents(tagValueInput);
+                #elif (MC_VER == MC_1_21_4)
+                existingBlockEntity.loadWithComponents(blockNBT, level.registryAccess());
                 #else
                 existingBlockEntity.load(blockNBT);
                 #endif
@@ -629,11 +643,16 @@ public class BlocksHandler extends HandlerBase {
                 }
                 return instructionStatus(isBlockSet);
             }
+			#if (MC_VER == MC_1_21_10)
+			boolean isClientSide = level.isClientSide();
+			#else
+			boolean isClientSide = level.isClientSide;
+			#endif
             if (
                 (flags & Block.UPDATE_CLIENTS) != 0 && (
-                    !chunk.getLevel().isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
+                    !isClientSide || (flags & Block.UPDATE_INVISIBLE) == 0
                 ) && (
-                    chunk.getLevel().isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(
+                    isClientSide || chunk.getFullStatus() != null && chunk.getFullStatus().isOrAfter(
                         #if (MC_VER == MC_1_19_2)
                         ChunkHolder.FullChunkStatus.TICKING
                         #else
@@ -642,7 +661,7 @@ public class BlocksHandler extends HandlerBase {
                     )
                 )
             ) {
-                chunk.getLevel().sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);
+                level.sendBlockUpdated(blockPos, chunk.getBlockState(blockPos), blockState, flags);
             }
             return instructionStatus(true);
         }
@@ -705,7 +724,7 @@ public class BlocksHandler extends HandlerBase {
     }
 
     private static BlockState applyBlockShape(BlockState newBlockState, Direction direction, BlockState otherBlockState, ServerLevel level, BlockPos inputBlockPos, BlockPos.MutableBlockPos mutableBlockPos) {
-        #if (MC_VER == MC_1_21_4)
+        #if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
         return newBlockState.updateShape(level, level, inputBlockPos, direction, mutableBlockPos, otherBlockState, level.getRandom());
         #else
         return newBlockState.updateShape(direction, otherBlockState, level, inputBlockPos, mutableBlockPos);

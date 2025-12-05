@@ -1,3 +1,7 @@
+# GDMC-HTTP 1.6.1 (Minecraft 1.19.2 + 1.20.2 + 1.21.4 + 1.21.10)
+
+- NEW: GDMC-HTTP is now compatible with Minecraft 1.21.10!
+
 # GDMC-HTTP 1.6.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 - NEW: `GET /heightmap` endpoint no longer requires having to set a build area using the in-game `/setbuildarea` command. It now also accepts `x`, `z`, `dx` and `dz` parameters to specify any area.

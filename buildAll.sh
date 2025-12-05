@@ -1,7 +1,7 @@
 #!/bin/sh
 
 echo "==================== Note: All build jars will be in the folder called 'buildAllJars' ===================="
-mkdir -p buildAllJars | true
+mkdir -p buildAllJars
 
 # Loop trough everything in the version properties folder
 for d in versionProperties/*; do
@@ -11,12 +11,16 @@ for d in versionProperties/*; do
   # Clean out the folders, build it, and merge it
   # (We could use "./" to run gradlew, but as it is a shell script im going to be running it with the "sh" command)
   echo "==================== Cleaning workspace to build $version ===================="
-  sh gradlew clean -PtargetMinecraftVersion=$version --no-daemon || true
-  echo "====================Building $version ===================="
-  sh gradlew build -PtargetMinecraftVersion=$version --no-daemon || true
-  echo "====================Publishing $version ===================="
-  sh gradlew mergeJars -PtargetMinecraftVersion=$version --no-daemon || true
+  sh gradlew clean -PtargetMinecraftVersion=$version
+  if [ $? != 0 ]; then continue; fi
 
-  mv Merged/*.jar ./buildAllJars/ || true
-  # The "| true" at the end of those are just to make sure the script continues even if a build fails
+  echo "====================Building $version ===================="
+  sh gradlew build -PtargetMinecraftVersion=$version
+  if [ $? != 0 ]; then continue; fi
+
+  echo "====================Publishing $version ===================="
+  sh gradlew mergeJars -PtargetMinecraftVersion=$version
+  if [ $? != 0 ]; then continue; fi
+
+  mv build/merged/*.jar ./buildAllJars/
 done

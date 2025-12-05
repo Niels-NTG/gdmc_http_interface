@@ -5,13 +5,13 @@ plugins {
 	id 'com.github.johnrengelman.shadow' version '8.1.1' apply false
 
 	// Plugin to create merged jars
-	id 'io.github.pacifistmc.forgix' version '1.2.9'
+	id 'io.github.pacifistmc.forgix' version '1.3.4'
 
 	// Manifold preprocessor
 	id 'systems.manifold.manifold-gradle-plugin' version '0.0.2-alpha'
 
 	// Architectury is used here only as a replacement for forge's own loom
-	id 'dev.architectury.loom' version '1.7.414' apply false
+	id 'dev.architectury.loom' version '1.11-SNAPSHOT' apply false
 }
 
 /**
@@ -47,27 +47,8 @@ rootProject.versionStr = rootProject.mod_version + '-' + rootProject.minecraft_v
 rootProject.group = mod_group_id
 
 forgix {
-	group = rootProject.group
-	mergedJarName = "${rootProject.mod_id}-${rootProject.versionStr}.jar"
-
-	if (findProject(':forge')) {
-		forge {
-			jarLocation = "build/libs/${rootProject.mod_id}-forge-${rootProject.versionStr}.jar"
-		}
-	}
-
-	if (findProject(':fabric')) {
-		fabric {
-			jarLocation = "build/libs/${rootProject.mod_id}-fabric-${rootProject.versionStr}.jar"
-		}
-	}
-
-	// TODO removeDuplicates causes a ClassNotFoundException with Forge.
-	//		forge can't seem to find the common package when this is enabled.
-	//		it would be good if we could use it since it downsizes the output .jar file quite a bit.
-	// removeDuplicate 'nl.nielspoldervaart.gdmc'
+    archiveClassifier = ''
 }
-
 
 subprojects { p ->
 
@@ -108,7 +89,7 @@ subprojects { p ->
 	}
 
 	dependencies {
-		annotationProcessor 'systems.manifold:manifold-preprocessor:2024.1.0'
+		annotationProcessor 'systems.manifold:manifold-preprocessor:2025.1.27'
 
 		if (isMinecraftSubProject) {
 			common(project(':common')) { transitive false }
@@ -231,13 +212,3 @@ allprojects { p -> {
 	}
 
 }}
-
-// Delete the merged folder when running clean
-task cleanMergedJars() {
-	def mergedFolder = file('Merged')
-	if (mergedFolder.exists()) {
-		delete(mergedFolder)
-	}
-}
-// add cleanMergedJars to the end of the "clean" task
-tasks['clean'].finalizedBy(cleanMergedJars)
