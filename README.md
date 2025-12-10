@@ -6,7 +6,7 @@ Mod for Minecraft (Java Edition) that implements an HTTP interface for reading a
 
 With this interface you can use other applications and scripts running on the same machine to read and modify a Minecraft world.
 
-This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](https://gendesignmc.wikidot.com), an annual competition for generative AI systems in Minecraft, where the challenge is to write an algorithm that creates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
+This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](https://gendesignmc.wikidot.com), an annual competition for procedural AI systems in Minecraft, where the challenge is to write an algorithm that generates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
 
 | Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                          | GDMC competition year                                                                                                                                                    |
 |-------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
