@@ -58,10 +58,7 @@ subprojects { p ->
 	apply plugin: 'com.github.johnrengelman.shadow'
 	apply plugin: 'systems.manifold.manifold-gradle-plugin'
 
-	if (
-		(findProject(':forge') && p == project(':forge')) ||
-		(findProject(':neoforge') && p == project(':neoforge'))
-	) {
+	if (findProject(':neoforge') && p == project(':neoforge')) {
 		apply plugin: 'dev.architectury.loom'
 	}
 
@@ -76,9 +73,6 @@ subprojects { p ->
 			compileClasspath.extendsFrom(common)
 			runtimeClasspath.extendsFrom(common)
 
-			if (findProject(':forge')) {
-				developmentForge.extendsFrom(common)
-			}
             if (findProject(':neoforge')) {
                 developmentNeoForge.extendsFrom(common)
             }
@@ -115,8 +109,6 @@ subprojects { p ->
 
 	processResources {
 		def resourceTargets = [
-			// For Forge
-			"META-INF/mods.toml",
 			// For NeoForge
 			"META-INF/neoforge.mods.toml",
 			// For Fabric
@@ -127,9 +119,6 @@ subprojects { p ->
 		def replaceProperties = [
 			minecraft_version: rootProject.minecraft_version,
 			minecraft_version_range: rootProject.minecraft_version_range,
-			forge_version: rootProject.forge_version,
-			forge_version_range: rootProject.forge_version_range,
-			forge_loader_version_range: rootProject.forge_loader_version_range,
 			neoforge_version: rootProject.neoforge_version,
 			fabric_version: rootProject.fabric_version,
 			fabric_loader_version: rootProject.fabric_loader_version,

@@ -33,9 +33,9 @@ The following instructions are for the Modrinth App, but other custom launchers 
 
 ## Manual installation
 
-Since GDMC-HTTP 1.5.0 this mod supports both the Fabric and Forge mod loaders within the same `.jar` file.
+This mod supports both the Fabric and NeoForge mod loaders within the same `.jar` file.
 
-The following installation instructions are for installing this mod in the Minecraft client, but GDMC-HTTP also works on the Minecraft server with either the Fabric or Forge mod loader installed.
+The following installation instructions are for installing this mod in the Minecraft client, but GDMC-HTTP also works on the Minecraft server with either the Fabric or NeoForge mod loader installed.
 
 ### Fabric
 
@@ -54,13 +54,13 @@ Installation instructions for when using the Fabric mod loader.
 5. Get the [Fabric Api Mod](https://modrinth.com/mod/fabric-api). Download the version that matches your Minecraft installation move it in the mod folder.
 6. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Fabric installation in the list.
 
-### Forge
+### NeoForge
 
-Installation instructions for when using the Forge mod loader.
+Installation instructions for when using the NeoForge mod loader.
 
 1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
-2. Get the [Forge Mod Installer](https://files.minecraftforge.net/net/minecraftforge/forge/) and navigate to your version of Minecraft that is supported by this mod and click "Installer" under the "Download Recommended" section to download.
-3. Open the downloaded file to install this version of Forge.
+2. Go to [NeoForged installer files](https://neoforged.net/), select a version of Minecraft compatible with GDMC-HTTP and click "Click Here to Download Installer" 
+3. Open the downloaded file to install this version of NeoForge.
     - Here are some troubleshooting resources If you have trouble opening this jar file:
         - [macOS](https://discussions.apple.com/thread/252960079)
         - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
@@ -68,7 +68,7 @@ Installation instructions for when using the Forge mod loader.
     - On Windows: `%APPDATA%/.minecraft/mods`.
     - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
     - On Linux desktop: `~/.minecraft/mods`
-5. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Forge installation in the list.
+5. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the NeoForge installation in the list.
 
 ## Usage
 
