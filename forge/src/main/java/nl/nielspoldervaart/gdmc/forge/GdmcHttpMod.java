@@ -1,5 +1,7 @@
 package nl.nielspoldervaart.gdmc.forge;
 
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
@@ -12,16 +14,17 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import nl.nielspoldervaart.gdmc.common.commands.GetHttpInterfacePort;
+import nl.nielspoldervaart.gdmc.common.commands.SetBuildAreaCommand;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
-import nl.nielspoldervaart.gdmc.forge.utils.RegistryHandler;
 import nl.nielspoldervaart.gdmc.forge.config.GdmcHttpConfig;
+import nl.nielspoldervaart.gdmc.forge.commands.SetHttpInterfacePort;
 
 import java.io.IOException;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("gdmc_http_interface")
-public final class GdmcHttpMod
-{
+public final class GdmcHttpMod {
     @SuppressWarnings("unused")
     public static final String MODID = "gdmc_http_interface";
 
@@ -40,7 +43,7 @@ public final class GdmcHttpMod
         // do something when the server starts
         LOGGER.info("Server starting");
 
-        RegistryHandler.registerCommands(event);
+        registerCommands(event);
         MinecraftServer minecraftServer = event.getServer();
 
         try {
@@ -72,5 +75,12 @@ public final class GdmcHttpMod
 
     private static MutableComponent failureMessage() {
         return Feedback.chatMessage("GDMC-HTTP server failed to start!");
+    }
+
+    private static void registerCommands(ServerStartingEvent event) {
+        CommandDispatcher<CommandSourceStack> dispatcher = event.getServer().getCommands().getDispatcher();
+        SetBuildAreaCommand.register(dispatcher);
+        SetHttpInterfacePort.register(dispatcher);
+        GetHttpInterfacePort.register(dispatcher);
     }
 }

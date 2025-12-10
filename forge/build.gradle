@@ -1,5 +1,5 @@
 plugins {
-    id 'architectury-plugin' version '3.4.155'
+    id 'architectury-plugin' version '3.4-SNAPSHOT'
 }
 
 architectury {
@@ -15,13 +15,13 @@ loom {
         client {
             client()
             setConfigName("Forge Client")
-            ideConfigGenerated(true)
+            ideConfigGenerated(false)
             runDir("../run")
         }
         server {
             server()
             setConfigName("Forge Server")
-            ideConfigGenerated(true)
+            ideConfigGenerated(false)
             runDir("../run")
         }
     }
@@ -42,7 +42,7 @@ dependencies {
     forge "net.minecraftforge:forge:${rootProject.minecraft_version}-${rootProject.forge_version}"
 }
 
-task deleteResources(type: Delete) {
+tasks.register('deleteResources', Delete) {
     delete file('build/resources/main')
 }
 
