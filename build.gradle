@@ -198,7 +198,7 @@ allprojects { p -> {
 
     }
 
-	task copyCommonResources(type: Copy) {
+	tasks.register('copyCommonResources', Copy) {
 		from project(":common").file("src/main/resources")
 		into(file(p.file("build/resources/main")))
 	}

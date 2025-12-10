@@ -27,7 +27,7 @@ Custom Minecraft launchers such as [Modrinth App](https://modrinth.com/app) or [
 The following instructions are for the Modrinth App, but other custom launchers will follow similar steps.
 
 1. Download and install the free and open source [Modrinth App](https://modrinth.com/app). When starting it for the first time, you will be prompted to authenticate with your Microsoft/Minecraft account.
-2. Click the 🔎 "Browse" button in the sidebar and search in the mods category for "[GDMC HTTP Interface](https://modrinth.com/mod/gdmc-http-interface/)".
+2. Click the "Browse" button in the sidebar and search in the mods category for "[GDMC HTTP Interface](https://modrinth.com/mod/gdmc-http-interface/)".
 3. Clicking "Install" will install the latest version, including the necessary dependencies. Alternatively you can pick a specific version from the "Versions" section on the mod's page. In the installation modal you can choose to add the mod to an existing compatible instance or create a new one.
 4. After the app has finished preparing the instance, you can click "Play" to launch your modded version of Minecraft.
 

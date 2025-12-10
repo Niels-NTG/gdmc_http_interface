@@ -9,10 +9,6 @@ pluginManagement {
             url = "https://maven.neoforged.net/releases/"
         }
         maven {
-            name = "NeoForge Snapshot"
-            url = "https://maven.neoforged.net/snapshots/"
-        }
-        maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
