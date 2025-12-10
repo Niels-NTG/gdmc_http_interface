@@ -9,26 +9,25 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Clearable;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
-#if (MC_VER == MC_1_21_4)
 import net.minecraft.world.level.levelgen.structure.templatesystem.LiquidSettings;
-#endif
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
+import net.minecraft.world.Clearable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -171,12 +170,8 @@ public class StructureHandler extends HandlerBase {
 		if (encoding == TagUtils.StructureEncoding.NBT_COMPRESSED || encoding == TagUtils.StructureEncoding.NBT_UNCOMPRESSED) {
 			try {
 				// Read request body into NBT data compound that can be placed in the world.
-				#if (MC_VER == MC_1_21_4)
 				NbtAccounter nbtAccounter = NbtAccounter.unlimitedHeap();
 				structureCompound = NbtIo.readCompressed(new ByteArrayInputStream(outputStream.toByteArray()), nbtAccounter);
-				#else
-				structureCompound = NbtIo.readCompressed(new ByteArrayInputStream(outputStream.toByteArray()));
-				#endif
 			} catch (IOException e2) {
 				// If header states the content should be compressed but isn't, throw an error. Otherwise, try
 				// reading the content again, assuming it is not compressed.
@@ -192,7 +187,7 @@ public class StructureHandler extends HandlerBase {
 			}
 		} else {
 			try {
-				structureCompound = TagParser.parseTag(outputStream.toString());
+				structureCompound = TagUtils.parseTag(outputStream.toString());
 			} catch (CommandSyntaxException e4) {
 				throw new HttpException("Could not process request body: " + e4.getMessage(), 400);
 			}
@@ -211,11 +206,7 @@ public class StructureHandler extends HandlerBase {
 		}
 		structurePlaceSettings.setRotationPivot(new BlockPos(pivotX, 0, pivotZ));
 		structurePlaceSettings.setIgnoreEntities(!includeEntities);
-		#if (MC_VER == MC_1_21_4)
 		structurePlaceSettings.setLiquidSettings(keepLiquids ? LiquidSettings.APPLY_WATERLOGGING : LiquidSettings.IGNORE_WATERLOGGING);
-		#else
-		structurePlaceSettings.setKeepLiquids(keepLiquids);
-		#endif
 
 		ServerLevel serverLevel = getServerLevel(dimension);
 
@@ -234,16 +225,25 @@ public class StructureHandler extends HandlerBase {
 			// (e.g. contents of a chest) from dropping.
 			ArrayList<BlockPos> positionsToClear = new ArrayList<>();
 			if ((blockPlacementFlags & Block.UPDATE_SUPPRESS_DROPS) != 0) {
-				structureCompound.getList("blocks", CompoundTag.TAG_COMPOUND).forEach(entry -> {
+				ListTag blockList = structureCompound.getListOrEmpty("blocks");
+				for (Tag entry : blockList) {
 					CompoundTag tag = (CompoundTag) entry;
 					if (tag.contains("pos")) {
-						ListTag posTag = tag.getList("pos", CompoundTag.TAG_INT);
+						//noinspection OptionalGetWithoutIsPresent
+						ListTag posTag = tag.getList("pos").get();
+						//noinspection OptionalGetWithoutIsPresent
+						int x = posTag.getInt(0).get();
+						//noinspection OptionalGetWithoutIsPresent
+						int y = posTag.getInt(1).get();
+						//noinspection OptionalGetWithoutIsPresent
+						int z = posTag.getInt(2).get();
+
 						positionsToClear.add(origin.offset(StructureTemplate.calculateRelativePosition(
 							structurePlaceSettings,
-							new BlockPos(posTag.getInt(0), posTag.getInt(1), posTag.getInt(2))
+							new BlockPos(x, y, z)
 						)));
 					}
-				});
+				}
 			}
 
 			// Place the structure into the world on the server thread to ensure NBT data within the blocks of the structure
@@ -252,7 +252,9 @@ public class StructureHandler extends HandlerBase {
 				if (!positionsToClear.isEmpty()) {
 					for (BlockPos pos : positionsToClear) {
 						BlockEntity blockEntityToClear = BlocksHandler.getExistingBlockEntity(pos, serverLevel);
-						Clearable.tryClear(blockEntityToClear);
+						if (blockEntityToClear instanceof Clearable) {
+							((Clearable) blockEntityToClear).clearContent();
+						}
 					}
 				}
 
@@ -303,7 +305,7 @@ public class StructureHandler extends HandlerBase {
 			origin,
 			size,
 			includeEntities,
-			Blocks.STRUCTURE_VOID
+			List.of(Blocks.STRUCTURE_BLOCK)
 		));
 		fillFromWorldFuture.join();
 		CompoundTag newStructureCompoundTag = structureTemplate.save(new CompoundTag());

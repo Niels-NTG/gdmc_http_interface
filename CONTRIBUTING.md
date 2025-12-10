@@ -13,7 +13,7 @@ Clone (or fork and clone) this repository to your machine.
 ## Choose your IDE:
 
 - We would personally recommend using [IntelliJ IDEA](https://www.jetbrains.com/idea/) for development. This is an IDE specialised for Java development that's very advanced while also easy to get started with. Additionally, this IDE supports the [Minecraft NBT Support](https://plugins.jetbrains.com/plugin/12839-minecraft-nbt-support) plugin which makes it easy to inspect [NBT files](https://minecraft.wiki/w/NBT_format) as well as [Manifold](https://plugins.jetbrains.com/plugin/10057-manifold) (more on that later).
-- For both Intellij IDEA and Eclipse their Gradle integration will handle the rest of the initial workspace setup, this includes downloading packages from Mojang, Fabric, Forge and other dependencies.
+- For both Intellij IDEA and Eclipse their Gradle integration will handle the rest of the initial workspace setup, this includes downloading packages from Mojang, Fabric, NeoForged and other dependencies.
 - For most, if not all, changes to the `build.gradle` or `gradle.properties` file to take effect Gradle will need to be invoked to re-evaluate the project, this can be done through Refresh buttons in the Gradle panels of both the previously mentioned IDEs.
 
 To aid in debugging the HTTP requests we recommend an API testing tool such as [Kreya](https://kreya.app), [Yaak](https://yaak.app) or a command line tool such as `cURL` or `wget`.
@@ -44,17 +44,17 @@ blockState.blocksMotion()
 
 You may need to install a [plugin](https://plugins.jetbrains.com/plugin/10057-manifold) for your IDE for it to apply syntax highlighting and understand how to evaluate these directives.
 
-Additionally, you should set the "language level" in the project settings of your IDE to the Java version used by the oldest version of Minecraft supported by this mod. In our case this is Java 17, which is what Minecraft 1.18.0 used until Minecraft 1.21.0, which uses Java 21. This way the IDE will warn you if you try to use features of a newer Java SDK. Meanwhile, the project's SDK should be set to a Java version equal or newer than that of the newest build target, meaning Java 21 or newer.
+Additionally, you should set the "language level" in the project settings of your IDE to the Java version used by the oldest version of Minecraft supported by this mod. In our case this is Java 21. This way the IDE will warn you if you try to use features of a newer Java SDK. Meanwhile, the project's SDK should be set to a Java version equal or newer than that of the newest build target, meaning Java 21 or newer.
 
 All Gradle tasks such as `publish` and `runClient` can only run for one Minecraft version at the time. This target version is defined using the `targetMinecraftVersion` property in the `gradle.properties` file. You may change this value to your target version during development, but please revert it to the newest version supported by GDMC when you're done. The specific versions we support are listed in the `versionProperties` folder, in which you will find a file with properties specific for that version of the game and modding framework. To compile `jar` files for all these versions in a single action, run `buildAll.sh` script. You can find the output files in the `buildAllJars/` folder. Before running this script you may need to set the `JAVA_HOME` environment variable to the path of the project's Java SDK.
 
 # Supporting multiple mod loaders
 
-We support multiple modding frameworks (currently Fabric and Forge) using a project setup inspired by [Distant Horizons mod](https://gitlab.com/distant-horizons-team/distant-horizons). This includes a script `buildAll.sh` which for each Minecraft version creates a single `.jar` file which is compatible with all the mod loaders we support.
+We support multiple modding frameworks (currently Fabric and NeoForge) using a project setup inspired by [Distant Horizons mod](https://gitlab.com/distant-horizons-team/distant-horizons). This includes a script `buildAll.sh` which for each Minecraft version creates a single `.jar` file which is compatible with all the mod loaders we support.
 
-For this we try to avoid using APIs specific to any mod loader as much as possible so the vast majority of code can be shared across all modding frameworks. You will find this code in the `common` namespace, while code specifically for mod loaders such as entry points and lifecycle event listeners are under the namespace of the mod loader name (`fabric`, `forge`).
+For this we try to avoid using APIs specific to any mod loader as much as possible so the vast majority of code can be shared across all modding frameworks. You will find this code in the `common` namespace, while code specifically for mod loaders such as entry points and lifecycle event listeners are under the namespace of the mod loader name (`fabric`, `neoforge`).
 
-The IDE has separate Gradle tasks for each mod loader. The most important of which are `Fabric Client (:fabric)` and `Forge Client (:forge)`, which builds and runs the mod in a Minecraft client with the relevant mod loader.
+The IDE has separate Gradle tasks for each mod loader. The most important of which are `Fabric Client (:fabric)` and `NeoForge Client (:neoforge)`, which builds and runs the mod in a Minecraft client with the relevant mod loader.
 
 # Update version checklist
 
@@ -72,7 +72,7 @@ Our version numbers follow the [Semantic Versioning schema](https://semver.org/)
 5. Run the `buildAll.sh` script to build `jar` files for each supported Minecraft version/modding framework.
 6. Do some final (manual) tests, preferably on all supported Minecraft/modding framework versions.
 7. Commit all relevant changes, including everything we did in the previous steps.
-8. Tag this commit with `v<newVersionNumber>` (e.g. `v1.6.0`).
+8. Tag this commit with `v<newVersionNumber>` (e.g. `v1.7.0`).
 9. Push the commit and the tag.
 10. Draft a new release on GitHub. Paste the items for this version from the changelog into the release notes section. Upload the jar files for this version for each Minecraft/modding framework we support.
 11. Inform the people on the GDMC Discord about the update.
@@ -82,4 +82,4 @@ Our version numbers follow the [Semantic Versioning schema](https://semver.org/)
 
 Of each minor version of Minecraft we tend to only support one version. Depending on how the timeline of Minecraft's release schedule and GDMC lines up, we pick the most recent version of the game and wait for a few patches to have rolled out. This is then set as the target version for the coming GDMC Settlement Generation Challenge.
 
-To start supporting a new version of Minecraft, first check if there is a stable version of a relevant modding framework (e.g. Fabric, Forge) that supports this version. If so, create a new file in the `versionProperties` folder named `<mcVersion>.properties` (eg.` 1.20.2.properties`). This file contains properties relevant for this specific version of the game, including the version of the modding framework. Prefer using the "Recommended" version that matches the relevant version of Minecraft. Don't forget the set the  `targetMinecraftVersion` property in the `gradle.properties` file to your new Minecraft version. Then reload Gradle so the IDE can set up the environment.
+To start supporting a new version of Minecraft, first check if there is a stable version of a relevant modding framework (e.g. Fabric, NeoForge) that supports this version. If so, create a new file in the `versionProperties` folder named `<mcVersion>.properties` (eg.` 1.20.2.properties`). This file contains properties relevant for this specific version of the game, including the version of the modding framework. Prefer using the "Recommended" version that matches the relevant version of Minecraft. Don't forget the set the  `targetMinecraftVersion` property in the `gradle.properties` file to your new Minecraft version. Then reload Gradle so the IDE can set up the environment.

@@ -1,4 +1,4 @@
-# Endpoints GDMC-HTTP 1.6.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
+# Endpoints GDMC-HTTP 1.7.0 (Minecraft 1.21.10)
 
 [TOC]
 
@@ -1217,8 +1217,8 @@ JSON object containing the following:
 
 ```json
 {
-	"minecraftVersion": "1.21.4",
-	"DataVersion": 4189,
-	"interfaceVersion": "1.6.0-1.21.4"
+	"minecraftVersion": "1.21.10",
+	"DataVersion": 4556,
+	"interfaceVersion": "1.7.0-1.21.10"
 }
 ```

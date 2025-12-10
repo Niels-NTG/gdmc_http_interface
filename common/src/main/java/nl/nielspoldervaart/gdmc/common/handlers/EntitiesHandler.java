@@ -1,9 +1,10 @@
 package nl.nielspoldervaart.gdmc.common.handlers;
 
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-#if (MC_VER == MC_1_21_4)
 import net.minecraft.world.entity.EntitySpawnReason;
-#endif
+import net.minecraft.util.ProblemReporter;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.ValueInput;
 import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -17,7 +18,6 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -156,7 +156,7 @@ public class EntitiesHandler extends HandlerBase {
 				JsonObject json = new JsonObject();
 				json.addProperty("uuid", entity.getStringUUID());
 				if (includeData) {
-					json.addProperty("data", TagUtils.serializeEntityNBT(entity).getAsString());
+					json.addProperty("data", TagUtils.tagAsString(TagUtils.serializeEntityNBT(entity)));
 				}
 				returnList.add(json);
 			}
@@ -253,7 +253,7 @@ public class EntitiesHandler extends HandlerBase {
 
 		private final ResourceLocation entityResourceLocation;
 		private final Vec3 entityPosition;
-		private CompoundTag entityData;
+		private final CompoundTag entityData;
 
 		SummonEntityInstruction(JsonObject summonInstructionInput, CommandSourceStack commandSourceStack) throws CommandSyntaxException, IllegalStateException, UnsupportedOperationException {
 			String positionArgumentString = "";
@@ -271,16 +271,7 @@ public class EntitiesHandler extends HandlerBase {
 			entityResourceLocation = ResourceLocationArgument.id().parse(sr);
 			sr.skip();
 
-			try {
-				entityDataString = sr.getRemaining();
-				if (entityDataString.isBlank()) {
-					entityDataString = "{}";
-				}
-				entityData = TagParser.parseTag(entityDataString);
-			} catch (StringIndexOutOfBoundsException e) {
-				entityData = new CompoundTag();
-			}
-
+			entityData = TagUtils.parseTag(sr.getRemaining());
 		}
 
 		public JsonObject summon(ServerLevel level) {
@@ -295,17 +286,10 @@ public class EntitiesHandler extends HandlerBase {
 
 			entityData.putString("id", entityResourceLocation.toString());
 
-			#if (MC_VER == MC_1_21_4)
 			Entity entity = EntityType.loadEntityRecursive(entityData, level, EntitySpawnReason.COMMAND,(_entity) -> {
-				_entity.moveTo(entityPosition);
+				_entity.setPos(entityPosition);
 				return _entity;
 			});
-			#else
-			Entity entity = EntityType.loadEntityRecursive(entityData, level, (_entity) -> {
-				_entity.moveTo(entityPosition);
-				return _entity;
-			});
-			#endif
 			if (entity == null) {
 				return instructionStatus(false, "Entity could not be spawned");
 			}
@@ -330,7 +314,7 @@ public class EntitiesHandler extends HandlerBase {
 
 		PatchEntityInstruction(JsonObject inputData) throws IllegalArgumentException, CommandSyntaxException, UnsupportedOperationException, NullPointerException {
 			uuid = UUID.fromString(inputData.get("uuid").getAsString());
-			patchData = TagParser.parseTag(inputData.get("data").getAsString());
+			patchData = TagUtils.parseTag(inputData.get("data").getAsString());
 		}
 
 		public boolean applyPatch(ServerLevel level) throws ReportedException {
@@ -346,7 +330,9 @@ public class EntitiesHandler extends HandlerBase {
 			if (TagUtils.serializeEntityNBT(entity).equals(patchedData)) {
 				return false;
 			}
-			entity.load(patchedData);
+
+			ValueInput valueInput = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), patchedData);
+			entity.load(valueInput);
 			return true;
 		}
 	}

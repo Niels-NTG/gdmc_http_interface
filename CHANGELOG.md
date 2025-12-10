@@ -1,3 +1,10 @@
+# GDMC-HTTP 1.7.0 (Minecraft 1.21.10)
+
+- NEW: GDMC-HTTP is now compatible with Minecraft 1.21.10!
+- NEW: In addition to Fabric, GDMC-HTTP now also supports the NeoForge mod loader.
+- BREAKING: Forge mod loader support has been removed.
+- BREAKING: Backwards compatibility with Minecraft versions prior to 1.21.10 has been removed.
+
 # GDMC-HTTP 1.6.0 (Minecraft 1.19.2 + 1.20.2 + 1.21.4)
 
 - NEW: `GET /heightmap` endpoint no longer requires having to set a build area using the in-game `/setbuildarea` command. It now also accepts `x`, `z`, `dx` and `dz` parameters to specify any area.

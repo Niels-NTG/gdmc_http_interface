@@ -6,7 +6,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
-import net.minecraft.util.LowerCaseEnumTypeAdapterFactory;
 
 import java.lang.reflect.Type;
 
@@ -69,7 +68,6 @@ public class ChatComponentDataExtractor {
 		gsonBuilder.disableHtmlEscaping();
 		gsonBuilder.addSerializationExclusionStrategy(exclusionStrategy);
 		gsonBuilder.registerTypeHierarchyAdapter(MutableComponent.class, serializer);
-		gsonBuilder.registerTypeAdapterFactory(new LowerCaseEnumTypeAdapterFactory());
 		return gsonBuilder.create();
 	});
 

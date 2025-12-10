@@ -1,11 +1,11 @@
-package nl.nielspoldervaart.gdmc.forge.commands;
+package nl.nielspoldervaart.gdmc.neoforge.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import nl.nielspoldervaart.gdmc.forge.config.GdmcHttpConfig;
+import nl.nielspoldervaart.gdmc.neoforge.config.GdmcHttpConfig;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 
 public final class SetHttpInterfacePort {

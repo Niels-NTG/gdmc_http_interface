@@ -305,11 +305,6 @@ public abstract class HandlerBase implements HttpHandler {
         return new LivingEntity(EntityType.PLAYER, level) {
 
             @Override
-            public Iterable<ItemStack> getArmorSlots() {
-                return null;
-            }
-
-            @Override
             public ItemStack getItemBySlot(EquipmentSlot p_21127_) {
                 return null;
             }

@@ -69,7 +69,7 @@ public class PlayersHandler extends HandlerBase {
                 json.addProperty("uuid", player.getStringUUID());
                 // All player NBT data if requested
                 if (includeData) {
-                    json.addProperty("data", TagUtils.serializeEntityNBT(player).getAsString());
+					json.addProperty("data", TagUtils.tagAsString(TagUtils.serializeEntityNBT(player)));
                 }
                 responseList.add(json);
             }

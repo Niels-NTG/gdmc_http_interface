@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.8.12'
+	id 'fabric-loom' version '1.10-SNAPSHOT'
 }
 
 loom {
@@ -46,8 +46,8 @@ dependencies {
 }
 
 
-task deleteResources(type: Delete) {
-	delete file('build/resources/main')
+tasks.register('deleteResources', Delete) {
+    delete file('build/resources/main')
 }
 
 processResources {

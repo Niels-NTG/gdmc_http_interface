@@ -6,10 +6,11 @@ Mod for Minecraft (Java Edition) that implements an HTTP interface for reading a
 
 With this interface you can use other applications and scripts running on the same machine to read and modify a Minecraft world.
 
-This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](https://gendesignmc.wikidot.com), an annual competition for generative AI systems in Minecraft, where the challenge is to write an algorithm that creates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
+This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](https://gendesignmc.wikidot.com), an annual competition for procedural AI systems in Minecraft, where the challenge is to write an algorithm that generates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
 
 | Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                          | GDMC competition year                                                                                                                                                    |
 |-------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1.21.10           | 📦 [GDMC-HTTP 1.7.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.7.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.7.0/docs/Endpoints.md) | [2026](https://gendesignmc.wikidot.com/wiki:2026-settlement-generation-competition)                                                                                      |
 | 1.21.4            | 📦 [GDMC-HTTP 1.6.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.6.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.6.0/docs/Endpoints.md) | [2025](https://gendesignmc.wikidot.com/wiki:2025-settlement-generation-competition)                                                                                      |
 | 1.20.2            | 📦 [GDMC-HTTP 1.6.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.6.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.6.0/docs/Endpoints.md) | [2024](https://gendesignmc.wikidot.com/wiki:2024-settlement-generation-competition)                                                                                      |
 | 1.19.2            | 📦 [GDMC-HTTP 1.6.0](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v1.6.0)  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/tree/v1.6.0/docs/Endpoints.md) | [2023](https://gendesignmc.wikidot.com/wiki:2023-settlement-generation-competition)                                                                                      |
@@ -26,15 +27,15 @@ Custom Minecraft launchers such as [Modrinth App](https://modrinth.com/app) or [
 The following instructions are for the Modrinth App, but other custom launchers will follow similar steps.
 
 1. Download and install the free and open source [Modrinth App](https://modrinth.com/app). When starting it for the first time, you will be prompted to authenticate with your Microsoft/Minecraft account.
-2. Click the 🔎 "Browse" button in the sidebar and search in the mods category for "[GDMC HTTP Interface](https://modrinth.com/mod/gdmc-http-interface/)".
+2. Click the "Browse" button in the sidebar and search in the mods category for "[GDMC HTTP Interface](https://modrinth.com/mod/gdmc-http-interface/)".
 3. Clicking "Install" will install the latest version, including the necessary dependencies. Alternatively you can pick a specific version from the "Versions" section on the mod's page. In the installation modal you can choose to add the mod to an existing compatible instance or create a new one.
 4. After the app has finished preparing the instance, you can click "Play" to launch your modded version of Minecraft.
 
 ## Manual installation
 
-Since GDMC-HTTP 1.5.0 this mod supports both the Fabric and Forge mod loaders within the same `.jar` file.
+This mod supports both the Fabric and NeoForge mod loaders within the same `.jar` file.
 
-The following installation instructions are for installing this mod in the Minecraft client, but GDMC-HTTP also works on the Minecraft server with either the Fabric or Forge mod loader installed.
+The following installation instructions are for installing this mod in the Minecraft client, but GDMC-HTTP also works on the Minecraft server with either the Fabric or NeoForge mod loader installed.
 
 ### Fabric
 
@@ -53,13 +54,13 @@ Installation instructions for when using the Fabric mod loader.
 5. Get the [Fabric Api Mod](https://modrinth.com/mod/fabric-api). Download the version that matches your Minecraft installation move it in the mod folder.
 6. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Fabric installation in the list.
 
-### Forge
+### NeoForge
 
-Installation instructions for when using the Forge mod loader.
+Installation instructions for when using the NeoForge mod loader.
 
 1. You need to own a copy of [Minecraft](https://www.minecraft.net/) Java Edition and have it installed on your machine.
-2. Get the [Forge Mod Installer](https://files.minecraftforge.net/net/minecraftforge/forge/) and navigate to your version of Minecraft that is supported by this mod and click "Installer" under the "Download Recommended" section to download.
-3. Open the downloaded file to install this version of Forge.
+2. Go to [NeoForged installer files](https://neoforged.net/), select a version of Minecraft compatible with GDMC-HTTP and click "Click Here to Download Installer" 
+3. Open the downloaded file to install this version of NeoForge.
     - Here are some troubleshooting resources If you have trouble opening this jar file:
         - [macOS](https://discussions.apple.com/thread/252960079)
         - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
@@ -67,7 +68,7 @@ Installation instructions for when using the Forge mod loader.
     - On Windows: `%APPDATA%/.minecraft/mods`.
     - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
     - On Linux desktop: `~/.minecraft/mods`
-5. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Forge installation in the list.
+5. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the NeoForge installation in the list.
 
 ## Usage
 
@@ -83,21 +84,21 @@ When the HTTP interface is active, you have access to the following HTTP endpoin
 
 | HTTP method | URL          | Description                                        | Docs                                                                                                                                    |
 |-------------|--------------|----------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------|
-| `POST`      | `/commands`  | 📜 Send Minecraft console commands                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-send-commands-POST-commands)              |
-| `GET`       | `/blocks`    | 🧱 Get information on blocks in a given area       | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-read-blocks-GET-blocks)                   |
-| `PUT`       | `/blocks`    | 🧱 Place blocks                                    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-place-blocks-PUT-blocks)                  |
-| `GET`       | `/biomes`    | 🏜️ Get information on biomes in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-read-biomes-GET-biomes)                   |
-| `GET`       | `/chunks`    | ⛏ Get raw chunk data in a given area               | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-read-chunk-data-GET-chunks)               |
-| `GET`       | `/structure` | 🏗️ Create an NBT structure file from a given area | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-create-NBT-structure-file-GET-structure)  |
-| `POST`      | `/structure` | 🏗️ Place an NBT structure file into the world     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-place-NBT-structure-file-POST-structure)  |
-| `GET`       | `/entities`  | 🐷 Get information on entities in a given area     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-read-entities-GET-entities)               |
-| `PUT`       | `/entities`  | 🐷 Summon entities into the world                  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-create-entities-PUT-entities)             |
-| `PATCH`     | `/entities`  | 🐷 Edit entities that already exist in the world   | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-edit-entities-PATCH-entities)             |
-| `DELETE`    | `/entities`  | 🐷 Remove entities from the world                  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-remove-entities-DELETE-entities)          |
-| `GET`       | `/players`   | 👷 Get information on players in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-read-players-GET-players)                 |
-| `GET`       | `/buildarea` | 📐 Get information on the current build area       | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-get-build-area-GET-buildarea)             |
-| `GET`       | `/heightmap` | 🗺️ Get heightmap information of the build area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-get-heightmap-GET-heightmap)              |
-| `OPTIONS`   | `/`          | 🪪 Get current Minecraft and mod version           | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.6.0/docs/Endpoints.md#-read-http-interface-information-OPTIONS-) |
+| `POST`      | `/commands`  | 📜 Send Minecraft console commands                 | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-send-commands-POST-commands)              |
+| `GET`       | `/blocks`    | 🧱 Get information on blocks in a given area       | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-read-blocks-GET-blocks)                   |
+| `PUT`       | `/blocks`    | 🧱 Place blocks                                    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-place-blocks-PUT-blocks)                  |
+| `GET`       | `/biomes`    | 🏜️ Get information on biomes in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-read-biomes-GET-biomes)                   |
+| `GET`       | `/chunks`    | ⛏ Get raw chunk data in a given area               | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-read-chunk-data-GET-chunks)               |
+| `GET`       | `/structure` | 🏗️ Create an NBT structure file from a given area | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-create-NBT-structure-file-GET-structure)  |
+| `POST`      | `/structure` | 🏗️ Place an NBT structure file into the world     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-place-NBT-structure-file-POST-structure)  |
+| `GET`       | `/entities`  | 🐷 Get information on entities in a given area     | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-read-entities-GET-entities)               |
+| `PUT`       | `/entities`  | 🐷 Summon entities into the world                  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-create-entities-PUT-entities)             |
+| `PATCH`     | `/entities`  | 🐷 Edit entities that already exist in the world   | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-edit-entities-PATCH-entities)             |
+| `DELETE`    | `/entities`  | 🐷 Remove entities from the world                  | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-remove-entities-DELETE-entities)          |
+| `GET`       | `/players`   | 👷 Get information on players in a given area      | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-read-players-GET-players)                 |
+| `GET`       | `/buildarea` | 📐 Get information on the current build area       | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-get-build-area-GET-buildarea)             |
+| `GET`       | `/heightmap` | 🗺️ Get heightmap information of the build area    | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-get-heightmap-GET-heightmap)              |
+| `OPTIONS`   | `/`          | 🪪 Get current Minecraft and mod version           | 📒 [API Docs](https://github.com/Niels-NTG/gdmc_http_interface/blob/v1.7.0/docs/Endpoints.md#-read-http-interface-information-OPTIONS-) |
 
 Detailed documentation of the endpoints can be found at [docs/Endpoints](./docs/Endpoints.md).
 

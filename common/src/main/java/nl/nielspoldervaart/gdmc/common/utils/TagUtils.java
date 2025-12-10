@@ -1,19 +1,20 @@
 package nl.nielspoldervaart.gdmc.common.utils;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.util.ProblemReporter;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-#if (MC_VER != MC_1_21_4)
-import java.util.zip.GZIPOutputStream;
-#endif
 
 public class TagUtils {
 
@@ -26,7 +27,7 @@ public class TagUtils {
 			return false;
 		}
 
-		for (String newCompoundKey : newCompound.getAllKeys()) {
+		for (String newCompoundKey : newCompound.keySet()) {
 			Tag existingTag = existingCompound.get(newCompoundKey);
 			if (existingTag == null) {
 				return false;
@@ -48,7 +49,7 @@ public class TagUtils {
 	 * @return targetComponent
 	 */
 	public static CompoundTag mergeTags(CompoundTag targetCompound, CompoundTag patchCompound) {
-		for (String patchKey : patchCompound.getAllKeys()) {
+		for (String patchKey : patchCompound.keySet()) {
 			Tag patchTag = patchCompound.get(patchKey);
 			if (patchTag == null) {
 				continue;
@@ -66,8 +67,8 @@ public class TagUtils {
 
 			if (patchTag.getId() == Tag.TAG_COMPOUND && targetTag.getId() == Tag.TAG_COMPOUND) {
 				TagUtils.mergeTags(
-					targetCompound.getCompound(patchKey),
-					patchCompound.getCompound(patchKey)
+					targetCompound.getCompoundOrEmpty(patchKey),
+					patchCompound.getCompoundOrEmpty(patchKey)
 				);
 				continue;
 			}
@@ -75,7 +76,7 @@ public class TagUtils {
 			if (patchTag.getId() == Tag.TAG_LIST && targetTag.getId() == Tag.TAG_LIST) {
 				ListTag patchListTag = (ListTag) patchTag;
 				ListTag targetListTag = (ListTag) targetTag;
-				if (patchListTag.getElementType() == targetListTag.getElementType()) {
+				if (patchListTag.getType() == targetListTag.getType()) {
 					targetCompound.put(patchKey, patchTag.copy());
 				}
 				continue;
@@ -96,24 +97,30 @@ public class TagUtils {
 	}
 
 	public static CompoundTag serializeEntityNBT(Entity entity) {
-		CompoundTag tag = new CompoundTag();
+		TagValueOutput tagValueOutput = TagValueOutput.createWithoutContext(ProblemReporter.DISCARDING);
 		String entityId = getEntityId(entity);
 		if (entityId != null) {
-			tag.putString("id", entityId);
+			tagValueOutput.putString("id", entityId);
 		}
-		return entity.saveWithoutId(tag);
+		entity.saveWithoutId(tagValueOutput);
+		return tagValueOutput.buildResult();
+	}
+
+	public static String tagAsString(CompoundTag tag) {
+		return tag.toString();
+	}
+
+	public static CompoundTag parseTag(String tagString) throws CommandSyntaxException {
+		if (tagString.isBlank()) {
+			tagString = "{}";
+		}
+		return TagParser.parseCompoundFully(tagString);
 	}
 
 	public static byte[] NBTToBytes(CompoundTag tag, boolean returnCompressed) throws IOException {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		if (returnCompressed) {
-			#if (MC_VER == MC_1_21_4)
 			NbtIo.writeCompressed(tag, baos);
-            #else
-            GZIPOutputStream dos = new GZIPOutputStream(baos);
-			NbtIo.writeCompressed(tag, dos);
-			dos.flush();
-            #endif
 			return baos.toByteArray();
 		}
 		DataOutputStream dos = new DataOutputStream(baos);
@@ -127,4 +134,5 @@ public class TagUtils {
 		NBT_COMPRESSED,
 		SNBT
 	}
+
 }

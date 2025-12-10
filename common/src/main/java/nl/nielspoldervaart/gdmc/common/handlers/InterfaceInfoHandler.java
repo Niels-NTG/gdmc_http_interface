@@ -25,11 +25,11 @@ public class InterfaceInfoHandler extends HandlerBase {
 		setDefaultResponseHeaders(responseHeaders);
 
 		JsonObject json = new JsonObject();
-		json.addProperty("minecraftVersion", SharedConstants.getCurrentVersion().getName());
+		json.addProperty("minecraftVersion", SharedConstants.getCurrentVersion().name());
 		// Return DataVersion (https://minecraft.wiki/w/Data_version) of current Minecraft version.
 		// Beware that the current server world might be created in an older version of Minecraft and
 		// hence might have a different DataVersion.
-		json.addProperty(SharedConstants.DATA_VERSION_TAG, SharedConstants.getCurrentVersion().getDataVersion().getVersion());
+		json.addProperty(SharedConstants.DATA_VERSION_TAG, SharedConstants.getCurrentVersion().dataVersion().version());
 		String modVersion = ModVersionRecord.getModVersion();
 		if (modVersion != null) {
 			json.addProperty("interfaceVersion", modVersion);
