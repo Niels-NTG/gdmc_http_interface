@@ -46,8 +46,8 @@ dependencies {
 }
 
 
-task deleteResources(type: Delete) {
-	delete file('build/resources/main')
+tasks.register('deleteResources', Delete) {
+    delete file('build/resources/main')
 }
 
 processResources {

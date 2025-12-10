@@ -1,7 +1,6 @@
 package nl.nielspoldervaart.gdmc.fabric;
 
-import java.io.IOException;
-
+import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStarting;
@@ -11,16 +10,21 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.Join;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import nl.nielspoldervaart.gdmc.common.commands.GetHttpInterfacePort;
+import nl.nielspoldervaart.gdmc.common.commands.SetBuildAreaCommand;
+import nl.nielspoldervaart.gdmc.common.utils.Feedback;
+import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
+import nl.nielspoldervaart.gdmc.fabric.commands.SetHttpInterfacePort;
+import nl.nielspoldervaart.gdmc.fabric.config.GdmcHttpConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
-import nl.nielspoldervaart.gdmc.common.utils.Feedback;
-import nl.nielspoldervaart.gdmc.fabric.utils.RegistryHandler;
-import nl.nielspoldervaart.gdmc.fabric.config.GdmcHttpConfig;
+
+import java.io.IOException;
 
 public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStopping, Join {
 
@@ -52,7 +56,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 		LOGGER.info("Server starting");
 
 		GdmcHttpConfig.loadConfig(configFilePath);
-		RegistryHandler.registerCommands(minecraftServer);
+		registerCommands(minecraftServer);
 
 		try {
 			FabricGdmcHttpServer.startServer(minecraftServer);
@@ -86,5 +90,12 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 
 	private static Component failureMessage() {
 		return Feedback.chatMessage("GDMC-HTTP server failed to start!");
+	}
+
+	private static void registerCommands(MinecraftServer minecraftServer) {
+		CommandDispatcher<CommandSourceStack> dispatcher = minecraftServer.getCommands().getDispatcher();
+		SetBuildAreaCommand.register(dispatcher);
+		SetHttpInterfacePort.register(dispatcher);
+		GetHttpInterfacePort.register(dispatcher);
 	}
 }
