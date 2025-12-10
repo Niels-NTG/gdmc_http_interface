@@ -27,14 +27,14 @@ loom {
             client()
             setConfigName("NeoForge Client")
             ideConfigGenerated(false) // When true a run configuration file will be generated for IDE's. By default only set to true for the root project.
-            runDir("../run/client")
+            runDir("../run")
             programArgs("--username", "Dev")
         }
         server {
             server()
             setConfigName("NeoForge Server")
             ideConfigGenerated(false)
-            runDir("../run/server")
+            runDir("../run")
         }
     }
 }
