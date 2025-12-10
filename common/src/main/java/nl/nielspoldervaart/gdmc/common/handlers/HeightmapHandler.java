@@ -116,13 +116,8 @@ public class HeightmapHandler extends HandlerBase {
         if (!yBoundsInput.isBlank() && customTransparentBlocksList != null) {
 	        try {
                 MinMaxBounds.Ints yBounds = RangeArgument.intRange().parse(new StringReader(yBoundsInput));
-                #if (MC_VER == MC_1_19_2)
-                    yMin = Optional.ofNullable(yBounds.getMin());
-                    yMax = Optional.ofNullable(yBounds.getMax());
-                #else
-                    yMin = yBounds.min();
-                    yMax = yBounds.max();
-                #endif
+                yMin = yBounds.min();
+                yMax = yBounds.max();
                 if (yMin.isPresent() && yMax.isPresent() && yMin.get() - yMax.get() == 0) {
                     throw new HttpException("yBounds should span more than 0", 400);
                 }
@@ -231,13 +226,7 @@ public class HeightmapHandler extends HandlerBase {
             return true;
         }
         // Check if block tag key exists https://minecraft.wiki/w/Tag#Block_tags_2
-        return BlocksHandler.getBlockRegistryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> {
-            #if (MC_VER == MC_1_19_2)
-            return existingTag.location().toString().equals(blockTagKeyString);
-            #else
-	        return existingTag.key().location().toString().equals(blockTagKeyString);
-            #endif
-        });
+        return BlocksHandler.getBlockRegistryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> existingTag.key().location().toString().equals(blockTagKeyString));
     }
 
     private static HashSet<ChunkPos> getChunkPosList(BoundingBox box) {

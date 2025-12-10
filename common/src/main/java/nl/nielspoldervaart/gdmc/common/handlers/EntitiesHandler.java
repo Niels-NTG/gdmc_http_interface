@@ -1,14 +1,10 @@
 package nl.nielspoldervaart.gdmc.common.handlers;
 
 import net.minecraft.commands.arguments.ResourceLocationArgument;
-#if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
 import net.minecraft.world.entity.EntitySpawnReason;
-#endif
-#if (MC_VER == MC_1_21_10)
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.ValueInput;
-#endif
 import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
@@ -290,17 +286,10 @@ public class EntitiesHandler extends HandlerBase {
 
 			entityData.putString("id", entityResourceLocation.toString());
 
-			#if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
 			Entity entity = EntityType.loadEntityRecursive(entityData, level, EntitySpawnReason.COMMAND,(_entity) -> {
 				_entity.setPos(entityPosition);
 				return _entity;
 			});
-			#else
-			Entity entity = EntityType.loadEntityRecursive(entityData, level, (_entity) -> {
-				_entity.setPos(entityPosition);
-				return _entity;
-			});
-			#endif
 			if (entity == null) {
 				return instructionStatus(false, "Entity could not be spawned");
 			}
@@ -341,12 +330,9 @@ public class EntitiesHandler extends HandlerBase {
 			if (TagUtils.serializeEntityNBT(entity).equals(patchedData)) {
 				return false;
 			}
-			#if (MC_VER == MC_1_21_10)
+
 			ValueInput valueInput = TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), patchedData);
 			entity.load(valueInput);
-			#else
-			entity.load(patchedData);
-			#endif
 			return true;
 		}
 	}

@@ -8,11 +8,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.LevelChunk;
-#if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
 import net.minecraft.world.level.chunk.storage.SerializableChunkData;
-#else
-import net.minecraft.world.level.chunk.storage.ChunkSerializer;
-#endif
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
@@ -116,13 +112,8 @@ public class ChunksHandler extends HandlerBase {
         }
         chunkMap.keySet().parallelStream().forEach(chunkPos -> {
             LevelChunk chunk = serverLevel.getChunk(chunkPos.x, chunkPos.z);
-            #if (MC_VER == MC_1_21_4 || MC_VER == MC_1_21_10)
-                final SerializableChunkData serializableChunkData = SerializableChunkData.copyOf(serverLevel, chunk);
-                CompoundTag chunkNBT = serializableChunkData.write();
-            #else
-                CompoundTag chunkNBT = ChunkSerializer.write(serverLevel, chunk);
-            #endif
-
+            final SerializableChunkData serializableChunkData = SerializableChunkData.copyOf(serverLevel, chunk);
+            CompoundTag chunkNBT = serializableChunkData.write();
             chunkMap.replace(chunkPos, chunkNBT);
         });
         ListTag chunkList = new ListTag();
