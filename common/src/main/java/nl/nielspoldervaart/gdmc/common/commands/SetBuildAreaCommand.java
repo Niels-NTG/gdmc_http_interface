@@ -16,7 +16,7 @@ public final class SetBuildAreaCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         dispatcher.register(Commands.literal(COMMAND_NAME)
-            .executes(SetBuildAreaCommand :: unsetBuildArea)
+            .executes(SetBuildAreaCommand::unsetBuildArea)
             .then(
                 Commands.argument("from", BlockPosArgument.blockPos())
             .then(

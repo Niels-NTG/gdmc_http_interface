@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -30,7 +29,7 @@ public class GdmcHttpMod {
 
 	private static final Logger logger = LogUtils.getLogger();
 
-	public GdmcHttpMod(IEventBus modEventBus, ModContainer modContainer) {
+	public GdmcHttpMod(ModContainer modContainer) {
 		modContainer.registerConfig(ModConfig.Type.COMMON, GdmcHttpConfig.SPEC);
 
 		NeoForge.EVENT_BUS.register(this);
