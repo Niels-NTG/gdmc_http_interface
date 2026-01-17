@@ -61,7 +61,7 @@ public class BuildArea {
 	@SuppressWarnings({"FieldCanBeLocal", "unused"})
 	public static class BuildAreaInstance {
 
-		// These 6 properties are used for JSON serialisation.
+		// These 6 properties are used for JSON serialization.
 		private final int xFrom;
 		private final int yFrom;
 		private final int zFrom;
@@ -75,7 +75,6 @@ public class BuildArea {
 		public final transient ChunkPos sectionFrom;
 		public final transient ChunkPos sectionTo;
 		private final transient BoundingBox sectionBox;
-
 
 		private BuildAreaInstance(BlockPos from, BlockPos to) {
 			box = BoundingBox.fromCorners(from, to);
