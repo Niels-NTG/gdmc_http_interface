@@ -97,7 +97,10 @@ public class BiomesHandler extends HandlerBase {
 			Optional<ResourceKey<Biome>> biomeResourceKey = levelChunk.getNoiseBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ()).unwrapKey();
 			if (biomeResourceKey.isPresent()) {
 				JsonObject json = new JsonObject();
-				json.addProperty("id", serverLevel.isOutsideBuildHeight(blockPos) ? "" : biomeResourceKey.get().location().toString());
+				json.addProperty("id", serverLevel.isOutsideBuildHeight(blockPos) ?
+					"" :
+					biomeResourceKey.get().identifier().toString()
+				);
 				json.addProperty("x", blockPos.getX());
 				json.addProperty("y", blockPos.getY());
 				json.addProperty("z", blockPos.getZ());

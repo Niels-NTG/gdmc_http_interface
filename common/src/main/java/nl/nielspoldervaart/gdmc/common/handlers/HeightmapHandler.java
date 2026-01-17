@@ -2,7 +2,7 @@ package nl.nielspoldervaart.gdmc.common.handlers;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.MinMaxBounds.Ints;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
@@ -115,7 +115,7 @@ public class HeightmapHandler extends HandlerBase {
         String yBoundsInput = queryParams.getOrDefault("yBounds", "");
         if (!yBoundsInput.isBlank() && customTransparentBlocksList != null) {
 	        try {
-                MinMaxBounds.Ints yBounds = RangeArgument.intRange().parse(new StringReader(yBoundsInput));
+				Ints yBounds = RangeArgument.intRange().parse(new StringReader(yBoundsInput));
                 yMin = yBounds.min();
                 yMax = yBounds.max();
                 if (yMin.isPresent() && yMax.isPresent() && yMin.get() - yMax.get() == 0) {

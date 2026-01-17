@@ -1,6 +1,7 @@
 package nl.nielspoldervaart.gdmc.common.handlers;
 
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.storage.TagValueInput;
@@ -18,7 +19,6 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -251,7 +251,7 @@ public class EntitiesHandler extends HandlerBase {
 
 	private final static class SummonEntityInstruction {
 
-		private final ResourceLocation entityResourceLocation;
+		private final Identifier identifier;
 		private final Vec3 entityPosition;
 		private final CompoundTag entityData;
 
@@ -268,7 +268,7 @@ public class EntitiesHandler extends HandlerBase {
 			entityPosition = Vec3Argument.vec3().parse(sr).getPosition(commandSourceStack);
 			sr.skip();
 
-			entityResourceLocation = ResourceLocationArgument.id().parse(sr);
+			identifier = IdentifierArgument.id().parse(sr);
 			sr.skip();
 
 			entityData = TagUtils.parseTag(sr.getRemaining());
@@ -284,7 +284,7 @@ public class EntitiesHandler extends HandlerBase {
 				return instructionStatus(false, "Position is not in spawnable bounds");
 			}
 
-			entityData.putString("id", entityResourceLocation.toString());
+			entityData.putString("id", identifier.toString());
 
 			Entity entity = EntityType.loadEntityRecursive(entityData, level, EntitySpawnReason.COMMAND,(_entity) -> {
 				_entity.setPos(entityPosition);

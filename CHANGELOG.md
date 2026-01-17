@@ -1,3 +1,7 @@
+# GDMC-HTTP 1.7.1 (Minecraft 1.21.11)
+
+- NEW: GDMC-HTTP is now compatible with Minecraft 1.21.11
+
 # GDMC-HTTP 1.7.0 (Minecraft 1.21.10)
 
 - NEW: GDMC-HTTP is now compatible with Minecraft 1.21.10!

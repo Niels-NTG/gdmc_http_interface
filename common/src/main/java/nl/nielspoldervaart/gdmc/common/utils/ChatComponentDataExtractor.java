@@ -1,7 +1,7 @@
 package nl.nielspoldervaart.gdmc.common.utils;
 
 import com.google.gson.*;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
@@ -43,16 +43,11 @@ public class ChatComponentDataExtractor {
 				if (translatableContents.getArgs().length > 0) {
 					JsonArray jsonArgsArray = new JsonArray();
 					for (Object object : translatableContents.getArgs()) {
-						if (object instanceof MutableComponent) {
-							extractValues(targetJson, (MutableComponent) object);
-							continue;
-						}
-						if (object instanceof Number) {
-							jsonArgsArray.add((Number)object);
-						} else if (object instanceof Boolean) {
-							jsonArgsArray.add((Boolean)object);
-						} else {
-							jsonArgsArray.add(String.valueOf(object));
+						switch (object) {
+							case MutableComponent mutableComponent -> extractValues(targetJson, mutableComponent);
+							case Number number -> jsonArgsArray.add(number);
+							case Boolean b -> jsonArgsArray.add(b);
+							default -> jsonArgsArray.add(String.valueOf(object));
 						}
 					}
 					if (!jsonArgsArray.isEmpty()) {
