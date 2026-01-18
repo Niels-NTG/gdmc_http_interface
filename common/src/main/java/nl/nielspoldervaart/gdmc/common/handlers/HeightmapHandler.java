@@ -10,6 +10,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
+import nl.nielspoldervaart.gdmc.common.utils.BuildArea.BuildAreaInstance;
 import nl.nielspoldervaart.gdmc.common.utils.CustomHeightmap;
 import com.google.common.base.Enums;
 import com.google.gson.Gson;
@@ -53,9 +54,9 @@ public class HeightmapHandler extends HandlerBase {
         // If true, constrain placement/getting blocks within the current build area.
         boolean withinBuildArea;
 
-        BuildArea.BuildAreaInstance buildArea = null;
+        BuildAreaInstance buildArea = null;
         try {
-            buildArea = BuildArea.getBuildArea();
+            buildArea = BuildArea.getCurrentBuildArea();
         } catch (HttpException ignored) {}
 
         try {

@@ -14,7 +14,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import nl.nielspoldervaart.gdmc.common.commands.GetHttpInterfacePort;
-import nl.nielspoldervaart.gdmc.common.commands.SetBuildAreaCommand;
+import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommands;
+import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import nl.nielspoldervaart.gdmc.neoforge.commands.SetHttpInterfacePort;
 import nl.nielspoldervaart.gdmc.neoforge.config.GdmcHttpConfig;
@@ -59,7 +60,12 @@ public class GdmcHttpMod {
 
 	@SubscribeEvent
 	public void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
-		event.getEntity().displayClientMessage(NeoForgeGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage(), true);
+		event.getEntity().displayClientMessage(
+			NeoForgeGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage(),
+			true
+		);
+		// Set build area if "default" is still present in server command storage.
+		BuildArea.setCurrentBuildAreaFromStorage(event.getEntity().level().getServer(), "default");
 	}
 
 	private static Component successMessage() {
@@ -72,9 +78,9 @@ public class GdmcHttpMod {
 		return Feedback.chatMessage("GDMC-HTTP server failed to start!");
 	}
 
-		SetBuildAreaCommand.register(dispatcher);
 	private static void registerCommands(MinecraftServer server) {
 		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
+		BuildAreaCommands.register(dispatcher);
 		SetHttpInterfacePort.register(dispatcher);
 		GetHttpInterfacePort.register(dispatcher);
 	}

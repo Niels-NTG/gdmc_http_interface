@@ -9,21 +9,22 @@ import java.io.IOException;
 
 public class BuildAreaHandler extends HandlerBase {
 
-    public BuildAreaHandler(MinecraftServer mcServer) {
-        super(mcServer);
-    }
+	public BuildAreaHandler(MinecraftServer mcServer) {
+		super(mcServer);
+	}
 
-    @Override
-    protected void internalHandle(HttpExchange httpExchange) throws IOException {
+	@Override
+	protected void internalHandle(HttpExchange httpExchange) throws IOException {
 
-        if (!httpExchange.getRequestMethod().equalsIgnoreCase("get")) {
-            throw new HttpException("Method not allowed. Use GET method to request the build area.", 405);
-        }
+		if (!httpExchange.getRequestMethod().equalsIgnoreCase("get")) {
+			throw new HttpException("Method not allowed. Use GET method to request the build area.", 405);
+		}
 
-        Headers responseHeaders = httpExchange.getResponseHeaders();
-        setDefaultResponseHeaders(responseHeaders);
+		Headers responseHeaders = httpExchange.getResponseHeaders();
+		setDefaultResponseHeaders(responseHeaders);
 
-        resolveRequest(httpExchange, BuildArea.toJSONString());
+		resolveRequest(httpExchange, BuildArea.toJSONString());
 
-    }
+
+	}
 }

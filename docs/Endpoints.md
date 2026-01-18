@@ -33,7 +33,7 @@ The following error status codes are shared across multiple endpoints:
     - `withinBuildArea` is set to `true`
     - A build area is set
     - Area in the request is completely outside the build area
-- `404`: "No build area is specified. Use the /setbuildarea command inside Minecraft to set a build area."
+- `404`: "No build area is specified. Use the `/buildarea` command inside Minecraft to set a build area."
   - Error is thrown if no build area is set when a request requires it
 
 - `405`: "Method not allowed"
@@ -930,9 +930,9 @@ Given a world with 1 player named "Dev" in it, request `GET /players?includeData
 
 # 📐 Get build area `GET /buildarea`
 
-This returns the current specified build area. The build area can be set inside Minecraft using the `setbuildarea` command. This is just a convenience command to specify the area, it has no implications to where blocks can be placed or read on the map.
+This returns the current specified build area. The build area can be set inside Minecraft using the `/buildarea set` command. This is just a convenience command to specify the area, it has no implications to where blocks can be placed or read on the map, except when the `withinBuildArea` parameter flag is used for endpoints that support it.
 
-The syntax for the setbuildarea Minecraft command is `/setbuildarea xFrom yFrom zFrom xTo yTo zTo`.
+The syntax for the in-game build area command is `/buildarea set <fromX> <fromY> <fromZ> <toX> <toY> <toZ>`.
 
 ## URL parameters
 
@@ -956,7 +956,7 @@ A JSON response following this [schema](./schema.buildarea.get.response.json):
 
 ## Example
 
-After having set the build area in game with `/setbuildarea ~ ~ ~ ~200 ~200 ~200`, requesting the build area via `GET /getbuildarea` returns:
+After having set the build area in game with `/buildarea set ~ ~ ~ ~200 ~200 ~200`, requesting the build area via `GET /getbuildarea` returns:
 
 ```json
 {
@@ -1065,7 +1065,7 @@ A `400` status code is returned if heightmap preset type is not recognised.
 
 ### Custom block list example
 
-After having set the build area in game with `/setbuildarea ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=#air,sand,gravel,dirt,clay,grass_block`, resulting in the following response:
+After having set the build area in game with `/buildarea set ~ ~ ~ ~10 ~10 ~10`, requesting heightmap data that ignores various "soft" soil and water can be done by calling the endpoint `GET /heightmap?blocks=#air,sand,gravel,dirt,clay,grass_block`, resulting in the following response:
 
 ```json
 [
@@ -1105,7 +1105,7 @@ The `yBounds` can be useful to take measurements of the surface of underground c
 
 ### Heightmap preset type example
 
-After having set the build area in game with `/setbuildarea ~ ~ ~ ~20 ~20 ~20`, requesting the heightmap of that ignores water with `GET /heightmap?type=OCEAN_FLOOR` could return:
+After having set the build area in game with `/buildarea set ~ ~ ~ ~20 ~20 ~20`, requesting the heightmap of that ignores water with `GET /heightmap?type=OCEAN_FLOOR` could return:
 
 ```json
 [

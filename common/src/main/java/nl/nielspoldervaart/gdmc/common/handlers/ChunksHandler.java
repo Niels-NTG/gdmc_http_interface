@@ -11,6 +11,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.SerializableChunkData;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
+import nl.nielspoldervaart.gdmc.common.utils.BuildArea.BuildAreaInstance;
 import nl.nielspoldervaart.gdmc.common.utils.TagUtils;
 
 import java.io.IOException;
@@ -46,9 +47,9 @@ public class ChunksHandler extends HandlerBase {
 
         String dimension;
 
-        BuildArea.BuildAreaInstance buildArea = null;
+        BuildAreaInstance buildArea = null;
         try {
-            buildArea = BuildArea.getBuildArea();
+            buildArea = BuildArea.getCurrentBuildArea();
         } catch (HttpException ignored) {}
 
         try {
