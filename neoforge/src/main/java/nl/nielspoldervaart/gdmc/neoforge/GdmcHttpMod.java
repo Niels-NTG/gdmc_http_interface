@@ -39,7 +39,7 @@ public class GdmcHttpMod {
 	public void onServerStarting(ServerStartingEvent event) {
 		logger.info("Server starting");
 
-		registerCommands(event);
+		registerCommands(event.getServer());
 		MinecraftServer minecraftServer = event.getServer();
 
 		try {
@@ -72,9 +72,9 @@ public class GdmcHttpMod {
 		return Feedback.chatMessage("GDMC-HTTP server failed to start!");
 	}
 
-	private static void registerCommands(ServerStartingEvent event) {
-		CommandDispatcher<CommandSourceStack> dispatcher = event.getServer().getCommands().getDispatcher();
 		SetBuildAreaCommand.register(dispatcher);
+	private static void registerCommands(MinecraftServer server) {
+		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
 		SetHttpInterfacePort.register(dispatcher);
 		GetHttpInterfacePort.register(dispatcher);
 	}
