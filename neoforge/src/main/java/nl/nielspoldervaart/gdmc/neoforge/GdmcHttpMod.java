@@ -14,7 +14,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import nl.nielspoldervaart.gdmc.common.commands.GetHttpInterfacePort;
-import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommands;
+import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommand;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import nl.nielspoldervaart.gdmc.neoforge.commands.SetHttpInterfacePort;
@@ -80,7 +80,7 @@ public class GdmcHttpMod {
 
 	private static void registerCommands(MinecraftServer server) {
 		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
-		BuildAreaCommands.register(dispatcher);
+		BuildAreaCommand.register(dispatcher);
 		SetHttpInterfacePort.register(dispatcher);
 		GetHttpInterfacePort.register(dispatcher);
 	}

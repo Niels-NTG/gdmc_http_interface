@@ -16,7 +16,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import nl.nielspoldervaart.gdmc.common.commands.GetHttpInterfacePort;
-import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommands;
+import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommand;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
@@ -97,7 +97,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 
 	private static void registerCommands(MinecraftServer minecraftServer) {
 		CommandDispatcher<CommandSourceStack> dispatcher = minecraftServer.getCommands().getDispatcher();
-		BuildAreaCommands.register(dispatcher);
+		BuildAreaCommand.register(dispatcher);
 		SetHttpInterfacePort.register(dispatcher);
 	GetHttpInterfacePort.register(dispatcher);
 	}

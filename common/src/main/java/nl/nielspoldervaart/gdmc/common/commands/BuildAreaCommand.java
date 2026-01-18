@@ -24,16 +24,16 @@ import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import java.util.HashMap;
 import java.util.Map;
 
-public final class BuildAreaCommands {
+public final class BuildAreaCommand {
 
 	static final String COMMAND_NAME = "buildarea";
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal(COMMAND_NAME)
-			.executes(BuildAreaCommands::getCurrentBuildArea)
+			.executes(BuildAreaCommand::getCurrentBuildArea)
 			.then(
 				Commands.literal("remove")
-					.executes(BuildAreaCommands::unsetBuildArea)
+					.executes(BuildAreaCommand::unsetBuildArea)
 					.then(Commands.argument("name", StringArgumentType.greedyString())
 					.executes(context -> unsetBuildArea(
 						context,
@@ -70,11 +70,11 @@ public final class BuildAreaCommands {
 			)
 			.then(
 				Commands.literal("list")
-					.executes(BuildAreaCommands::listBuildAreas)
+					.executes(BuildAreaCommand::listBuildAreas)
 			)
 			.then(
 				Commands.literal("tp")
-					.executes(BuildAreaCommands::gotoBuildArea)
+					.executes(BuildAreaCommand::gotoBuildArea)
 					.then(Commands.argument("name", StringArgumentType.greedyString())
 					.executes(context -> gotoBuildArea(
 						context,
@@ -82,6 +82,7 @@ public final class BuildAreaCommands {
 					)))
 			)
 		);
+		// TODO implement command to generate TP book
 	}
 
 	private static int getCurrentBuildArea(CommandContext<CommandSourceStack> context) {
