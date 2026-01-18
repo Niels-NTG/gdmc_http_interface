@@ -34,4 +34,9 @@ public class Feedback {
 		source.sendSuccess(() -> message, true);
 	}
 
+	public static void sendFailure(CommandContext<CommandSourceStack> commandSourceContext, MutableComponent message) {
+		CommandSourceStack source = commandSourceContext.getSource();
+		source.sendFailure(message);
+	}
+
 }
