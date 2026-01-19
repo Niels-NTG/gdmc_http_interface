@@ -122,13 +122,6 @@ public class BuildArea {
 		return savedBuildAreas;
 	}
 
-	public static String toJSONString() {
-		if (currentBuildAreaInstance == null) {
-			return "";
-		}
-		return getCurrentBuildArea().toJSONString();
-	}
-
 	@SuppressWarnings({"FieldCanBeLocal", "unused"})
 	public static class BuildAreaInstance {
 

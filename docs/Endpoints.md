@@ -930,13 +930,15 @@ Given a world with 1 player named "Dev" in it, request `GET /players?includeData
 
 # 📐 Get build area `GET /buildarea`
 
-This returns the current specified build area. The build area can be set inside Minecraft using the `/buildarea set` command. This is just a convenience command to specify the area, it has no implications to where blocks can be placed or read on the map, except when the `withinBuildArea` parameter flag is used for endpoints that support it.
+This returns the current or a saved build area. The build area can be set inside Minecraft using the `/buildarea set` command. This is just a convenience command to specify the area, it has no implications to where blocks can be placed or read on the map, except when the `withinBuildArea` parameter flag is used for endpoints that support it.
 
 The syntax for the in-game build area command is `/buildarea set <fromX> <fromY> <fromZ> <toX> <toY> <toZ>`.
 
 ## URL parameters
 
-None
+| key  | valid values             | required | defaults to | description                                                                               |
+|------|--------------------------|----------|-------------|-------------------------------------------------------------------------------------------|
+| name | name of saved build area | no       |             | If omitted, get the current build area. If set, get a saved build area of the given name. |
 
 ## Request headers
 
