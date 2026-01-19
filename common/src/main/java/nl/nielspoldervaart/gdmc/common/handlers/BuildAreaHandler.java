@@ -41,6 +41,5 @@ public class BuildAreaHandler extends HandlerBase {
 
 		resolveRequest(httpExchange, buildAreaJSON);
 
-
 	}
 }

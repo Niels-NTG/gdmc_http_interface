@@ -99,6 +99,6 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 		CommandDispatcher<CommandSourceStack> dispatcher = minecraftServer.getCommands().getDispatcher();
 		BuildAreaCommand.register(dispatcher);
 		SetHttpInterfacePort.register(dispatcher);
-	GetHttpInterfacePort.register(dispatcher);
+		GetHttpInterfacePort.register(dispatcher);
 	}
 }

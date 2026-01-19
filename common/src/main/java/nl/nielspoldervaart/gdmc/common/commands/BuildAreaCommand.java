@@ -15,7 +15,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.server.MinecraftServer;
 import nl.nielspoldervaart.gdmc.common.handlers.HandlerBase;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea.BuildAreaInstance;
@@ -207,9 +206,8 @@ public final class BuildAreaCommand {
 	}
 
 	private static int gotoBuildArea(CommandContext<CommandSourceStack> context, String name) {
-		MinecraftServer server = context.getSource().getServer();
 		BuildAreaInstance buildArea = BuildArea.createBuildAreaInstanceFromData(
-			server,
+			context.getSource().getServer(),
 			name
 		);
 		if (buildArea != null) {
