@@ -1037,6 +1037,9 @@ Additionally, this mod provides 2 extra heightmap types:
     - [Bamboo plants](https://minecraft.wiki/w/Bamboo)
     - [Cobwebs](https://minecraft.wiki/w/Cobweb)
     - [Sculk](https://minecraft.wiki/w/Sculk)
+    - [Saplings](https://minecraft.wiki/w/Block_tag_(Java_Edition)#saplings)
+    - [Flowers](https://minecraft.wiki/w/Block_tag_(Java_Edition)#flowers)
+    - [Crops](https://minecraft.wiki/w/Block_tag_(Java_Edition)#crops)
 - `OCEAN_FLOOR_NO_PLANTS`
   - Same as `OCEAN_FLOOR`, except it also excludes the following blocks:
     - Everything listed for `MOTION_BLOCKING_NO_PLANTS`

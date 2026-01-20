@@ -155,18 +155,29 @@ public class CustomHeightmap {
 	}
 
 	private static final Predicate<BlockState> NO_PLANTS = blockState ->
-		!blockState.is(BlockTags.LEAVES) && !blockState.is(BlockTags.LOGS) && !blockState.is(Blocks.BEE_NEST) && !blockState.is(Blocks.MANGROVE_ROOTS) && !blockState.is(Blocks.MUDDY_MANGROVE_ROOTS) &&
-		!blockState.is(Blocks.BROWN_MUSHROOM_BLOCK) && !blockState.is(Blocks.RED_MUSHROOM_BLOCK) && !blockState.is(Blocks.MUSHROOM_STEM) &&
+		!blockState.is(BlockTags.LEAVES) &&
+		!blockState.is(BlockTags.LOGS) &&
+		!blockState.is(Blocks.BEE_NEST) &&
+		!blockState.is(Blocks.MANGROVE_ROOTS) &&
+		!blockState.is(Blocks.MUDDY_MANGROVE_ROOTS) &&
+		!blockState.is(Blocks.BROWN_MUSHROOM_BLOCK) &&
+		!blockState.is(Blocks.RED_MUSHROOM_BLOCK) &&
+		!blockState.is(Blocks.MUSHROOM_STEM) &&
 		!blockState.is(Blocks.PUMPKIN) &&
 		!blockState.is(Blocks.MELON) &&
-		!blockState.is(Blocks.MOSS_BLOCK) && !blockState.is(Blocks.NETHER_WART_BLOCK) &&
+		!blockState.is(Blocks.MOSS_BLOCK) &&
+		!blockState.is(Blocks.NETHER_WART_BLOCK) &&
 		!blockState.is(Blocks.CACTUS) &&
 		!blockState.is(Blocks.FARMLAND) &&
-		!blockState.is(BlockTags.CORAL_BLOCKS) && !blockState.is(Blocks.SPONGE) && !blockState.is(Blocks.WET_SPONGE) &&
+		!blockState.is(BlockTags.CORAL_BLOCKS) &&
+		!blockState.is(Blocks.SPONGE) &&
+		!blockState.is(Blocks.WET_SPONGE) &&
 		!blockState.is(Blocks.BAMBOO) &&
 		!blockState.is(Blocks.COBWEB) &&
-		!blockState.is(Blocks.SCULK)
-		;
+		!blockState.is(Blocks.SCULK) &&
+		!blockState.is(BlockTags.SAPLINGS) &&
+		!blockState.is(BlockTags.FLOWERS) &&
+		!blockState.is(BlockTags.CROPS);
 
 	public enum Types implements StringRepresentable {
 		@SuppressWarnings("unused") MOTION_BLOCKING_NO_PLANTS(
