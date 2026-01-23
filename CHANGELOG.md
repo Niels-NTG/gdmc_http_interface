@@ -9,6 +9,7 @@
   - Teleport to the current build area using `/buildarea tp`.
   - Teleport to a previously saved build area using `/buildarea tp <name>`.
   - Get a list of all previously saved build areas using `/buildarea list`.
+  - Using `/buildarea makebook`, give players a written book that lists all saved build areas, including clickable links that teleport players to those locations.
 
 # GDMC-HTTP 1.7.0 (Minecraft 1.21.10)
 

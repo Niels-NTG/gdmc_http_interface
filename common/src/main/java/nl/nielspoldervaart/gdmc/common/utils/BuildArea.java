@@ -9,7 +9,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.handlers.HandlerBase.HttpException;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 
 public class BuildArea {
 
@@ -114,10 +114,10 @@ public class BuildArea {
 		return box;
 	}
 
-	public static HashMap<String, BuildAreaInstance> getSavedBuildAreas(MinecraftServer server) {
-		HashMap<String, BuildAreaInstance> savedBuildAreas = new HashMap<>();
+	public static ArrayList<BuildAreaInstance> getSavedBuildAreas(MinecraftServer server) {
+		ArrayList<BuildAreaInstance> savedBuildAreas = new ArrayList<>();
 		for (String name : getStorageData(server).keySet()) {
-			savedBuildAreas.put(name, createBuildAreaInstanceFromData(server, name));
+			savedBuildAreas.add(createBuildAreaInstanceFromData(server, name));
 		}
 		return savedBuildAreas;
 	}

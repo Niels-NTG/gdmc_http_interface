@@ -1,5 +1,7 @@
 package nl.nielspoldervaart.gdmc.common.commands;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -20,16 +22,16 @@ import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea.BuildAreaInstance;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 public final class BuildAreaCommand {
 
 	static final String COMMAND_NAME = "buildarea";
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal(COMMAND_NAME)
-			.executes(BuildAreaCommand::getCurrentBuildArea)
+		dispatcher.register(
+			Commands.literal(COMMAND_NAME)
+				.executes(BuildAreaCommand::getCurrentBuildArea)
 			.then(
 				Commands.literal("remove")
 					.executes(BuildAreaCommand::unsetBuildArea)
@@ -41,7 +43,6 @@ public final class BuildAreaCommand {
 			)
 			.then(
 				Commands.literal("set")
-//                    TODO suggest current location as auto-complete suggestion?
 					.then(Commands.argument("from", BlockPosArgument.blockPos())
 					.then(Commands.argument("to", BlockPosArgument.blockPos())
 					.executes( context -> setBuildArea(
@@ -79,9 +80,16 @@ public final class BuildAreaCommand {
 						context,
 						context.getArgument("name", String.class)
 					)))
+			).then(
+				Commands.literal("makebook")
+					.executes(BuildAreaCommand::makeBook)
+					.then(Commands.argument("author", StringArgumentType.greedyString())
+					.executes(context -> makeBook(
+						context,
+						context.getArgument("author", String.class)
+					)))
 			)
 		);
-		// TODO implement command to generate TP book
 	}
 
 	private static int getCurrentBuildArea(CommandContext<CommandSourceStack> context) {
@@ -111,7 +119,6 @@ public final class BuildAreaCommand {
 	private static int unsetBuildArea(CommandContext<CommandSourceStack> context, String name) {
 		boolean result = BuildArea.unsetBuildArea(context.getSource().getServer(), name);
 		if (result) {
-//            TODO show unset area name
 			Feedback.sendSuccess(
 				context,
 				Feedback.chatMessage("Removed build area ").append(buildAreaNameText(name))
@@ -155,7 +162,7 @@ public final class BuildAreaCommand {
 	}
 
 	private static int listBuildAreas(CommandContext<CommandSourceStack> context) {
-		HashMap<String, BuildAreaInstance> savedBuildAreas = BuildArea.getSavedBuildAreas(context.getSource().getServer());
+		ArrayList<BuildAreaInstance> savedBuildAreas = BuildArea.getSavedBuildAreas(context.getSource().getServer());
 		if (savedBuildAreas.isEmpty()) {
 			Feedback.sendSuccess(
 				context,
@@ -169,22 +176,20 @@ public final class BuildAreaCommand {
 			currentBuildArea = BuildArea.getCurrentBuildArea();
 		} catch (HandlerBase.HttpException ignored) {}
 		MutableComponent chatMessage = Feedback.chatMessage("Saved build areas:\n");
-		for (Map.Entry<String, BuildAreaInstance> entry : savedBuildAreas.entrySet()) {
-			String name = entry.getKey();
-			BuildAreaInstance buildArea = entry.getValue();
+		for (BuildAreaInstance buildArea : savedBuildAreas) {
 			boolean isCurrentBuildArea = buildArea.equals(currentBuildArea);
 			chatMessage.append(
 				Component.literal(isCurrentBuildArea ? "☑" : "☐")
 					.withStyle((Style style) ->
 						style.withClickEvent(
-							new ClickEvent.RunCommand(String.format("buildarea load %s", name))
+							new ClickEvent.RunCommand(String.format("buildarea load %s", buildArea.name))
 						).withHoverEvent(
 							new HoverEvent.ShowText(Component.literal("Click to set as current build area"))
 						)
 					)
 			);
 			chatMessage.append(" ");
-			chatMessage.append(buildAreaNameText(name));
+			chatMessage.append(buildAreaNameText(buildArea.name));
 			chatMessage.append(Feedback.copyOnClickText(
 				String.format("from %s to %s", buildArea.from.toShortString(), buildArea.to.toShortString()),
 				buildArea.toJSONString()
@@ -228,6 +233,72 @@ public final class BuildAreaCommand {
 			}
 		}
 		return 0;
+	}
+
+	private static int makeBook(CommandContext<CommandSourceStack> context) {
+		return makeBook(context, "GDMC");
+	}
+
+	private static int makeBook(CommandContext<CommandSourceStack> context, String author) {
+		ArrayList<BuildAreaInstance> savedBuildAreas = BuildArea.getSavedBuildAreas(context.getSource().getServer());
+		if (savedBuildAreas.isEmpty()) {
+			Feedback.sendSuccess(
+				context,
+				Feedback.chatMessage("No saved build areas")
+			);
+			return 0;
+		}
+		JsonArray pageLines = new JsonArray();
+		JsonObject title = new JsonObject();
+		title.addProperty("text", "Locations\n");
+		title.addProperty("bold", true);
+		pageLines.add(title);
+		pageLines.add("\n");
+		for (BuildAreaInstance buildArea : savedBuildAreas) {
+			pageLines.add(" • ");
+			JsonObject line = new JsonObject();
+			line.addProperty("text",  buildArea.name + "\n");
+			line.addProperty("color", "dark_green");
+			line.addProperty("underlined", true);
+			line.addProperty("bold", false);
+			JsonObject clickEvent = new JsonObject();
+			clickEvent.addProperty("action", "run_command");
+			clickEvent.addProperty(
+				"command",
+				String.format(
+					"tp @s %s %s %s",
+					buildArea.spawnPos.getX(),
+					buildArea.spawnPos.getY(),
+					buildArea.spawnPos.getZ()
+				)
+			);
+			line.add("click_event", clickEvent);
+			JsonObject hoverEvent = new JsonObject();
+			hoverEvent.addProperty("action", "show_text");
+			hoverEvent.addProperty(
+				"value",
+				"Teleport to location (%s)".formatted(buildArea.spawnPos.toShortString())
+			);
+			line.add("hover_event", hoverEvent);
+			pageLines.add(line);
+		}
+		String bookContentValue = String.format(
+			"{title:%s,author:%s,pages:[[[%s]]]}",
+			"Locations",
+			author,
+			pageLines
+		);
+
+		try {
+			context.getSource().dispatcher().execute(
+				"give @s written_book[written_book_content=" + bookContentValue + "]",
+				context.getSource()
+			);
+		} catch (CommandSyntaxException e) {
+			Feedback.sendFailure(context, Component.literal(e.getMessage()));
+			return 0;
+		}
+		return 1;
 	}
 
 	private static MutableComponent buildAreaNameText(String name) {
