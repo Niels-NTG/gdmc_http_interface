@@ -16,7 +16,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import nl.nielspoldervaart.gdmc.common.commands.GetHttpInterfacePort;
-import nl.nielspoldervaart.gdmc.common.commands.SetBuildAreaCommand;
+import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommand;
+import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
 import nl.nielspoldervaart.gdmc.fabric.commands.SetHttpInterfacePort;
@@ -80,6 +81,8 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 		player.sendSystemMessage(
 			FabricGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage()
 		);
+		// Set build area if "default" is still present in server command storage.
+		BuildArea.setCurrentBuildAreaFromStorage(server, "default");
 	}
 
 	private static Component successMessage() {
@@ -94,7 +97,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 
 	private static void registerCommands(MinecraftServer minecraftServer) {
 		CommandDispatcher<CommandSourceStack> dispatcher = minecraftServer.getCommands().getDispatcher();
-		SetBuildAreaCommand.register(dispatcher);
+		BuildAreaCommand.register(dispatcher);
 		SetHttpInterfacePort.register(dispatcher);
 		GetHttpInterfacePort.register(dispatcher);
 	}

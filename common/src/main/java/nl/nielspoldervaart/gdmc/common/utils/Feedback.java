@@ -21,7 +21,7 @@ public class Feedback {
 
 	public static MutableComponent copyOnClickText(String str, String clipboardContent) {
 		return Component.literal(str).withStyle(
-			(style) -> style.withUnderlined(true).withClickEvent(
+			(Style style) -> style.withUnderlined(true).withClickEvent(
 				new ClickEvent.CopyToClipboard(clipboardContent)
 			).withHoverEvent(
 				new HoverEvent.ShowText(Component.translatable("chat.copy.click"))
@@ -32,6 +32,11 @@ public class Feedback {
 	public static void sendSuccess(CommandContext<CommandSourceStack> commandSourceContext, MutableComponent message) {
 		CommandSourceStack source = commandSourceContext.getSource();
 		source.sendSuccess(() -> message, true);
+	}
+
+	public static void sendFailure(CommandContext<CommandSourceStack> commandSourceContext, MutableComponent message) {
+		CommandSourceStack source = commandSourceContext.getSource();
+		source.sendFailure(message);
 	}
 
 }

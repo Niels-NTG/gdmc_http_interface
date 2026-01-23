@@ -67,7 +67,7 @@ public class BlocksHandler extends HandlerBase {
     // GET: Whether to include block entity data https://minecraft.wiki/w/Chunk_format#Block_entity_format
     private boolean includeData;
 
-    // PUT: Defaults to true. If true, update neighbouring blocks after placement.
+    // PUT: Defaults to true. If true, update neighboring blocks after placement.
     private boolean doBlockUpdates;
 
     // PUT: Defaults to false. If true, block updates cause item drops after placement.
@@ -258,7 +258,7 @@ public class BlocksHandler extends HandlerBase {
             }
 
             // When placing blocks in parallel, skip all placement instructions for a position that has duplicate entries except for the one in
-            // parsedPlacementInstructionsBlockPosMap, which is the last instruction for this position. This prevents undefined behaviour where
+            // parsedPlacementInstructionsBlockPosMap, which is the last instruction for this position. This prevents undefined behavior where
             // it cannot be predicted which instruction for the same position ends up being placed.
             if (canPlaceInParallel) {
                 PlacementInstructionRecord placementInstructionForSameBlockPos = parsedPlacementInstructionsBlockPosMap.get(blockPos);
@@ -642,9 +642,9 @@ public class BlocksHandler extends HandlerBase {
      *
      * @param inputBlockPos             Position of block to change the shape of.
      * @param inputBlockState           Original {@link BlockState}.
-     * @param placementInstructionsMap  Other placement instructions to find neighbouring blocks in.
-     * @param chunkMap                  Cached chunks to find neighbouring blocks in.
-     * @param level                     Level to find neighbouring blocks in.
+     * @param placementInstructionsMap  Other placement instructions to find neighboring blocks in.
+     * @param chunkMap                  Cached chunks to find neighboring blocks in.
+     * @param level                     Level to find neighboring blocks in.
      * @param flags                     Block placement flags (see {@link #getBlockFlags(boolean, boolean)}).
      * @return                          The updated {@link BlockState}.
      */
@@ -652,10 +652,10 @@ public class BlocksHandler extends HandlerBase {
         if ((flags & Block.UPDATE_NEIGHBORS) == 0) {
             return inputBlockState;
         }
-        // If block placement flags allow for updating the block based on neighbouring blocks, do so in the north, west,
+        // If block placement flags allow for updating the block based on neighboring blocks, do so in the north, west,
         // south, east, up, down directions. Use block states from other placement instruction items to ensure the shape
         // conforms when the placement instructions are resolved. If no placement instruction is present get the
-        // neighbouring BlockState from any preloaded chunks. If null, load the block state from the level.
+        // neighboring BlockState from any preloaded chunks. If null, load the block state from the level.
         BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
         BlockState newBlockState = inputBlockState;
         for (Direction direction : UPDATE_SHAPE_ORDER) {

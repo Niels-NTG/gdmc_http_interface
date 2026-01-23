@@ -1,3 +1,16 @@
+# GDMC-HTTP 1.8.0 (Minecraft 1.21.11)
+
+- NEW: GDMC-HTTP is now compatible with Minecraft 1.21.11
+- NEW: Command for managing build areas has been completely overhauled:
+  - `/setbuildarea <fromX> <fromY> <fromZ> <toX> <toY> <toZ>` has changed to `/buildarea set <fromX> <fromY> <fromZ> <toX> <toY> <toZ>`.
+  - You can now give a build area a name by passing `/buildarea set <fromX> <fromY> <fromZ> <toX> <toY> <toZ> <name>`.
+  - Previously saved build areas can be loaded using `/buildarea load <name>`.
+  - Build areas are saved with the level data and are therefore persistent.
+  - Teleport to the current build area using `/buildarea tp`.
+  - Teleport to a previously saved build area using `/buildarea tp <name>`.
+  - Get a list of all previously saved build areas using `/buildarea list`.
+  - Using `/buildarea makebook`, give players a written book that lists all saved build areas, including clickable links that teleport players to those locations.
+
 # GDMC-HTTP 1.7.0 (Minecraft 1.21.10)
 
 - NEW: GDMC-HTTP is now compatible with Minecraft 1.21.10!

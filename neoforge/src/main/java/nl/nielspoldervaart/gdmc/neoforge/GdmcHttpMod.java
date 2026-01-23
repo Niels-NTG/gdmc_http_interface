@@ -5,7 +5,6 @@ import com.mojang.logging.LogUtils;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
@@ -15,7 +14,8 @@ import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppingEvent;
 import nl.nielspoldervaart.gdmc.common.commands.GetHttpInterfacePort;
-import nl.nielspoldervaart.gdmc.common.commands.SetBuildAreaCommand;
+import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommand;
+import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import nl.nielspoldervaart.gdmc.neoforge.commands.SetHttpInterfacePort;
 import nl.nielspoldervaart.gdmc.neoforge.config.GdmcHttpConfig;
@@ -30,7 +30,7 @@ public class GdmcHttpMod {
 
 	private static final Logger logger = LogUtils.getLogger();
 
-	public GdmcHttpMod(IEventBus modEventBus, ModContainer modContainer) {
+	public GdmcHttpMod(ModContainer modContainer) {
 		modContainer.registerConfig(ModConfig.Type.COMMON, GdmcHttpConfig.SPEC);
 
 		NeoForge.EVENT_BUS.register(this);
@@ -40,7 +40,7 @@ public class GdmcHttpMod {
 	public void onServerStarting(ServerStartingEvent event) {
 		logger.info("Server starting");
 
-		registerCommands(event);
+		registerCommands(event.getServer());
 		MinecraftServer minecraftServer = event.getServer();
 
 		try {
@@ -60,7 +60,12 @@ public class GdmcHttpMod {
 
 	@SubscribeEvent
 	public void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
-		event.getEntity().displayClientMessage(NeoForgeGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage(), true);
+		event.getEntity().displayClientMessage(
+			NeoForgeGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage(),
+			true
+		);
+		// Set build area if "default" is still present in server command storage.
+		BuildArea.setCurrentBuildAreaFromStorage(event.getEntity().level().getServer(), "default");
 	}
 
 	private static Component successMessage() {
@@ -73,9 +78,9 @@ public class GdmcHttpMod {
 		return Feedback.chatMessage("GDMC-HTTP server failed to start!");
 	}
 
-	private static void registerCommands(ServerStartingEvent event) {
-		CommandDispatcher<CommandSourceStack> dispatcher = event.getServer().getCommands().getDispatcher();
-		SetBuildAreaCommand.register(dispatcher);
+	private static void registerCommands(MinecraftServer server) {
+		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
+		BuildAreaCommand.register(dispatcher);
 		SetHttpInterfacePort.register(dispatcher);
 		GetHttpInterfacePort.register(dispatcher);
 	}

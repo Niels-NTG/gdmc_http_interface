@@ -12,9 +12,8 @@ public final class GetHttpInterfacePort {
 	static final String COMMAND_NAME = "gethttpport";
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(
-			Commands.literal(COMMAND_NAME)
-			.executes(GetHttpInterfacePort :: perform)
+		dispatcher.register(Commands.literal(COMMAND_NAME)
+			.executes(GetHttpInterfacePort::perform)
 		);
 	}
 

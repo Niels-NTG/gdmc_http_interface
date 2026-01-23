@@ -38,7 +38,8 @@ public final class SetHttpInterfacePort {
 				Feedback.chatMessage("Port changed to ").append(Feedback.copyOnClickText(String.valueOf(newPortNumber))).append(". Reload the world for it to take effect.")
 			);
 		} catch (IllegalArgumentException e) {
-			commandSourceContext.getSource().sendFailure(
+			Feedback.sendFailure(
+				commandSourceContext,
 				Feedback.chatMessage(String.format("Cannot change port number to %s: %s", newPortNumber, e.getMessage()))
 			);
 		}

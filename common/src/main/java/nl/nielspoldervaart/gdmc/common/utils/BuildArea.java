@@ -2,66 +2,132 @@ package nl.nielspoldervaart.gdmc.common.utils;
 
 import com.google.gson.Gson;
 import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.handlers.HandlerBase.HttpException;
 
+import java.util.ArrayList;
+
 public class BuildArea {
 
-	private static BuildAreaInstance buildAreaInstance;
+	private static BuildAreaInstance currentBuildAreaInstance;
 
-	public static BuildAreaInstance getBuildArea() {
-		if (buildAreaInstance == null) {
-			throw new HttpException("No build area is specified. Use the /setbuildarea command inside Minecraft to set a build area.", 404);
+	private static final Identifier buildAreaStorageIdentifier = Identifier.parse("gdmc:buildarea");
+
+	public static BuildAreaInstance getCurrentBuildArea() {
+		if (currentBuildAreaInstance == null) {
+			throw new HttpException("No build area is specified. Use the \"/buildarea set\" command inside Minecraft to set a build area.", 404);
 		}
-		return buildAreaInstance;
+		return currentBuildAreaInstance;
 	}
 
-	public static BuildAreaInstance setBuildArea(BlockPos from, BlockPos to) {
-		buildAreaInstance = new BuildAreaInstance(from, to);
-		return buildAreaInstance;
+	public static BuildAreaInstance setCurrentBuildArea(BlockPos from, BlockPos to, BlockPos entityPosition, float entityLookRotation, MinecraftServer server, String name) {
+		currentBuildAreaInstance = new BuildAreaInstance(name, from, to, entityPosition, entityLookRotation);
+		saveBuildAreaToStorage(server, name, currentBuildAreaInstance);
+		return currentBuildAreaInstance;
 	}
 
-	public static void unsetBuildArea() {
-		buildAreaInstance = null;
+	private static void saveBuildAreaToStorage(MinecraftServer server, String name, BuildAreaInstance buildArea) {
+		CompoundTag buildAreaStorageData = getStorageData(server);
+		CompoundTag positionTag = new CompoundTag();
+		positionTag.putLong("from", buildArea.from.asLong());
+		positionTag.putLong("to", buildArea.to.asLong());
+		positionTag.putLong("spawn", buildArea.spawnPos.asLong());
+		positionTag.putFloat("spawnLookRotation", buildArea.spawnLookRotation);
+		buildAreaStorageData.put(name, positionTag);
+		server.getCommandStorage().set(buildAreaStorageIdentifier, buildAreaStorageData);
+	}
+
+	public static BuildAreaInstance setCurrentBuildAreaFromStorage(MinecraftServer server, String name) {
+		if (getStorageData(server).contains(name)) {
+			BuildAreaInstance newBuildArea = createBuildAreaInstanceFromData(server, name);
+			if (newBuildArea == null) {
+				return null;
+			}
+			currentBuildAreaInstance = newBuildArea;
+			return newBuildArea;
+		}
+		return null;
+	}
+
+	private static CompoundTag getStorageData(MinecraftServer server) {
+		return server.getCommandStorage().get(buildAreaStorageIdentifier);
+	}
+
+	public static BuildAreaInstance createBuildAreaInstanceFromData(MinecraftServer server, String name) {
+		if (getStorageData(server).contains(name)) {
+			CompoundTag buildAreaStorageData = getStorageData(server).getCompoundOrEmpty(name);
+			return new BuildAreaInstance(
+				name,
+				BlockPos.of(buildAreaStorageData.getLongOr("from", 0)),
+				BlockPos.of(buildAreaStorageData.getLongOr("to", 0)),
+				BlockPos.of(buildAreaStorageData.getLongOr("spawn", 0)),
+				buildAreaStorageData.getFloatOr("spawnLookRotation", 0)
+			);
+		}
+		return null;
+	}
+
+	public static boolean unsetBuildArea(MinecraftServer server, String name) {
+		if (currentBuildAreaInstance != null && currentBuildAreaInstance.name.equals(name)) {
+			currentBuildAreaInstance = null;
+		}
+		if (getStorageData(server).contains(name)) {
+			removeBuildAreaFromStorage(server, name);
+			return true;
+		}
+		return false;
+	}
+
+	private static void removeBuildAreaFromStorage(MinecraftServer server, String name) {
+		CompoundTag buildAreaStorageData = getStorageData(server);
+		buildAreaStorageData.remove(name);
+		server.getCommandStorage().set(buildAreaStorageIdentifier, buildAreaStorageData);
 	}
 
 	public static boolean isOutsideBuildArea(BlockPos blockPos, boolean withinBuildArea) {
 		if (withinBuildArea) {
-			return getBuildArea().isOutsideBuildArea(blockPos.getX(), blockPos.getZ());
+			return getCurrentBuildArea().isOutsideBuildArea(blockPos.getX(), blockPos.getZ());
 		}
 		return false;
 	}
 
 	public static boolean isOutsideBuildArea(BoundingBox box, boolean withinBuildArea) {
 		if (withinBuildArea) {
-			return !getBuildArea().isInsideBuildArea(box);
+			return !getCurrentBuildArea().isInsideBuildArea(box);
 		}
 		return false;
 	}
 
 	public static BoundingBox clampToBuildArea(BoundingBox box, boolean withinBuildArea) {
 		if (withinBuildArea) {
-			return getBuildArea().clampBox(box);
+			return getCurrentBuildArea().clampBox(box);
 		}
 		return box;
 	}
 
 	public static BoundingBox clampChunksToBuildArea(BoundingBox box, boolean withinBuildArea) {
 		if (withinBuildArea) {
-			return getBuildArea().clampSectionBox(box);
+			return getCurrentBuildArea().clampSectionBox(box);
 		}
 		return box;
 	}
 
-	public static String toJSONString() {
-		return new Gson().toJson(getBuildArea());
+	public static ArrayList<BuildAreaInstance> getSavedBuildAreas(MinecraftServer server) {
+		ArrayList<BuildAreaInstance> savedBuildAreas = new ArrayList<>();
+		for (String name : getStorageData(server).keySet()) {
+			savedBuildAreas.add(createBuildAreaInstanceFromData(server, name));
+		}
+		return savedBuildAreas;
 	}
 
 	@SuppressWarnings({"FieldCanBeLocal", "unused"})
 	public static class BuildAreaInstance {
 
-		// These 6 properties are used for JSON serialisation.
+		// These 6 properties are used for JSON serialization.
 		private final int xFrom;
 		private final int yFrom;
 		private final int zFrom;
@@ -69,6 +135,9 @@ public class BuildArea {
 		private final int yTo;
 		private final int zTo;
 
+		public final transient String name;
+		public final transient BlockPos spawnPos;
+		public final transient float spawnLookRotation;
 		public final transient BoundingBox box;
 		public final transient BlockPos from;
 		public final transient BlockPos to;
@@ -76,11 +145,13 @@ public class BuildArea {
 		public final transient ChunkPos sectionTo;
 		private final transient BoundingBox sectionBox;
 
-
-		private BuildAreaInstance(BlockPos from, BlockPos to) {
+		private BuildAreaInstance(String name, BlockPos from, BlockPos to, BlockPos spawnPos, float spawnLookRotation) {
+			this.name = name;
 			box = BoundingBox.fromCorners(from, to);
 			this.from = new BlockPos(box.minX(), box.minY(), box.minZ());
 			this.to = new BlockPos(box.maxX(), box.maxY(), box.maxZ());
+			this.spawnPos = isOutsideBuildArea(spawnPos.getX(), spawnPos.getZ()) ? this.from : spawnPos;
+			this.spawnLookRotation = spawnLookRotation;
 			sectionFrom = new ChunkPos(this.from);
 			sectionTo = new ChunkPos(this.to);
 			sectionBox = BoundingBox.fromCorners(
@@ -138,6 +209,17 @@ public class BuildArea {
 					Math.max(Math.min(sectionBox.maxZ(), otherBox.maxZ()), sectionBox.minZ())
 				)
 			);
+		}
+
+		public boolean equals(BuildAreaInstance other) {
+			if (other == null) {
+				return false;
+			}
+			return this.name.equals(other.name) && this.box.equals(other.box);
+		}
+
+		public String toJSONString() {
+			return new Gson().toJson(this);
 		}
 	}
 }

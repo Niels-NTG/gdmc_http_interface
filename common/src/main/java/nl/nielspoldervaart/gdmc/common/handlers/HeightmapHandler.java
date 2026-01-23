@@ -2,7 +2,7 @@ package nl.nielspoldervaart.gdmc.common.handlers;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.MinMaxBounds.Ints;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
@@ -10,6 +10,7 @@ import net.minecraft.core.SectionPos;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
+import nl.nielspoldervaart.gdmc.common.utils.BuildArea.BuildAreaInstance;
 import nl.nielspoldervaart.gdmc.common.utils.CustomHeightmap;
 import com.google.common.base.Enums;
 import com.google.gson.Gson;
@@ -53,9 +54,9 @@ public class HeightmapHandler extends HandlerBase {
         // If true, constrain placement/getting blocks within the current build area.
         boolean withinBuildArea;
 
-        BuildArea.BuildAreaInstance buildArea = null;
+        BuildAreaInstance buildArea = null;
         try {
-            buildArea = BuildArea.getBuildArea();
+            buildArea = BuildArea.getCurrentBuildArea();
         } catch (HttpException ignored) {}
 
         try {
@@ -115,7 +116,7 @@ public class HeightmapHandler extends HandlerBase {
         String yBoundsInput = queryParams.getOrDefault("yBounds", "");
         if (!yBoundsInput.isBlank() && customTransparentBlocksList != null) {
 	        try {
-                MinMaxBounds.Ints yBounds = RangeArgument.intRange().parse(new StringReader(yBoundsInput));
+				Ints yBounds = RangeArgument.intRange().parse(new StringReader(yBoundsInput));
                 yMin = yBounds.min();
                 yMax = yBounds.max();
                 if (yMin.isPresent() && yMax.isPresent() && yMin.get() - yMax.get() == 0) {

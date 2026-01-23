@@ -6,7 +6,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -92,7 +92,7 @@ public class TagUtils {
 
 	public static String getEntityId(Entity entity) {
 		EntityType<?> entityType = entity.getType();
-		ResourceLocation resourceLocation = EntityType.getKey(entityType);
+		Identifier resourceLocation = EntityType.getKey(entityType);
 		return entityType.canSerialize() ? resourceLocation.toString() : null;
 	}
 

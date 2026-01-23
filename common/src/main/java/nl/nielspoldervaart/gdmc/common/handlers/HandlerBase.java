@@ -7,13 +7,13 @@ import com.google.gson.JsonSyntaxException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.Vec3i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.permissions.PermissionSet;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.HumanoidArm;
@@ -117,7 +117,7 @@ public abstract class HandlerBase implements HttpHandler {
                 levelName = "the_" + levelName;
             }
             for (ResourceKey<net.minecraft.world.level.Level> levelResourceKey : mcServer.levelKeys()) {
-                if (levelResourceKey.location().getPath().equals(levelName)) {
+                if (levelResourceKey.identifier().getPath().equals(levelName)) {
                     return mcServer.getLevel(levelResourceKey);
                 }
             }
@@ -138,7 +138,7 @@ public abstract class HandlerBase implements HttpHandler {
         if(list == null || list.isEmpty()) {
             return defaultValue;
         }
-        return list.get(0);
+        return list.getFirst();
     }
 
     /**
@@ -285,7 +285,7 @@ public abstract class HandlerBase implements HttpHandler {
             pos,
             new Vec2(0, 0),
             level,
-            4,
+            PermissionSet.ALL_PERMISSIONS,
             name,
             Component.literal(name),
             mcServer,
@@ -319,9 +319,5 @@ public abstract class HandlerBase implements HttpHandler {
                 return null;
             }
         };
-    }
-
-    protected boolean isServerOverloaded() {
-        return (Util.getMillis() - mcServer.getNextTickTime()) > 2000L;
     }
 }

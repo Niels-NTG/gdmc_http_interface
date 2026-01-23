@@ -57,7 +57,7 @@ public class StructureHandler extends HandlerBase {
 	// POST/GET: Whether to include entities (mobs, villagers, items) in placing/getting a structure.
 	private boolean includeEntities;
 
-	// POST: Defaults to true. If true, update neighbouring blocks after placement.
+	// POST: Defaults to true. If true, update neighboring blocks after placement.
 	private boolean doBlockUpdates;
 
 	// POST: Defaults to false. If true, block updates cause item drops after placement.
