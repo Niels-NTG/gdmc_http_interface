@@ -24,8 +24,8 @@ public class BuildArea {
 		return currentBuildAreaInstance;
 	}
 
-	public static BuildAreaInstance setCurrentBuildArea(BlockPos from, BlockPos to, MinecraftServer server, BlockPos entityPosition, String name) {
-		currentBuildAreaInstance = new BuildAreaInstance(name, from, to, entityPosition);
+	public static BuildAreaInstance setCurrentBuildArea(BlockPos from, BlockPos to, BlockPos entityPosition, float entityLookRotation, MinecraftServer server, String name) {
+		currentBuildAreaInstance = new BuildAreaInstance(name, from, to, entityPosition, entityLookRotation);
 		saveBuildAreaToStorage(server, name, currentBuildAreaInstance);
 		return currentBuildAreaInstance;
 	}
@@ -36,6 +36,7 @@ public class BuildArea {
 		positionTag.putLong("from", buildArea.from.asLong());
 		positionTag.putLong("to", buildArea.to.asLong());
 		positionTag.putLong("spawn", buildArea.spawnPos.asLong());
+		positionTag.putFloat("spawnLookRotation", buildArea.spawnLookRotation);
 		buildAreaStorageData.put(name, positionTag);
 		server.getCommandStorage().set(buildAreaStorageIdentifier, buildAreaStorageData);
 	}
@@ -63,7 +64,8 @@ public class BuildArea {
 				name,
 				BlockPos.of(buildAreaStorageData.getLongOr("from", 0)),
 				BlockPos.of(buildAreaStorageData.getLongOr("to", 0)),
-				BlockPos.of(buildAreaStorageData.getLongOr("spawn", 0))
+				BlockPos.of(buildAreaStorageData.getLongOr("spawn", 0)),
+				buildAreaStorageData.getFloatOr("spawnLookRotation", 0)
 			);
 		}
 		return null;
@@ -135,6 +137,7 @@ public class BuildArea {
 
 		public final transient String name;
 		public final transient BlockPos spawnPos;
+		public final transient float spawnLookRotation;
 		public final transient BoundingBox box;
 		public final transient BlockPos from;
 		public final transient BlockPos to;
@@ -142,12 +145,13 @@ public class BuildArea {
 		public final transient ChunkPos sectionTo;
 		private final transient BoundingBox sectionBox;
 
-		private BuildAreaInstance(String name, BlockPos from, BlockPos to, BlockPos spawnPos) {
+		private BuildAreaInstance(String name, BlockPos from, BlockPos to, BlockPos spawnPos, float spawnLookRotation) {
 			this.name = name;
 			box = BoundingBox.fromCorners(from, to);
 			this.from = new BlockPos(box.minX(), box.minY(), box.minZ());
 			this.to = new BlockPos(box.maxX(), box.maxY(), box.maxZ());
 			this.spawnPos = isOutsideBuildArea(spawnPos.getX(), spawnPos.getZ()) ? this.from : spawnPos;
+			this.spawnLookRotation = spawnLookRotation;
 			sectionFrom = new ChunkPos(this.from);
 			sectionTo = new ChunkPos(this.to);
 			sectionBox = BoundingBox.fromCorners(

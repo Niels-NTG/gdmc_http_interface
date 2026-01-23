@@ -12,6 +12,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.commands.arguments.coordinates.Coordinates;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
@@ -133,10 +134,14 @@ public final class BuildAreaCommand {
 		BlockPos entityPosition = context.getSource().getEntity() == null ?
 			from :
 			context.getSource().getEntity().blockPosition();
+		float entityDirection = context.getSource().getEntity() == null ?
+			Direction.EAST.toYRot() :
+			context.getSource().getEntity().getYRot();
 		BuildAreaInstance buildArea = BuildArea.setCurrentBuildArea(
 			from, to,
-			context.getSource().getServer(),
 			entityPosition,
+			entityDirection,
+			context.getSource().getServer(),
 			name
 		);
 		Feedback.sendSuccess(
@@ -219,10 +224,11 @@ public final class BuildAreaCommand {
 			try {
 				context.getSource().dispatcher().execute(
 					String.format(
-						"tp %s %s %s",
+						"tp @s %s %s %s %s 0",
 						buildArea.spawnPos.getX(),
 						buildArea.spawnPos.getY(),
-						buildArea.spawnPos.getZ()
+						buildArea.spawnPos.getZ(),
+						buildArea.spawnLookRotation
 					),
 					context.getSource()
 				);
@@ -232,6 +238,7 @@ public final class BuildAreaCommand {
 				return 0;
 			}
 		}
+		sendCannotFindBuildArea(context, name);
 		return 0;
 	}
 
@@ -256,30 +263,7 @@ public final class BuildAreaCommand {
 		pageLines.add("\n");
 		for (BuildAreaInstance buildArea : savedBuildAreas) {
 			pageLines.add(" • ");
-			JsonObject line = new JsonObject();
-			line.addProperty("text",  buildArea.name + "\n");
-			line.addProperty("color", "dark_green");
-			line.addProperty("underlined", true);
-			line.addProperty("bold", false);
-			JsonObject clickEvent = new JsonObject();
-			clickEvent.addProperty("action", "run_command");
-			clickEvent.addProperty(
-				"command",
-				String.format(
-					"tp @s %s %s %s",
-					buildArea.spawnPos.getX(),
-					buildArea.spawnPos.getY(),
-					buildArea.spawnPos.getZ()
-				)
-			);
-			line.add("click_event", clickEvent);
-			JsonObject hoverEvent = new JsonObject();
-			hoverEvent.addProperty("action", "show_text");
-			hoverEvent.addProperty(
-				"value",
-				"Teleport to location (%s)".formatted(buildArea.spawnPos.toShortString())
-			);
-			line.add("hover_event", hoverEvent);
+			JsonObject line = writeBookLine(buildArea);
 			pageLines.add(line);
 		}
 		String bookContentValue = String.format(
@@ -299,6 +283,35 @@ public final class BuildAreaCommand {
 			return 0;
 		}
 		return 1;
+	}
+
+	private static JsonObject writeBookLine(BuildAreaInstance buildArea) {
+		JsonObject line = new JsonObject();
+		line.addProperty("text",  buildArea.name + "\n");
+		line.addProperty("color", "dark_green");
+		line.addProperty("underlined", true);
+		line.addProperty("bold", false);
+		JsonObject clickEvent = new JsonObject();
+		clickEvent.addProperty("action", "run_command");
+		clickEvent.addProperty(
+			"command",
+			String.format(
+				"tp @s %s %s %s %s 0",
+				buildArea.spawnPos.getX(),
+				buildArea.spawnPos.getY(),
+				buildArea.spawnPos.getZ(),
+				buildArea.spawnLookRotation
+			)
+		);
+		line.add("click_event", clickEvent);
+		JsonObject hoverEvent = new JsonObject();
+		hoverEvent.addProperty("action", "show_text");
+		hoverEvent.addProperty(
+			"value",
+			"Teleport to location (%s)".formatted(buildArea.spawnPos.toShortString())
+		);
+		line.add("hover_event", hoverEvent);
+		return line;
 	}
 
 	private static MutableComponent buildAreaNameText(String name) {
