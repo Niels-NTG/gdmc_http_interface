@@ -266,7 +266,7 @@ public final class BuildAreaCommand {
 
 		try {
 			context.getSource().dispatcher().execute(
-				"give @s written_book[written_book_content=" + bookContentValue + "]",
+				"give @s written_book[written_book_content=" + bookContentValue + ",custom_name=[\"\",{\"text\":\"Locations\",\"italic\":false,\"color\":\"dark_aqua\"}]]",
 				context.getSource()
 			);
 		} catch (CommandSyntaxException e) {
