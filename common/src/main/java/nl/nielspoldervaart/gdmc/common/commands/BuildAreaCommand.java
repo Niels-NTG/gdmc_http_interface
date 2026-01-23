@@ -96,10 +96,7 @@ public final class BuildAreaCommand {
 	private static int getCurrentBuildArea(CommandContext<CommandSourceStack> context) {
 		try {
 			BuildAreaInstance buildArea = BuildArea.getCurrentBuildArea();
-			Feedback.sendSuccess(
-				context,
-				Feedback.chatMessage("Current build area: ").append(buildAreaCopyText(buildArea))
-			);
+			sendCurrentBuildArea(context, buildArea);
 			return 1;
 		} catch (HandlerBase.HttpException exception) {
 			Feedback.sendFailure(context, Feedback.chatMessage("No build area set"));
@@ -144,10 +141,7 @@ public final class BuildAreaCommand {
 			context.getSource().getServer(),
 			name
 		);
-		Feedback.sendSuccess(
-			context,
-			Feedback.chatMessage("Current build area: ").append(buildAreaCopyText(buildArea))
-		);
+		sendCurrentBuildArea(context, buildArea);
 		return 1;
 	}
 
@@ -157,12 +151,7 @@ public final class BuildAreaCommand {
 			sendCannotFindBuildArea(context, name);
 			return 0;
 		}
-		Feedback.sendSuccess(
-			context,
-			Feedback.chatMessage("Build area ")
-				.append(buildAreaCopyText(buildArea))
-				.append(" loaded")
-		);
+		sendCurrentBuildArea(context, buildArea);
 		return 1;
 	}
 
@@ -199,7 +188,9 @@ public final class BuildAreaCommand {
 				String.format("from %s to %s", buildArea.from.toShortString(), buildArea.to.toShortString()),
 				buildArea.toJSONString()
 			));
-			chatMessage.append("\n");
+			if (savedBuildAreas.getLast() != buildArea) {
+				chatMessage.append("\n");
+			}
 		}
 		Feedback.sendSuccess(context, chatMessage);
 		return 1;
@@ -308,7 +299,11 @@ public final class BuildAreaCommand {
 		hoverEvent.addProperty("action", "show_text");
 		hoverEvent.addProperty(
 			"value",
-			"Teleport to location (%s)".formatted(buildArea.spawnPos.toShortString())
+			String.format(
+				"%s\n%s",
+				buildArea.spawnPos.toShortString(),
+				Component.translatable("chat.coordinates.tooltip").getString()
+			)
 		);
 		line.add("hover_event", hoverEvent);
 		return line;
@@ -323,7 +318,15 @@ public final class BuildAreaCommand {
 			Feedback.copyOnClickText(
 				String.format("from %s to %s", buildArea.from.toShortString(), buildArea.to.toShortString()),
 				buildArea.toJSONString()
-			));
+			)
+		);
+	}
+
+	private static void sendCurrentBuildArea(CommandContext<CommandSourceStack> context, BuildAreaInstance buildArea) {
+		Feedback.sendSuccess(
+			context,
+			Feedback.chatMessage("Current build area: ").append(buildAreaCopyText(buildArea))
+		);
 	}
 
 	private static void sendCannotFindBuildArea(CommandContext<CommandSourceStack> context, String name) {
