@@ -10,6 +10,7 @@ import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.handlers.HandlerBase.HttpException;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 public class BuildArea {
 
@@ -116,9 +117,13 @@ public class BuildArea {
 		return box;
 	}
 
+	public static Set<String> getSavedBuildAreaKeys(MinecraftServer server) {
+		return getStorageData(server).keySet();
+	}
+
 	public static ArrayList<BuildAreaInstance> getSavedBuildAreas(MinecraftServer server) {
 		ArrayList<BuildAreaInstance> savedBuildAreas = new ArrayList<>();
-		for (String name : getStorageData(server).keySet()) {
+		for (String name : getSavedBuildAreaKeys(server)) {
 			savedBuildAreas.add(createBuildAreaInstanceFromData(server, name));
 		}
 		return savedBuildAreas;

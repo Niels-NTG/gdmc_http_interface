@@ -22,6 +22,7 @@ import nl.nielspoldervaart.gdmc.common.handlers.HandlerBase;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea.BuildAreaInstance;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
+import nl.nielspoldervaart.gdmc.common.utils.SavedBuildAreaNameArgument;
 
 import java.util.ArrayList;
 
@@ -36,7 +37,7 @@ public final class BuildAreaCommand {
 			.then(
 				Commands.literal("remove")
 					.executes(BuildAreaCommand::unsetBuildArea)
-					.then(Commands.argument("name", StringArgumentType.greedyString())
+					.then(Commands.argument("name", new SavedBuildAreaNameArgument())
 					.executes(context -> unsetBuildArea(
 						context,
 						context.getArgument("name", String.class)
@@ -52,7 +53,7 @@ public final class BuildAreaCommand {
 						context.getArgument("to", Coordinates.class).getBlockPos(context.getSource()),
 						"default"
 					))
-					.then(Commands.argument("name",  StringArgumentType.greedyString())
+					.then(Commands.argument("name", new SavedBuildAreaNameArgument())
 					.executes(context -> setBuildArea(
 						context,
 						context.getArgument("from", Coordinates.class).getBlockPos(context.getSource()),
@@ -62,8 +63,7 @@ public final class BuildAreaCommand {
 			)
 			.then(
 				Commands.literal("load")
-					.then(Commands.argument("name", StringArgumentType.greedyString())
-					// TODO autocomplete with existing saved names
+					.then(Commands.argument("name", new SavedBuildAreaNameArgument())
 					.executes(context -> loadBuildArea(
 						context,
 						context.getArgument("name", String.class)
@@ -76,7 +76,7 @@ public final class BuildAreaCommand {
 			.then(
 				Commands.literal("tp")
 					.executes(BuildAreaCommand::gotoBuildArea)
-					.then(Commands.argument("name", StringArgumentType.greedyString())
+					.then(Commands.argument("name", new SavedBuildAreaNameArgument())
 					.executes(context -> gotoBuildArea(
 						context,
 						context.getArgument("name", String.class)

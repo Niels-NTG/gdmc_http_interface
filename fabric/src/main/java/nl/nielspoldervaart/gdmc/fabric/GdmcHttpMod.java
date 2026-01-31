@@ -2,6 +2,7 @@ package nl.nielspoldervaart.gdmc.fabric;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStarting;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents.ServerStopping;
@@ -11,7 +12,9 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents.Join;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -20,6 +23,7 @@ import nl.nielspoldervaart.gdmc.common.commands.BuildAreaCommand;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
 import nl.nielspoldervaart.gdmc.common.utils.Feedback;
 import nl.nielspoldervaart.gdmc.common.utils.ModVersionRecord;
+import nl.nielspoldervaart.gdmc.common.utils.SavedBuildAreaNameArgument;
 import nl.nielspoldervaart.gdmc.fabric.commands.SetHttpInterfacePort;
 import nl.nielspoldervaart.gdmc.fabric.config.GdmcHttpConfig;
 import org.apache.logging.log4j.LogManager;
@@ -49,6 +53,12 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 		ServerLifecycleEvents.SERVER_STARTING.register(this);
 		ServerLifecycleEvents.SERVER_STOPPING.register(this);
 		ServerPlayConnectionEvents.JOIN.register(this);
+
+		ArgumentTypeRegistry.registerArgumentType(
+			Identifier.fromNamespaceAndPath(MODID, "saved_build_area_name_argument"),
+			SavedBuildAreaNameArgument.class,
+			SingletonArgumentInfo.contextFree(SavedBuildAreaNameArgument::new)
+		);
 	}
 
 	@Override
@@ -97,6 +107,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 
 	private static void registerCommands(MinecraftServer minecraftServer) {
 		CommandDispatcher<CommandSourceStack> dispatcher = minecraftServer.getCommands().getDispatcher();
+		SavedBuildAreaNameArgument.server = minecraftServer;
 		BuildAreaCommand.register(dispatcher);
 		SetHttpInterfacePort.register(dispatcher);
 		GetHttpInterfacePort.register(dispatcher);
