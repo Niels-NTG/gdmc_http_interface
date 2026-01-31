@@ -34,15 +34,11 @@ configurations {
 
 dependencies {
 	minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-	mappings loom.layered() {
-		// Mojang mappings
-		officialMojangMappings()
-	}
+	mappings loom.officialMojangMappings()
+
 	// Fabric loader
 	modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-
-	addModJar(fabricApi.module("fabric-lifecycle-events-v1", rootProject.fabric_version))
-	addModJar(fabricApi.module("fabric-networking-api-v1", rootProject.fabric_version))
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_version}"
 }
 
 
