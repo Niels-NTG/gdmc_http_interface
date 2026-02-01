@@ -7,6 +7,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.RangeArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.SectionPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.levelgen.structure.BoundingBox;
 import nl.nielspoldervaart.gdmc.common.utils.BuildArea;
@@ -221,13 +222,15 @@ public class HeightmapHandler extends HandlerBase {
     }
 
     private static boolean isExistingBlockTagKey(String blockTagKeyString, CommandSourceStack commandSourceStack) {
-        // Since fluid tag keys are not included in any public list (that I know of), check for these manually.
-        // https://minecraft.wiki/w/Tag#Fluid_tags
-        if (blockTagKeyString.equals("minecraft:water") || blockTagKeyString.equals("minecraft:lava")) {
-            return true;
-        }
-        // Check if block tag key exists https://minecraft.wiki/w/Tag#Block_tags_2
-        return BlocksHandler.getBlockRegistryLookup(commandSourceStack).listTags().anyMatch((existingTag) -> existingTag.key().location().toString().equals(blockTagKeyString));
+        return
+            // Check if fluid tag exists https://minecraft.wiki/w/Fluid_tag_(Java_Edition)
+            commandSourceStack.getLevel().holderLookup(Registries.FLUID).listTags().anyMatch((existingTag) ->
+                existingTag.key().location().toString().equals(blockTagKeyString)
+            ) ||
+            // Check if block tag key exists https://minecraft.wiki/w/Block_tag_(Java_Edition)
+            BlocksHandler.getBlockRegistryLookup(commandSourceStack).listTags().anyMatch((existingTag) ->
+                existingTag.key().location().toString().equals(blockTagKeyString)
+            );
     }
 
     private static HashSet<ChunkPos> getChunkPosList(BoundingBox box) {
