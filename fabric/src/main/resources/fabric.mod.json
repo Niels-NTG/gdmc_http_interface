@@ -19,9 +19,7 @@
   },
   "depends": {
 	"fabricloader": "*",
-	"fabric-api-base": "*",
-	"fabric-networking-api-v1": "*",
-	"fabric-lifecycle-events-v1": "*",
+	"fabric-api": "*",
 	"minecraft": ["${minecraft_version}"],
 	"java": ">=${java_version}"
   }
