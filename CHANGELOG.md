@@ -1,6 +1,7 @@
 # GDMC-HTTP 1.8.1 (Minecraft 1.21.11)
 
 - FIX: Commands `/buildarea load`, `/buildarea remove`, `/buildarea set` and `/buildarea tp` now provide suggestions with existing build area names while typing.
+- FIX: Custom heightmaps now accept fluid tags that aren't just 'water' or 'lava'.
 - FIX: Mod file size has been reduced by removing unneeded Fabric dependencies.
 
 # GDMC-HTTP 1.8.0 (Minecraft 1.21.11)
