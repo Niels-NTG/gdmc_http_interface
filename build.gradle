@@ -170,7 +170,7 @@ allprojects { p -> {
 	apply plugin: 'maven-publish'
 
 	archivesBaseName = rootProject.mod_id
-	version = project.name + '-' + rootProject.versionStr
+	version = rootProject.versionStr
 	group = rootProject.group
 
 	repositories {
