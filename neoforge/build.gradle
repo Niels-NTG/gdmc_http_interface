@@ -41,10 +41,7 @@ loom {
 
 dependencies {
     minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-    mappings loom.layered()
-    {
-        officialMojangMappings()
-    }
+    mappings loom.officialMojangMappings()
 
     // Neoforge
     neoForge "net.neoforged:neoforge:${rootProject.neoforge_version}"
