@@ -13,6 +13,16 @@
 		"sources": "${website}",
 		"issues": "${issue_tracker}"
 	},
+	"custom": {
+		"modmenu": {
+			"links": {
+				"modmenu.discord": "https://discord.gg/YwpPCRQWND",
+				"modmenu.github_releases": "${website}/releases",
+				"modmenu.modrinth": "https://modrinth.com/mod/gdmc-http-interface",
+				"modmenu.wiki": "https://gendesignmc.wikidot.com/"
+			}
+		}
+	},
 	"description": "${mod_description}",
 	"entrypoints": {
 		"main": [
