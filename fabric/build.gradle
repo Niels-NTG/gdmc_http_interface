@@ -20,11 +20,6 @@ loom {
 	}
 }
 
-remapJar {
-	inputFile = shadowJar.archiveFile
-	dependsOn shadowJar
-}
-
 configurations {
 	// The addModJar basically embeds the mod to the built jar
 	addModJar
@@ -46,13 +41,22 @@ tasks.register('deleteResources', Delete) {
     delete file('build/resources/main')
 }
 
-processResources {
+tasks.register('copyAllResources') {
 	dependsOn(copyCommonResources)
 }
 
+processResources {
+	dependsOn(tasks.named('copyAllResources'))
+}
+
 runClient {
-	dependsOn(copyCommonResources)
+	dependsOn(tasks.named('copyAllResources'))
 	finalizedBy(deleteResources)
+}
+
+remapJar {
+	inputFile = shadowJar.archiveFile
+	dependsOn shadowJar
 }
 
 sourcesJar {

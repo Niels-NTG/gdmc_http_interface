@@ -127,7 +127,10 @@ subprojects { p ->
 			mod_license: rootProject.mod_license,
 			mod_version: rootProject.versionStr,
 			mod_authors: rootProject.mod_authors,
+			mod_authors_string: rootProject.mod_authors.replaceAll("\"", "").replace("[", "").replace("]", "").split(","),
 			mod_description: rootProject.mod_description,
+			issue_tracker: rootProject.issue_tracker,
+			website: rootProject.website,
 			java_version: rootProject.java_version,
 		]
 		inputs.properties replaceProperties
