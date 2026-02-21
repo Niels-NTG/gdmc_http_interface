@@ -362,10 +362,10 @@ Note that if `doBlockUpdates=false` or the block update flag is set to `0` some 
 The following list shows which block update flags `doBlockUpdates` and `spawnDrops` get evaluated internally to:
 
 ```
-doBlockUpdates=False, spawnDrops=False -> 0110010
-doBlockUpdates=False, spawnDrops=True  -> 0110010
-doBlockUpdates=True,  spawnDrops=False -> 0100011    (default behavior)
-doBlockUpdates=True,  spawnDrops=True  -> 0000011
+doBlockUpdates=false, spawnDrops=false -> 0110010
+doBlockUpdates=false, spawnDrops=true  -> 0110010
+doBlockUpdates=true,  spawnDrops=false -> 0100011    (default behavior)
+doBlockUpdates=true,  spawnDrops=true  -> 0000011
 ```
 
 ## Request headers
