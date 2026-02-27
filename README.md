@@ -1,6 +1,6 @@
 # GDMC HTTP Interface Mod
 
-![logo](common/src/main/resources/logo.png)
+![logo](neoforge/src/main/resources/logo.png)
 
 Mod for Minecraft (Java Edition) that implements an HTTP interface for reading and writing blocks (and more).
 
