@@ -1,3 +1,9 @@
+# GDMC-HTTP 1.8.2 (Minecraft 1.21.11)
+
+- NEW: Support for [Mod Menu](https://modrinth.com/mod/modmenu) (Fabric only).
+- FIX: Update mod metadata for Fabric and NeoForge.
+- FIX: Build system config file cleanup.
+
 # GDMC-HTTP 1.8.1 (Minecraft 1.21.11)
 
 - FIX: Commands `/buildarea load`, `/buildarea remove`, `/buildarea set` and `/buildarea tp` now provide suggestions with existing build area names while typing.
