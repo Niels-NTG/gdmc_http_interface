@@ -9,6 +9,7 @@ import java.net.InetSocketAddress;
 
 public class GdmcHttpServer {
     private static HttpServer httpServer;
+    private static InetSocketAddress httpServerAddress;
     public static MinecraftServer mcServer;
 
     public static boolean hasHttpServerStarted = false;
@@ -17,9 +18,18 @@ public class GdmcHttpServer {
         return httpServer.getAddress().getPort();
     }
 
-    public static void startServer(int portNumber) throws IOException {
-        // Create HTTP server on localhost with the port number defined in the config file.
-        httpServer = HttpServer.create(new InetSocketAddress(portNumber), 0);
+    public static String getCurrentHttpHost() {
+        return httpServerAddress.getHostString();
+    }
+
+    public static void startServer(String hostAddress, int portNumber) throws IOException {
+        // Create HTTP server on localhost with the host address and port number defined in the config file.
+        if (hostAddress == null || hostAddress.equals("localhost")) {
+            httpServerAddress = new InetSocketAddress(portNumber);
+        } else {
+            httpServerAddress = new InetSocketAddress(hostAddress, portNumber);
+        }
+        httpServer = HttpServer.create(httpServerAddress, 0);
         httpServer.setExecutor(null); // creates a default executor
         createContexts();
         httpServer.start();

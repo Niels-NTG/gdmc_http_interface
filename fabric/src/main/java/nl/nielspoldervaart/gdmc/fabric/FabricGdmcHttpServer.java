@@ -12,11 +12,18 @@ public class FabricGdmcHttpServer extends GdmcHttpServer {
 		return GdmcHttpConfig.HTTP_INTERFACE_PORT;
 	}
 
+	public static String getHttpServerHostConfig() {
+		return GdmcHttpConfig.HTTP_INTERFACE_HOST;
+	}
+
 	public static void startServer(MinecraftServer mcServer) throws IOException {
 		if (FabricGdmcHttpServer.mcServer != mcServer) {
 			FabricGdmcHttpServer.mcServer = mcServer;
 		}
-		FabricGdmcHttpServer.startServer(FabricGdmcHttpServer.getHttpServerPortConfig());
+		FabricGdmcHttpServer.startServer(
+			FabricGdmcHttpServer.getHttpServerHostConfig(),
+			FabricGdmcHttpServer.getHttpServerPortConfig()
+		);
 	}
 
 }

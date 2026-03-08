@@ -18,6 +18,7 @@ public class GdmcHttpConfig {
 	public static final int DEFAULT_HTTP_INTERFACE_PORT = 9000;
 
 	public static int HTTP_INTERFACE_PORT = DEFAULT_HTTP_INTERFACE_PORT;
+	public static String HTTP_INTERFACE_HOST = "localhost";
 
 	public static void loadConfig(String filePath) {
 		try {
@@ -25,6 +26,8 @@ public class GdmcHttpConfig {
 			if (json.isJsonObject()) {
 				JsonObject object = (JsonObject) json;
 				HTTP_INTERFACE_PORT = object.get("http_port").getAsInt();
+				HTTP_INTERFACE_HOST = object.has("http_host") ?
+					object.get("http_host").getAsString() : "localhost";
 			}
 		} catch (JsonIOException | JsonSyntaxException | FileNotFoundException ignored) {}
 	}
@@ -32,6 +35,7 @@ public class GdmcHttpConfig {
 	public static void saveConfig(String filePath) {
 		JsonObject json = new JsonObject();
 		json.addProperty("http_port", HTTP_INTERFACE_PORT);
+		json.addProperty("http_host", HTTP_INTERFACE_HOST);
 		try {
 			BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(filePath));
 			bufferedWriter.write(json.toString());

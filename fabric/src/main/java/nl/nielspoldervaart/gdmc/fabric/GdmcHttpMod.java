@@ -97,7 +97,11 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 
 	private static Component successMessage() {
 		return Feedback.chatMessage("Server started at ").append(
-			Feedback.copyOnClickText(String.format("http://localhost:%s/", FabricGdmcHttpServer.getCurrentHttpPort()))
+			Feedback.copyOnClickText(String.format(
+				"http://%s:%s/",
+				FabricGdmcHttpServer.getCurrentHttpHost(),
+				FabricGdmcHttpServer.getCurrentHttpPort()
+			))
 		);
 	}
 

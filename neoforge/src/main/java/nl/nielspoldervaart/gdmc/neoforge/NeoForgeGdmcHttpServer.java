@@ -12,11 +12,18 @@ public class NeoForgeGdmcHttpServer extends GdmcHttpServer {
 		return GdmcHttpConfig.HTTP_INTERFACE_PORT.get();
 	}
 
+	public static String getHttpServerHostConfig() {
+		return GdmcHttpConfig.HTTP_INTERFACE_HOST.get();
+	}
+
 	public static void startServer(MinecraftServer minecraftServer) throws IOException {
 		if (NeoForgeGdmcHttpServer.mcServer != minecraftServer) {
 			NeoForgeGdmcHttpServer.mcServer = minecraftServer;
 		}
-		NeoForgeGdmcHttpServer.startServer(NeoForgeGdmcHttpServer.getHttpServerPortConfig());
+		NeoForgeGdmcHttpServer.startServer(
+			NeoForgeGdmcHttpServer.getHttpServerHostConfig(),
+			NeoForgeGdmcHttpServer.getHttpServerPortConfig()
+		);
 	}
 
 }
