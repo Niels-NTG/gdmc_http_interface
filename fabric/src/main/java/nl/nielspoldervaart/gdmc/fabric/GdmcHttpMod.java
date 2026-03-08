@@ -73,7 +73,7 @@ public class GdmcHttpMod implements ModInitializer, ServerStarting, ServerStoppi
 			FabricGdmcHttpServer.startServer(minecraftServer);
 			minecraftServer.sendSystemMessage(successMessage());
 		} catch (IOException e) {
-			LOGGER.warn("Unable to start server!");
+			LOGGER.error("Unable to start server!", e);
 			minecraftServer.sendSystemMessage(failureMessage());
 		}
 	}

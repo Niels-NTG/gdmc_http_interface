@@ -35,7 +35,7 @@ public class GdmcHttpMod {
 
 	public static final String MODID = "gdmc_http_interface";
 
-	private static final Logger logger = LogUtils.getLogger();
+	public static final Logger LOGGER = LogUtils.getLogger();
 
 	public GdmcHttpMod(ModContainer modContainer, IEventBus eventBus) {
 		modContainer.registerConfig(ModConfig.Type.COMMON, GdmcHttpConfig.SPEC);
@@ -58,7 +58,7 @@ public class GdmcHttpMod {
 
 	@SubscribeEvent
 	public void onServerStarting(ServerStartingEvent event) {
-		logger.info("Server starting");
+		LOGGER.info("Server starting");
 
 		registerCommands(event.getServer());
 		MinecraftServer minecraftServer = event.getServer();
@@ -67,14 +67,14 @@ public class GdmcHttpMod {
 			NeoForgeGdmcHttpServer.startServer(minecraftServer);
 			minecraftServer.sendSystemMessage(successMessage());
 		} catch (IOException e) {
-			logger.warn("Unable to start server!");
+			LOGGER.error("Unable to start server!", e);
 			minecraftServer.sendSystemMessage(failureMessage());
 		}
 	}
 
 	@SubscribeEvent
 	public void onServerStopping(ServerStoppingEvent event) {
-		logger.info("Server stopping");
+		LOGGER.info("Server stopping");
 		NeoForgeGdmcHttpServer.stopServer();
 	}
 
