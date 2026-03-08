@@ -1,4 +1,8 @@
-# GDMC-HTTP 1.8.2 (Minecraft 1.21.11)
+# GDMC-HTTP 1.8.3 (Minecraft 1.21.11)
+
+- FIX: Allow setting alternative HTTP host address in mod settings ([#36](https://github.com/Niels-NTG/gdmc_http_interface/issues/36)).
+- FIX: Log stack trace if HTTP server fails to start ([#36](https://github.com/Niels-NTG/gdmc_http_interface/issues/36)).
+
 
 - NEW: Support for [Mod Menu](https://modrinth.com/mod/modmenu) (Fabric only).
 - FIX: Update mod metadata for Fabric and NeoForge.
