@@ -45,6 +45,7 @@ public class GdmcHttpMod {
 		eventBus.addListener(this::registerCustomArgumentType);
 	}
 
+	@SuppressWarnings("MethodMayBeStatic")
 	private void registerCustomArgumentType(RegisterEvent event) {
 		event.register(
 			BuiltInRegistries.COMMAND_ARGUMENT_TYPE.key(),
@@ -56,6 +57,7 @@ public class GdmcHttpMod {
 		);
 	}
 
+	@SuppressWarnings("MethodMayBeStatic")
 	@SubscribeEvent
 	public void onServerStarting(ServerStartingEvent event) {
 		LOGGER.info("Server starting");
@@ -72,12 +74,14 @@ public class GdmcHttpMod {
 		}
 	}
 
+	@SuppressWarnings("MethodMayBeStatic")
 	@SubscribeEvent
 	public void onServerStopping(ServerStoppingEvent event) {
 		LOGGER.info("Server stopping");
 		NeoForgeGdmcHttpServer.stopServer();
 	}
 
+	@SuppressWarnings("MethodMayBeStatic")
 	@SubscribeEvent
 	public void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
 		event.getEntity().displayClientMessage(
