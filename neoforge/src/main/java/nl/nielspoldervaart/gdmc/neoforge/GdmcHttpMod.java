@@ -86,7 +86,7 @@ public class GdmcHttpMod {
 	public void onPlayerLogIn(PlayerEvent.PlayerLoggedInEvent event) {
 		event.getEntity().displayClientMessage(
 			NeoForgeGdmcHttpServer.hasHttpServerStarted ? successMessage() : failureMessage(),
-			true
+			false
 		);
 		// Set build area if "default" is still present in server command storage.
 		BuildArea.setCurrentBuildAreaFromStorage(event.getEntity().level().getServer(), "default");
