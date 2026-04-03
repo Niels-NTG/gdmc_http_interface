@@ -93,10 +93,14 @@ public class GdmcHttpMod {
 	}
 
 	private static Component successMessage() {
+		String currentHttpHost = NeoForgeGdmcHttpServer.getCurrentHttpHost();
+		if (currentHttpHost.equals("::")) {
+			currentHttpHost = "localhost";
+		}
 		return Feedback.chatMessage("Server started at ").append(
 			Feedback.copyOnClickText(String.format(
 				"http://%s:%s/",
-				NeoForgeGdmcHttpServer.getCurrentHttpHost(),
+				currentHttpHost,
 				NeoForgeGdmcHttpServer.getCurrentHttpPort()
 			))
 		);
