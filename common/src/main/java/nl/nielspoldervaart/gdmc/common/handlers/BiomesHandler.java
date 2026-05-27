@@ -28,6 +28,7 @@ public class BiomesHandler extends HandlerBase {
 
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
+		if (resolvePreflight(httpExchange, "GET, PUT, OPTIONS", "Content-Type")) return;
 
 		if (!httpExchange.getRequestMethod().equalsIgnoreCase("get")) {
 			throw new HttpException("Method not allowed. Only GET requests are supported.", 405);

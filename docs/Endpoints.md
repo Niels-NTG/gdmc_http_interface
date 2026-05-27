@@ -73,6 +73,10 @@ The responses for all endpoints return with the following headers, unless stated
 | Content-Disposition         | `inline`                          |             |
 | Content-Type                | `application/json; charset=UTF-8` |             |
 
+## CORS Preflight requests
+
+Although not explicitly documented below, all routes also support `OPTION` [CORS preflight requests](https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request).
+
 # 📜 Send Commands `POST /commands`
 
 Send one or more Minecraft console commands to the server. For the full list of all commands consult the [Minecraft commands documentation](https://minecraft.wiki/w/Commands#List_and_summary_of_commands).
@@ -128,7 +132,7 @@ each command will be executed line by line in the context of the overworld dimen
 ```json
 [
 	{
-		"status": 1,
+		"status": 1
 	},
 	{
 		"status": 1,

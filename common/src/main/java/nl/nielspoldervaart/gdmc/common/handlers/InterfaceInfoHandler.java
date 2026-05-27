@@ -16,13 +16,23 @@ public class InterfaceInfoHandler extends HandlerBase {
 
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
+		if (resolvePreflight(httpExchange, "OPTIONS", "Content-Type")) return;
 
 		if (!httpExchange.getRequestMethod().equalsIgnoreCase("options")) {
 			throw new HttpException("Method not allowed. Only OPTIONS requests are supported.", 405);
 		}
 
+		Headers requestHeaders = httpExchange.getRequestHeaders();
 		Headers responseHeaders = httpExchange.getResponseHeaders();
 		setDefaultResponseHeaders(responseHeaders);
+
+		// Handle preflight requests
+		if (requestHeaders.containsKey("Access-Control-Request-Method")) {
+			responseHeaders.set("Access-Control-Allow-Methods", "OPTIONS");
+			responseHeaders.set("Access-Control-Allow-Headers", "Content-Type");
+			httpExchange.sendResponseHeaders(204, -1);
+			return;
+		}
 
 		JsonObject json = new JsonObject();
 		json.addProperty("minecraftVersion", SharedConstants.getCurrentVersion().name());
