@@ -777,7 +777,7 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 
 ## Response body
 
-For each placement instruction in the request, it returns a JSON array following this [schema](./schema.entities.put.response.json), with the entity's UUID if placement was successful or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
+For each placement instruction in the request, it returns a JSON array following this [schema](./schema.entities.put.response.json). This includes the entity's UUID if placement was successful or an error code if something else went wrong such as a missing or invalid entity ID or incorrectly formatted entity data.
 
 ## Example
 
@@ -838,7 +838,13 @@ Refer to [the conversion from JSON table](https://minecraft.wiki/w/NBT_format#Co
 
 ## Response body
 
-For each patch instruction in the request, it returns a JSON array following this [schema](./schema.entities.patch.response.json), with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* if the data has changed after the patch. `{ "status": 0 }` if no entity exists in the world with this UUID, if the patch has no effect on the existing data or if an invalid UUID or patch data has been submitted or if merging the data failed for some other reason.
+For each patch instruction in the request, it returns a JSON array following this [schema](./schema.entities.patch.response.json).
+Here a `{ "status": 1 }` indicates an existing entity with that UUID has been found *and* if the data has changed after the patch.
+When a `{ "status": 0 }` is returned, it can mean one of the following:
+- No entity exists in the world for the submitted UUID.
+- Submitted UUID is formatted incorrectly.
+- Submitted data did not change the target entity.
+- Applying the data patch has failed for some reason.
 
 ## Example
 
@@ -878,7 +884,8 @@ After receiving the request, GDMC-HTTP will first to attempt to parse the whole 
 
 ## Response body
 
-For each patch instruction in the request, it returns a JSON array following this [schema](./schema.entities.delete.response.json) with a `{ "status": 1 }` if an existing entity with that UUID has been found *and* can be removed, `{ "status": 0 }` if no entity exists in the world with this UUID and an error message if an invalid UUID.
+For each patch instruction in the request, it returns a JSON array following this [schema](./schema.entities.delete.response.json).
+Here a `{ "status": 1 }` indicates an existing entity with that UUID has been found *and* has been removed. `{ "status": 0 }` indicates no entity with this UUID has been found.
 
 ## Example
 

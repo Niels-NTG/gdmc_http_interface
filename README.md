@@ -6,7 +6,7 @@ Mod for Minecraft (Java Edition) that implements an HTTP interface for reading a
 
 With this interface you can use other applications and scripts running on the same machine to read and modify a Minecraft world.
 
-This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](https://gendesignmc.wikidot.com), an annual competition for procedural AI systems in Minecraft, where the challenge is to write an algorithm that generates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
+This is designed as a tool for the [Generative Design in Minecraft Competition (GDMC)](https://gendesignmc.wikidot.com). This annual competition for procedural AI systems in Minecraft, where the challenge is to write an algorithm that generates a settlement while adapting to pre-existing terrain. Feel free to join our [community Discord server](https://discord.gg/YwpPCRQWND)!
 
 | Minecraft version | GDMC-HTTP version                                                                           | Docs                                                                                          | GDMC competition year                                                                                                                                                    |
 |-------------------|---------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -22,7 +22,7 @@ Jump to: [Installation](#Installation) | [Usage](#Usage) | [Acknowledgements](#A
 
 ## Automated installation (recommended)
 
-Custom Minecraft launchers such as [Modrinth App](https://modrinth.com/app) or [Prism Launcher](https://prismlauncher.org/) make it easy to create separate instances of the game and can automatically install the mods you want for you, including any dependencies these mods may require such as modding frameworks.
+Custom Minecraft launchers such as [Modrinth App](https://modrinth.com/app) or [Prism Launcher](https://prismlauncher.org/) make it easy to create separate instances of the game and can automatically install the mods you want for you, including dependencies if needed.
 
 The following instructions are for the Modrinth App, but other custom launchers will follow similar steps.
 
@@ -48,10 +48,10 @@ Installation instructions for when using the Fabric mod loader.
       - [macOS](https://discussions.apple.com/thread/252960079)
       - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
 4. Download this mod's jar file from [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and move it in the mod folder:
-   - On Windows: `%APPDATA%/.minecraft/mods`.
-   - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
+   - On Windows: `%APPDATA%/.minecraft/mods`
+   - On macOS: `~/Library/Application\ Support/Minecraft/mods`
    - On Linux desktop: `~/.minecraft/mods`
-5. Get the [Fabric Api Mod](https://modrinth.com/mod/fabric-api). Download the version that matches your Minecraft installation move it in the mod folder.
+5. Get the [Fabric API Mod](https://modrinth.com/mod/fabric-api). Download the version that matches your Minecraft installation move it in the mod folder.
 6. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the Fabric installation in the list.
 
 ### NeoForge
@@ -65,8 +65,8 @@ Installation instructions for when using the NeoForge mod loader.
         - [macOS](https://discussions.apple.com/thread/252960079)
         - [Ubuntu and Ubuntu-based Linux distros](https://itsfoss.com/run-jar-file-ubuntu-linux/)
 4. Download this mod's jar file from [here](https://github.com/Niels-NTG/gdmc_http_interface/releases/latest) and move it in the mod folder:
-    - On Windows: `%APPDATA%/.minecraft/mods`.
-    - On macOS: `~/Library/Application\ Support/Minecraft/mods`.
+    - On Windows: `%APPDATA%/.minecraft/mods`
+    - On macOS: `~/Library/Application\ Support/Minecraft/mods`
     - On Linux desktop: `~/.minecraft/mods`
 5. Open the Minecraft launcher, go to the "Installations" tab and click "Play" on the NeoForge installation in the list.
 

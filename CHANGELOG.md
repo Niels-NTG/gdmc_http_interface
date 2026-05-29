@@ -3,6 +3,7 @@
 - FIX: Allow setting alternative HTTP host address in mod settings ([#36](https://github.com/Niels-NTG/gdmc_http_interface/issues/36)).
 - FIX: Log stack trace if HTTP server fails to start ([#36](https://github.com/Niels-NTG/gdmc_http_interface/issues/36)).
 
+# GDMC-HTTP 1.8.2 (Minecraft 1.21.11)
 
 - NEW: Support for [Mod Menu](https://modrinth.com/mod/modmenu) (Fabric only).
 - FIX: Update mod metadata for Fabric and NeoForge.
@@ -175,7 +176,7 @@ TL;DR:
 
 # GDMC-HTTP 1.1.0 (Minecraft 1.19.2)
 
-- NEW: `POST /command` now accepts `x`, `y`, `z` parameters, usefull for when using commands with [relative coordinates](https://minecraft.wiki/w/Coordinates#Relative_world_coordinates).
+- NEW: `POST /command` now accepts `x`, `y`, `z` parameters, useful for when using commands with [relative coordinates](https://minecraft.wiki/w/Coordinates#Relative_world_coordinates).
 - NEW: Add `OPTIONS /` to get version of Minecraft and version of GDMC-HTTP interface.
 - NEW: Port number of the HTTP interface can be changed using the `/sethttpport <port>` Minecraft console command. This value will be saved to a config file and therefore will be persistent.
 - NEW: Get port number of the HTTP interface via the `/gethttpport` Minecraft console command.
