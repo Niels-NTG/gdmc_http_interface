@@ -75,7 +75,7 @@ The responses for all endpoints return with the following headers, unless stated
 
 ## CORS Preflight requests
 
-Although not explicitly documented below, all routes also support `OPTION` [CORS preflight requests](https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request).
+Although not explicitly documented below, all routes also support `OPTIONS` [CORS preflight requests](https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request).
 
 # 📜 Send Commands `POST /commands`
 
