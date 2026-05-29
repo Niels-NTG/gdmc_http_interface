@@ -157,25 +157,31 @@ public abstract class HandlerBase implements HttpHandler {
      * 'Access-Control-Request-Method' header and returning the allowed methods/headers.
      *
      * @param httpExchange   The current HttpExchange object.
-     * @param allowedMethods A comma-separated string of permitted HTTP methods (e.g., "GET, PUT, OPTIONS").
+     * @param allowedMethods A comma-separated string of permitted HTTP methods (e.g., "GET, PUT").
      * @param allowedHeaders A comma-separated string of permitted request headers (e.g., "Content-Type").
      * @return true if the request was a preflight and was resolved, false if it should be processed as a standard request.
      * @throws IOException If an I/O error occurs while sending the response.
      */
-    protected boolean resolvePreflight(HttpExchange httpExchange, String allowedMethods, String allowedHeaders)
-            throws IOException {
+    protected static boolean resolvePreflight(HttpExchange httpExchange, String allowedMethods, String allowedHeaders) throws IOException {
         Headers requestHeaders = httpExchange.getRequestHeaders();
-
-        if (httpExchange.getRequestMethod().equalsIgnoreCase("options")
-                && requestHeaders.containsKey("Access-Control-Request-Method")) {
+        if (
+            httpExchange.getRequestMethod().equalsIgnoreCase("options") &&
+            requestHeaders.containsKey("Access-Control-Request-Method")
+        ) {
             Headers responseHeaders = httpExchange.getResponseHeaders();
             setDefaultResponseHeaders(responseHeaders);
-            responseHeaders.set("Access-Control-Allow-Methods", allowedMethods);
+            responseHeaders.set(
+                "Access-Control-Allow-Methods",
+                allowedMethods.isEmpty() ? "OPTIONS" : allowedMethods + ", OPTIONS"
+            );
             responseHeaders.set("Access-Control-Allow-Headers", allowedHeaders);
             httpExchange.sendResponseHeaders(204, -1);
             return true;
         }
         return false;
+    }
+    protected static boolean resolvePreflight(HttpExchange httpExchange, String allowedMethods) throws IOException {
+        return resolvePreflight(httpExchange, allowedMethods, "Content-Type");
     }
 
     /**
