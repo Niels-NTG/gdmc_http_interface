@@ -1,3 +1,10 @@
+# GDMC-HTTP 1.8.4 (Minecraft 1.21.11)
+
+- NEW: All routes now also support the `OPTIONS` method for [CORS preflight requests](https://developer.mozilla.org/en-US/docs/Glossary/Preflight_request). Thanks to [MoltenCoffee](https://github.com/MoltenCoffee)!
+- FIX: Upgrade to stable NeoForged version.
+- FIX: Upgrade Fabric loader.
+- FIX: Improve logging HTTP server initialisation.
+
 # GDMC-HTTP 1.8.3 (Minecraft 1.21.11)
 
 - FIX: Allow setting alternative HTTP host address in mod settings ([#36](https://github.com/Niels-NTG/gdmc_http_interface/issues/36)).
