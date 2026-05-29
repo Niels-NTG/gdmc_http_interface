@@ -80,6 +80,9 @@ public class StructureHandler extends HandlerBase {
 
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
+		if (resolvePreflight(httpExchange, "GET, POST")) {
+			return;
+		}
 
 		// query parameters
 		Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());

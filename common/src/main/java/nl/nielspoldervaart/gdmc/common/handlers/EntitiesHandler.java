@@ -60,6 +60,9 @@ public class EntitiesHandler extends HandlerBase {
 	}
 	@Override
 	protected void internalHandle(HttpExchange httpExchange) throws IOException {
+		if (resolvePreflight(httpExchange, "GET, PUT, PATCH, DELETE")) {
+			return;
+		}
 
 		// query parameters
 		Map<String, String> queryParams = parseQueryString(httpExchange.getRequestURI().getRawQuery());
